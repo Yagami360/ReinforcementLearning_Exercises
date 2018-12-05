@@ -52,6 +52,9 @@ class MazeAgent( AgentBase ):
         print( "----------------------------------" )
         return
     
+    def state_history( self ):
+        return self._states_history
+
     def agent_reset( self ):
         """
         エージェントの再初期化処理
@@ -98,17 +101,43 @@ class MazeAgent( AgentBase ):
 
         return self._policy
 
-    def agent_step( self ):
+    def agent_step( self, step ):
         """
-        エージェント [Agent] の次の状態を記述する。
+        エージェント [Agent] の次の状態を決定する。
 
         [Args]
+            step : 学習環境のシミュレーションステップ
 
         [Returns]
-            next_state : Agent の次の状態
+            done : bool
+                   シミュレーションの完了フラグ
         """
-        next_state = self._state
-        return next_state
+        done = False
+        self._states_history.append( self._state )
+
+        direction = ["up", "right", "down", "left"]
+
+        # 行動方針の確率に従って、direction が選択される
+        next_direction = np.random.choice( 
+            direction,
+            p = self._policy[ self._state, : ]
+        )
+
+        if next_direction == "up":
+            self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
+        elif next_direction == "right":
+            self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
+        elif next_direction == "down":
+            self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
+        elif next_direction == "left":
+            self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+        
+        # ゴール地点なら、完了フラグ ON
+        if( self._state == 8 ):
+            done = True
+            self._states_history.append( self._state )
+            
+        return done
     
     def agent_action( self ):
         """

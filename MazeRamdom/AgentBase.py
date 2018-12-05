@@ -56,17 +56,19 @@ class AgentBase( object ):
         
         return
 
-    def agent_step( self ):
+    def agent_step( self, step ):
         """
-        エージェント [Agent] の次の状態を記述する。
+        エージェント [Agent] の次の状態を決定する。
 
         [Args]
+            step : 学習環境のシミュレーションステップ
 
         [Returns]
-            next_state : Agent の次の状態
+            done : bool
+                   シミュレーションの完了フラグ
         """
-        next_state = self._state
-        return next_state
+        done = False
+        return done
     
     def agent_action( self ):
         """

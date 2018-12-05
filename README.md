@@ -36,3 +36,7 @@ https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/</br>
 ## ■ 項目（フォルダ別）
 
 1. ./MazeRandom
+
+## ■ 参考
+
+- [Deep-Reinforcement-Learning-Book](https://github.com/Yagami360/Deep-Reinforcement-Learning-Book)<br>
