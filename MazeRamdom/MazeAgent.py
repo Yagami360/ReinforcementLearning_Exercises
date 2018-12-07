@@ -9,10 +9,10 @@
 import numpy as np
 
 # 自作クラス
-from AgentBase import AgentBase
+from Agent import Agent
 
 
-class MazeAgent( AgentBase ):
+class MazeAgent( Agent ):
     """
     迷路探索用エージェント。
     [public]
@@ -23,49 +23,61 @@ class MazeAgent( AgentBase ):
         _theta : 
             方策を決定するためのパラメータ
 
+        _state : int
+            エージェントの状態 s
+        _states_history : list <state>
+            エージェントの状態の履歴
+
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
 
-    def __init__( self ):
-        super().__init__()
-        """
+    def __init__( self, brain = None ):
+        super().__init__( brain )
+        self._policy = 0.0
+        self._theta = []
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
-        self._policy = 0.0
-        self._theta = []
-        """
         self.agent_reset()
         return
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "AgentBase" )
+        print( "MazeAgent" )
         print( self )
         print( str )
         
+        print( "_brain : \n", self._brain )
+        print( "_observations : \n", self._observations )
         print( "_state : \n", self._state )
         print( "_states_history : \n", self._states_history )
         print( "_policy : \n", self._policy )
         print( "_theta : \n", self._theta )        
         print( "----------------------------------" )
         return
-    
-    def state_history( self ):
-        return self._states_history
+
+    def collect_observations( self ):
+        """
+        Agent が観測している State を Brain に提供する。
+        ・Brain が、エージェントの状態を取得時にコールバックする。
+        """
+        self.add_vector_obs( self._state )
+        self.add_vector_obs( self._states_history )
+        return
+
 
     def agent_reset( self ):
         """
         エージェントの再初期化処理
         """
+        super().agent_reset()
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
         self._policy = 0.0
         self.init_theta()
         self.convert_into_policy_from_theta( self._theta )
-
         return
         
     def init_theta( self ):
@@ -101,50 +113,57 @@ class MazeAgent( AgentBase ):
 
         return self._policy
 
-    def agent_step( self, step ):
-        """
-        エージェント [Agent] の次の状態を決定する。
+    def state_history( self ):
+        return self._states_history
 
-        [Args]
-            step : 学習環境のシミュレーションステップ
 
-        [Returns]
-            done : bool
-                   シミュレーションの完了フラグ
-        """
-        done = False
-        self._states_history.append( self._state )
-
-        direction = ["up", "right", "down", "left"]
-
-        # 行動方針の確率に従って、direction が選択される
-        next_direction = np.random.choice( 
-            direction,
-            p = self._policy[ self._state, : ]
-        )
-
-        if next_direction == "up":
-            self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
-        elif next_direction == "right":
-            self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
-        elif next_direction == "down":
-            self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
-        elif next_direction == "left":
-            self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
-        
-        # ゴール地点なら、完了フラグ ON
-        if( self._state == 8 ):
-            done = True
-            self._states_history.append( self._state )
-            
-        return done
-    
-    def agent_action( self ):
+    def agent_action( self, step ):
         """
         現在の状態に基づき、エージェントの実際のアクションを記述する。
 
         [Input]
 
         """
+        super().agent_action( step )
+        done = False
+        self._states_history.append( self._state )
+
+        action = self._brain.action()
+
+        #-------------------------------------------
+        # エージェントの意思決定ロジック
+        # → Brain で処理したい
+        #-------------------------------------------
+        # 行動方針の確率に従って、action が選択される
+        next_action = np.random.choice( 
+            action,
+            p = self._policy[ self._state, : ]
+        )
+
+        #-------------------------------------------
+        # エージェントの移動
+        #-------------------------------------------
+        if next_action == "Up":
+            self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
+        elif next_action == "Down":
+            self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
+        elif next_action == "Left":
+            self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+        elif next_action == "Right":
+            self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
+        
+        #-------------------------------------------
+        # 報酬の指定
+        #-------------------------------------------
+        #self.add_reword( 0.1 )
+
+        #-------------------------------------------
+        # エピソードの完了
+        #-------------------------------------------
+        # ゴール地点なら、完了フラグ ON
+        if( self._state == 8 ):
+            self.Done()
+            self._states_history.append( self._state )
+            
         return
 

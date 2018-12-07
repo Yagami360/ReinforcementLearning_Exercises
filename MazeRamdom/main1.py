@@ -9,8 +9,10 @@ from IPython.display import HTML
 
 # 自作モジュール
 from Academy import Academy
+from MazeAcademy import MazeAcademy
 from Brain import Brain
-from AgentBase import AgentBase
+from MazeBrain import MazeBrain
+from Agent import Agent
 from MazeAgent import MazeAgent
 
 
@@ -22,13 +24,20 @@ def main():
     print("Start main()")
 
     #-----------------------------------
-    # 学習環境、エージェント作成フェイズ
+    # 学習環境、エージェント生成フェイズ
     #-----------------------------------
-    academy = Academy( max_step = 1000 )
+    # Academy の生成
+    academy = MazeAcademy( max_step = 1000 )
 
-	# 
+    # Brain の生成
+    brain = MazeBrain()
+
+	# Agent の生成
     agent = MazeAgent()
     agent.print( "after init()" )
+
+    # Agent の Brain を設定
+    agent.set_brain( brain )
 
     # 学習環境に作成したエージェントを追加
     academy.add_agent( agent )
@@ -103,7 +112,8 @@ def main():
         interval=200, repeat=False
     )
 
-    HTML(anim.to_jshtml())
+    HTML( anim.to_jshtml() )
+    anim.save( "MazeRandom.gif", writer = 'imagemagick' )
 
     print("Finish main()")
     return
