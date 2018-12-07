@@ -23,6 +23,11 @@ class MazeAgent( Agent ):
         _states_history : list <state>
             エージェントの状態の履歴
 
+        _action : int
+            上下移動のアクション
+        _action_istory : list<action>
+            アクションの履歴
+
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
@@ -32,6 +37,8 @@ class MazeAgent( Agent ):
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
+        self._action = None
+        self._action_history = []
         self.agent_reset()
         return
 
@@ -44,9 +51,11 @@ class MazeAgent( Agent ):
         print( "_observations : \n", self._observations )
         print( "_state : \n", self._state )
         print( "_states_history : \n", self._states_history )
+        print( "_action : \n", self._action )
+        print( "_action_history : \n", self._action_history )
         print( "----------------------------------" )
         return
-
+    
     def collect_observations( self ):
         """
         Agent が観測している State を Brain に提供する。
@@ -54,6 +63,8 @@ class MazeAgent( Agent ):
         """
         self.add_vector_obs( self._state )
         self.add_vector_obs( self._states_history )
+        self.add_vector_obs( self._action )
+        self.add_vector_obs( self._action_history )
         return
 
 
@@ -65,6 +76,8 @@ class MazeAgent( Agent ):
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
+        self._action = None
+        self._action_history = []
         return
 
     def state_history( self ):
@@ -79,7 +92,6 @@ class MazeAgent( Agent ):
         """
         super().agent_action( step )
         done = False
-        self._states_history.append( self._state )
 
         #------------------------------------------------
         # エージェントの意思決定ロジック
@@ -99,14 +111,20 @@ class MazeAgent( Agent ):
         # エージェントの移動
         if next_action == "Up":
             self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
+            self._action = 0
         elif next_action == "Right":
             self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
+            self._action = 1
         elif next_action == "Down":
             self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
+            self._action = 2
         elif next_action == "Left":
             self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+            self._action = 3
 
-        
+        self._states_history.append( self._state )
+        self._action_history.append( self._action )
+
         #------------------------------------------------
         # 報酬の指定
         #------------------------------------------------

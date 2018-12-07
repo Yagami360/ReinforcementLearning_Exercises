@@ -11,7 +11,7 @@ from IPython.display import HTML
 from Academy import Academy
 from MazeAcademy import MazeAcademy
 from Brain import Brain
-from MazeRamdomBrain import MazeRamdomBrain
+from MazePolicyGradientBrain import MazePolicyGradientBrain
 from Agent import Agent
 from MazeAgent import MazeAgent
 
@@ -19,7 +19,7 @@ from MazeAgent import MazeAgent
 def main():
     """
 	強化学習の学習環境用の迷路探索問題
-    ・エージェントの経路選択ロジックは、等確率な方向から１つを無作為選択
+    ・エージェントの経路の選択ロジックは、方策勾配法
 	・Unity ML-Agents のフレームワークを参考にして実装
     """
     print("Start main()")
@@ -31,7 +31,7 @@ def main():
     academy = MazeAcademy( max_step = 1000 )
 
     # Brain の生成
-    brain = MazeRamdomBrain()
+    brain = MazePolicyGradientBrain()
 
 	# Agent の生成
     agent = MazeAgent()
@@ -88,7 +88,7 @@ def main():
     line, = ax.plot([0.5], [2.5], marker="o", color='g', markersize=60)
 
     #
-    plt.savefig( "MazeGame_Random1.png", dpi = 300, bbox_inches = "tight" )
+    #plt.savefig( "MazeGame_PolicyGradient.png", dpi = 300, bbox_inches = "tight" )
         
     #----------------------------------------
     # エージェントの移動の様子を可視化
@@ -115,7 +115,7 @@ def main():
     )
 
     HTML( anim.to_jshtml() )
-    anim.save( "MazeGame_Random1.gif", writer = 'imagemagick' )
+    anim.save( "MazeGame_PolicyGradient1.gif", writer = 'imagemagick' )
 
     print("Finish main()")
     return
@@ -123,4 +123,4 @@ def main():
     
 if __name__ == '__main__':
      main()
-    
+

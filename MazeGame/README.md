@@ -1,18 +1,20 @@
 # 強化学習のトイプロブレム用の迷路探索問題
 > 実装中...
 
-強化学習のトイプロブレム用としての迷路探索問題。<br>
-単純な迷路探索問題を、Unity ML-Agents のフレームワークを参考にして実装<br>
+強化学習の学習環境用としての迷路探索問題。<br>
+単純な迷路探索問題を、Unity ML-Agents のフレームワークを参考にして実装。<br>
+分かりやすいように `main.py` ファイル毎に１つの完結した実行コードにしています。<br>
 
 - 【参考文献＆サイト】<br>
-    - [Unityで強化学習していたAgentのソースコードを読む話](https://ensekitt.hatenablog.com/entry/2017/12/27/123000)<br>
-    - 
+    - [Reinforcement Learning in Unity](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Design.md)<br>
+    - [Unityで強化学習していたAgentのソースコードを読む話](https://ensekitt.hatenablog.com/entry/2017/12/27/123000)<br> 
 
-## 項目 [Contents]
+
+## ■ 項目 [Contents]
 1. [動作環境](#動作環境)
 1. [コード説明＆実行結果](#コード説明＆実行結果)
     1. [等確率による迷路検索問題 : `main1.py`](#コード説明＆実行結果１)
-    1. [方策反復法による迷路検索問題 : `main2.py`](#コード説明＆実行結果２)
+    1. [方策勾配法による迷路検索問題 : `main2.py`](#コード説明＆実行結果２)
 
 <!--
 1. [使用するライブラリ](#使用するライブラリ)
@@ -48,17 +50,18 @@
 
 ### ◎ 等確率による迷路検索問題 : `main1.py`
 強化学習の学習環境用の迷路探索問題。<br>
-この等確率で表現された４つの移動候補（上下左右）から１つの方向を無作為に選択し、これを繰り返すことで、最終的に目的地に到着させる。<br>
+等確率で表現された４つの移動候補（上下左右）から１つの方向を無作為に選択し、これを繰り返すことで、最終的に目的地に到着させる。<br>
 Unity ML-Agents のフレームワーク（`Academy`,`Brain`,`Agent`クラス など）を参考にして実装している。<br>
 
-![mazegame_random1](https://user-images.githubusercontent.com/25688193/49662514-61084780-fa8f-11e8-9888-b17b4860fb1d.gif)<br>
+![mazegame_random1](https://user-images.githubusercontent.com/25688193/49664161-67e58900-fa94-11e8-8df4-262c46446ddb.gif)<br>
 
 
 <a id="コード説明＆実行結果２"></a>
 
-### ◎ 方策反復法による迷路検索問題 : `main2.py`
+### ◎ 方策勾配法による迷路検索問題 : `main2.py`
 > 実装中...
 
+方策反復法の具体例なアルゴリズムの１つである方策勾配法によって、迷路探索問題を解く。<br>
 
 
 ---

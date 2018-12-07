@@ -3,7 +3,7 @@
 
 """
     更新情報
-    [18/12/07] : 新規作成
+    [18/12/08] : 新規作成
     [xx/xx/xx] : 
 """
 import numpy as np
@@ -14,9 +14,10 @@ import matplotlib.pyplot as plt
 from Brain import Brain
 
 
-class MazeRamdomBrain( Brain ):
+class MazePolicyGradientBrain( Brain ):
     """
-    迷宮問題の Brain
+    迷宮問題の Brain。
+    ・方策勾配法による迷路検索用のアルゴリズム
     
     [public]
 
@@ -36,7 +37,7 @@ class MazeRamdomBrain( Brain ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "MazeRamdomBrain" )
+        print( "MazePolicyGradientBrain" )
         print( self )
         print( str )
         
@@ -69,11 +70,16 @@ class MazeRamdomBrain( Brain ):
         """
         方策パラメータから、行動方針 [policy] を決定する
         """
+        beta = 1.0
         [m, n] = brain_parameters.shape
         policy = np.zeros( shape = (m,n) )
+
+        theta = brain_parameters
+        exp_theta = np.exp( beta * theta )
+
         for i in range(0, m):
             # 割合の計算
-            policy[i, :] = brain_parameters[i, :] / np.nansum( brain_parameters[i, :] )
+            policy[i, :] = exp_theta[i, :] / np.nansum( exp_theta[i, :] )
 
         # NAN 値は 0 に変換
         policy = np.nan_to_num( policy )
