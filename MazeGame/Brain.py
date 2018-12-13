@@ -6,6 +6,7 @@
     [18/12/05] : 新規作成
     [xx/xx/xx] : 
 """
+from Agent import Agent
 
 class Brain( object ):
     """
@@ -16,10 +17,13 @@ class Brain( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _agent : Agent
+            この Brain を持つ Agent への参照
+
         _action : サブクラスにて動的に型を決定する
                   エージェント取りうるアクション（上移動、下移動など）
 
-        _observation : list<動的な型>
+        _observations : list<動的な型>
                 エージェントが観測できる状態
 
         _policy : 動的な型
@@ -32,8 +36,9 @@ class Brain( object ):
 
     """
     def __init__( self ):
+        self._agent = None
         self._action = None
-        self._observation = None
+        self._observations = None
         self._policy = None
         self._brain_parameters = None
         return
@@ -43,11 +48,16 @@ class Brain( object ):
         print( "Brain" )
         print( self )
         print( str )
+        print( "_agent : \n", self._agent )
         print( "_action : \n", self._action )
-        print( "_observation : \n", self._observation )
+        print( "_observations : \n", self._observations )
         print( "_policy : \n", self._policy )
         print( "_brain_parameters : \n", self._brain_parameters )
         print( "----------------------------------" )
+        return
+
+    def set_agent( self, agent ):
+        self._agent = agent
         return
 
     def action( self ):
@@ -60,4 +70,11 @@ class Brain( object ):
         """
         行動方針を決定する
         """
+        # エージェントの状態を取得
+        self._observations = self._agent.collect_observations()
+
+        # 行動の方策のためのパラメーターを更新
+
+        # 行動の方策のためのパラメーターを元に、行動方策を決定する。
+
         return self._policy

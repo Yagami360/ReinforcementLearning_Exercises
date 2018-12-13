@@ -108,7 +108,8 @@ class Agent( object ):
         Agent が観測している State を Brain に提供する。
         ・Brain が、エージェントの状態を取得時にコールバックする。
         """
-        return
+        self._observations = []
+        return self._observations
 
 
     def agent_step( self, step ):

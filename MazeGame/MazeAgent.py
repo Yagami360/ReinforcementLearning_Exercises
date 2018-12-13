@@ -23,7 +23,7 @@ class MazeAgent( Agent ):
         _states_history : list <state>
             エージェントの状態の履歴
 
-        _action : int
+        _action : str
             上下移動のアクション
         _action_istory : list<action>
             アクションの履歴
@@ -37,8 +37,9 @@ class MazeAgent( Agent ):
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
-        self._action = None
+        self._action = np.nan
         self._action_history = []
+        self._action_history.append( self._action )
         self.agent_reset()
         return
 
@@ -61,11 +62,12 @@ class MazeAgent( Agent ):
         Agent が観測している State を Brain に提供する。
         ・Brain が、エージェントの状態を取得時にコールバックする。
         """
+        self._observations = []
         self.add_vector_obs( self._state )
         self.add_vector_obs( self._states_history )
         self.add_vector_obs( self._action )
         self.add_vector_obs( self._action_history )
-        return
+        return self._observations
 
 
     def agent_reset( self ):
@@ -76,8 +78,9 @@ class MazeAgent( Agent ):
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
-        self._action = None
+        self._action = np.nan
         self._action_history = []
+        self._action_history.append( self._action )
         return
 
     def state_history( self ):
@@ -111,17 +114,14 @@ class MazeAgent( Agent ):
         # エージェントの移動
         if next_action == "Up":
             self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
-            self._action = 0
         elif next_action == "Right":
             self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
-            self._action = 1
         elif next_action == "Down":
             self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
-            self._action = 2
         elif next_action == "Left":
             self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
-            self._action = 3
 
+        self._action = next_action
         self._states_history.append( self._state )
         self._action_history.append( self._action )
 

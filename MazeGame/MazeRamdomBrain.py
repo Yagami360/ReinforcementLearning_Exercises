@@ -21,7 +21,6 @@ class MazeRamdomBrain( Brain ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -39,10 +38,10 @@ class MazeRamdomBrain( Brain ):
         print( "MazeRamdomBrain" )
         print( self )
         print( str )
-        
+        print( "_agent : \n", self._agent )
         print( "_action : \n", self._action )
         print( "_policy : \n", self._policy )
-        print( "_observation : \n", self._observation )
+        print( "_observations : \n", self._observations )
         print( "_brain_parameters : \n", self._brain_parameters )
         print( "----------------------------------" )
         return
@@ -51,7 +50,7 @@ class MazeRamdomBrain( Brain ):
         """
         方策パラメータを初期化
         """
-        _brain_parameters = np.array(
+        brain_parameters = np.array(
             [   # a0="Up", a1="Right", a3="Down", a4="Left"
                 [ np.nan, 1,        1,         np.nan ], # s0
                 [ np.nan, 1,        np.nan,    1 ],      # s1
@@ -63,7 +62,7 @@ class MazeRamdomBrain( Brain ):
                 [ 1,      1,        np.nan,    np.nan ], # s7
             ]
         )
-        return _brain_parameters
+        return brain_parameters
 
     def convert_into_policy_from_brain_parameters( self, brain_parameters ):
         """
@@ -84,6 +83,12 @@ class MazeRamdomBrain( Brain ):
         """
         行動方針を決定する
         """
+        # エージェントの状態を取得
+        self._observations = self._agent.collect_observations()
+
+        # 行動の方策のためのパラメーターを更新
+
+        # 行動の方策のためのパラメーターを元に、行動方策を決定する。
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
 
         return self._policy
