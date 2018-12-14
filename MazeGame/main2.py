@@ -14,6 +14,7 @@ from Brain import Brain
 from MazePolicyGradientBrain import MazePolicyGradientBrain
 from Agent import Agent
 from MazeAgent import MazeAgent
+from MazePolicyGradientAgent import MazePolicyGradientAgent
 
 
 def main():
@@ -34,7 +35,7 @@ def main():
     brain = MazePolicyGradientBrain()
 
 	# Agent の生成
-    agent = MazeAgent()
+    agent = MazePolicyGradientAgent()
 
     # Agent の Brain を設定（相互参照）
     agent.set_brain( brain )

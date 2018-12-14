@@ -83,7 +83,10 @@ class MazePolicyGradientBrain( Brain ):
                 学習率
 
         """
-        n_steps = len(state_action_historys) - 1 # ゴールまでの総ステップ数
+        n_steps = len( state_action_historys ) - 1 # ゴールまでの総ステップ数
+        if( n_steps == 0):
+            n_steps = 1
+
         [m,n] = brain_parameters.shape
 
         #--------------------------------------------------------------
@@ -146,11 +149,15 @@ class MazePolicyGradientBrain( Brain ):
         """
         # エージェントの状態を取得
         self._observations = self._agent.collect_observations()
+        
+        state_action_historys = []
+        for s,a in zip( self._observations[1], self._observations[3] ):
+            state_action_historys.append( [s,a] )
 
         # 行動の方策のためのパラメーターを更新
         self._brain_parameters = self.update_brain_parameter(
             brain_parameters = self._brain_parameters,
-            state_action_historys = [ self._observations[1], self._observations[3] ],
+            state_action_historys = state_action_historys,
             policy = self._policy,
             learning_rate = 0.1
         )
