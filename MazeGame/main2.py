@@ -29,7 +29,7 @@ def main():
     # 学習環境、エージェント生成フェイズ
     #-----------------------------------
     # Academy の生成
-    academy = MazeAcademy( max_step = 1000 )
+    academy = MazeAcademy( max_step = 5000 )
 
     # Brain の生成
     brain = MazePolicyGradientBrain()

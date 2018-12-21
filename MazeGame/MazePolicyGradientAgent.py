@@ -72,18 +72,28 @@ class MazePolicyGradientAgent( MazeAgent ):
 
     def agent_action( self, step ) :
         """
+        各エピソードでのエージェントのアクションを記述
+        ・Academy からコールされるコールバック関数
         """
         done = False
-        stop_epsilon = 10**-8
+        stop_epsilon = 0.001
         #self._brain.reset_brain()
-        
+        print( "エピソードのステップ数：", step )
+
+        policy = self._brain.get_policy()
+
         # 行動方策に基づき、エージェントを迷路のゴールまで移動させる。
-        self.goal_maze( self._brain.get_policy() )
-        print( "迷路を解くのにかかったステップ数は" + str( len(self._states_history) ) + "です。" )
+        self.goal_maze( policy )
+        print( "迷路を解くのにかかったステップ数：" + str( len(self._states_history) ) )
 
         # エージェントのゴールまでの履歴を元に、行動方策を更新
-        self._brain.decision_policy()
+        new_policy = self._brain.decision_policy()
 
-        #
+        # 前回の行動方針との差分が十分小さくなれば学習を終了する。
+        delta_policy = np.sum( np.abs( new_policy - policy ) )
+        print( "前回の行動方針との差分：", delta_policy )
+
+        if( delta_policy < stop_epsilon ):
+            done = True
 
         return
