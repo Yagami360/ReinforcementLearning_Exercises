@@ -67,6 +67,13 @@ class MazePolicyGradientBrain( Brain ):
         )
         return brain_parameters
 
+    def reset_brain( self ):
+        """
+        """
+        self._policy = 0.0
+        self._brain_parameters = self.init__brain_parameters()
+        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+        return
 
     def update_brain_parameter( self, brain_parameters, state_action_historys, policy, learning_rate = 0.1 ):
         """
@@ -99,7 +106,7 @@ class MazePolicyGradientBrain( Brain ):
         for i in range(0,m):
             for j in range(0,n):
                 # thetaがnanでない場合
-                if( np.isnan( brain_parameters[i,j] ) != False ):
+                if( np.isnan( brain_parameters[i,j] ) == False ):
                     # エージェントの状態履歴から、状態 i のもののみを取り出す
                     SA_i = [SA for SA in state_action_historys if SA[0] == i]
 

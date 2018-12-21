@@ -56,6 +56,17 @@ class Brain( object ):
         print( "----------------------------------" )
         return
 
+    def reset_brain( self ):
+        """
+        """
+        self._policy = None
+        self._brain_parameters = None
+        return
+
+    def get_policy( self ):
+        return self._policy
+
+        
     def set_agent( self, agent ):
         self._agent = agent
         return

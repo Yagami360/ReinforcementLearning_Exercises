@@ -19,13 +19,15 @@ class MazePolicyGradientAgent( MazeAgent ):
     def __init__( self, brain = None ):
         return super().__init__( brain )
 
-    def goal_maze( self ):
+    def goal_maze( self, policy ):
         """
         行動方策に基づき、迷宮のゴール地点までエージェントを移動
         """
         self.agent_reset()
-        policy = self._brain.decision_policy()
 
+        #------------------------------------------------
+        # Goal にたどり着くまでループ
+        #------------------------------------------------
         while(1):
             #------------------------------------------------
             # 行動方針の確率に従った次のエージェントの action
@@ -73,12 +75,15 @@ class MazePolicyGradientAgent( MazeAgent ):
         """
         done = False
         stop_epsilon = 10**-8
+        #self._brain.reset_brain()
         
-        # 初期の行動方策に基づき、エージェントを迷路のゴールまで移動させる。
-        self.goal_maze()
+        # 行動方策に基づき、エージェントを迷路のゴールまで移動させる。
+        self.goal_maze( self._brain.get_policy() )
         print( "迷路を解くのにかかったステップ数は" + str( len(self._states_history) ) + "です。" )
 
         # エージェントのゴールまでの履歴を元に、行動方策を更新
         self._brain.decision_policy()
+
+        #
 
         return
