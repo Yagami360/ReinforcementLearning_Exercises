@@ -24,16 +24,19 @@ class MazePolicyGradientBrain( Brain ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _learning_rate : float
+                学習率
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self ):
+    def __init__( self, learning_rate ):
         super().__init__()
         self._action = ["Up", "Right", "Down", "Left"]
         self._policy = np.zeros( shape = (8, len(self._action)) )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+        self._learning_rate = learning_rate
         return
 
     def print( self, str ):
@@ -46,6 +49,7 @@ class MazePolicyGradientBrain( Brain ):
         print( "_policy : \n", self._policy )
         print( "_observations : \n", self._observations )
         print( "_brain_parameters : \n", self._brain_parameters )
+        print( "_learning_rate : \n", self._learning_rate )
         print( "----------------------------------" )
         return
 
@@ -82,7 +86,7 @@ class MazePolicyGradientBrain( Brain ):
         return brain_parameters
 
 
-    def update_brain_parameter( self, brain_parameters, state_action_historys, policy, learning_rate = 0.1 ):
+    def update_brain_parameter( self, brain_parameters, state_action_historys, policy ):
         """
         方策勾配法に従って、行動方策のためのパラメーターを更新する。
         Θ(s_i,a_j) = Θ(s_i,a_j) + η * ΔΘ(s,a_j)
@@ -130,7 +134,7 @@ class MazePolicyGradientBrain( Brain ):
         #-------------------------------------------------------
         # Θ(s_i,a_j) = Θ(s_i,a_j) + η * ΔΘ(s,a_j)
         #-------------------------------------------------------
-        new_brain_parameters = brain_parameters + learning_rate * delta_brain_parameters
+        new_brain_parameters = brain_parameters + self._learning_rate * delta_brain_parameters
 
         return new_brain_parameters
 
@@ -188,8 +192,7 @@ class MazePolicyGradientBrain( Brain ):
         self._brain_parameters = self.update_brain_parameter(
             brain_parameters = self._brain_parameters,
             state_action_historys = state_action_historys,
-            policy = self._policy,
-            learning_rate = 0.1
+            policy = self._policy
         )
 
         # 行動の方策のためのパラメーターを元に、行動方策を決定する。

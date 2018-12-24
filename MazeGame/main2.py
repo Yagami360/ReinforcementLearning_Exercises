@@ -22,8 +22,7 @@ from MazePolicyGradientBrain import MazePolicyGradientBrain
 def main():
     """
 	強化学習の学習環境用の迷路探索問題
-    ・エージェントの経路の選択ロジックは、方策勾配法
-	・Unity ML-Agents のフレームワークを参考にして実装
+    ・エージェントの行動方策の学習ロジックは、方策勾配法
     """
     print("Start main()")
 
@@ -34,7 +33,7 @@ def main():
     academy = MazeAcademy( max_episode = 5000 )
 
     # Brain の生成
-    brain = MazePolicyGradientBrain()
+    brain = MazePolicyGradientBrain( learning_rate = 0.1 )
 
 	# Agent の生成
     agent = MazeAgent()
@@ -122,7 +121,7 @@ def main():
     )
 
     HTML( anim.to_jshtml() )
-    anim.save( "MazeGame_PolicyGradient1.gif", writer = 'imagemagick' )
+    anim.save( "MazeGame_PolicyGradient.gif", writer = 'imagemagick' )
 
     print("Finish main()")
     return

@@ -3,7 +3,7 @@
 
 """
     更新情報
-    [18/12/08] : 新規作成
+    [18/12/24] : 新規作成
     [xx/xx/xx] : 
 """
 import numpy as np
@@ -29,11 +29,15 @@ class MazeSarsaBrain( Brain ):
 
         _epsilon : float
                    ε-greedy 法の ε 値
+        _gamma : float
+                割引利得の γ 値
+        _learning_rate : float
+                学習率
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, epsilon = 0.5 ):
+    def __init__( self, epsilon = 0.5, gamma = 0.9, learning_rate = 0.1 ):
         super().__init__()
         self._action = ["Up", "Right", "Down", "Left"]
         self._policy = np.zeros( shape = (8, len(self._action)) )
@@ -41,6 +45,8 @@ class MazeSarsaBrain( Brain ):
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         self._q_function = self.init_q_function( brain_parameters = self._brain_parameters )
         self._epsilon = epsilon
+        self._gamma = gamma
+        self._learning_rate = learning_rate
         return
 
     def print( self, str ):
@@ -55,6 +61,8 @@ class MazeSarsaBrain( Brain ):
         print( "_brain_parameters : \n", self._brain_parameters )
         print( "_q_function : \n", self._q_function )
         print( "_epsilon : \n", self._epsilon )
+        print( "_gamma : \n", self._gamma )
+        print( "_learning_rate : \n", self._learning_rate )
         print( "----------------------------------" )
         return
 
@@ -103,6 +111,34 @@ class MazeSarsaBrain( Brain ):
         return q_function
 
 
+    def update_q_function( self, state, action, next_state, next_action, reword ):
+        """
+        Q 関数の値を更新する。
+
+        [Args]
+            state : int
+                現在の状態 s
+            action : str
+                現在の行動 a
+            next_state : int
+                次の状態 s'
+            next_action : str
+                次の行動 a'
+            reword : float
+                報酬
+        
+        [Returns]
+
+        """
+        # ゴールした場合
+        if( next_state == 8):
+            self._q_function[ state, action ] += self._learning_rate * ( reword - self._q_function[ state, action ] )
+        else:
+            self._q_function[ state, action ] += self._learning_rate * ( reword + self._gamma * self._q_function[ next_state, next_action ] - self._q_function[ state, action ] )
+
+        return self._q_function
+
+
     def next_action( self, state ):
         """
         Brain のロジックに従って、次の行動を決定する。
@@ -123,6 +159,9 @@ class MazeSarsaBrain( Brain ):
             # Q の最大化する行動を選択
             next_action = self._action[ np.nanargmax( self._q_function[state, :] ) ]
 
+        # このメソッドが呼び出される度に、ε の値を徐々に小さくする。
+        self._epsilon = self._epsilon / 2
+
         return next_action
 
 
@@ -140,3 +179,28 @@ class MazeSarsaBrain( Brain ):
         policy = np.nan_to_num( policy )
 
         return policy
+
+
+    def decision_policy( self ):
+        """
+        行動方針を決定する
+        """
+        # エージェントの状態を取得
+        self._observations = self._agent.collect_observations()
+        
+        state_action_historys = []
+        for s,a in zip( self._observations[1], self._observations[2] ):
+            state_action_historys.append( [s,a] )
+
+        # 行動の方策のためのパラメーターを更新
+        self._brain_parameters = self.update_brain_parameter(
+            brain_parameters = self._brain_parameters,
+            state_action_historys = state_action_historys,
+            policy = self._policy,
+            learning_rate = 0.1
+        )
+
+        # 行動の方策のためのパラメーターを元に、行動方策を決定する。
+        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+
+        return self._policy

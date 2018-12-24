@@ -19,8 +19,7 @@ from MazeAgent import MazeAgent
 def main():
     """
 	強化学習の学習環境用の迷路探索問題
-    ・エージェントの経路の選択ロジックは、Sarsa
-	・Unity ML-Agents のフレームワークを参考にして実装
+    ・エージェントの行動方策の学習ロジックは、Sarsa
     """
     print("Start main()")
 
@@ -31,7 +30,10 @@ def main():
     academy = MazeAcademy( max_episode = 5000 )
 
     # Brain の生成
-    brain = MazeSarsaBrain( epsilon = 0.5 )
+    brain = MazeSarsaBrain( 
+        epsilon = 0.5,
+        gamma = 0.9
+   )
 
 	# Agent の生成
     agent = MazeAgent()
@@ -91,7 +93,7 @@ def main():
     line, = ax.plot([0.5], [2.5], marker="o", color='g', markersize=60)
 
     #
-    #plt.savefig( "MazeGame_PolicyGradient.png", dpi = 300, bbox_inches = "tight" )
+    #plt.savefig( "MazeGame_Sarsa.png", dpi = 300, bbox_inches = "tight" )
         
     #----------------------------------------
     # エージェントの移動の様子を可視化
@@ -120,7 +122,7 @@ def main():
     )
 
     HTML( anim.to_jshtml() )
-    anim.save( "MazeGame_PolicyGradient1.gif", writer = 'imagemagick' )
+    anim.save( "MazeGame_Sarsa.gif", writer = 'imagemagick' )
 
     print("Finish main()")
     return

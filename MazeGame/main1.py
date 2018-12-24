@@ -22,7 +22,6 @@ def main():
     """
 	強化学習の学習環境用の迷路探索問題
     ・エージェントの経路選択ロジックは、等確率な方向から１つを無作為選択
-	・Unity ML-Agents のフレームワークを参考にして実装
     """
     print("Start main()")
 
@@ -121,7 +120,7 @@ def main():
     )
 
     HTML( anim.to_jshtml() )
-    anim.save( "MazeGame_Random1.gif", writer = 'imagemagick' )
+    anim.save( "MazeGame_Random.gif", writer = 'imagemagick' )
 
     print("Finish main()")
     return
