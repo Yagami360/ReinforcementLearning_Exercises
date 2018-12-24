@@ -244,6 +244,7 @@ class MazePolicyGradientBrain
     ```
 
 #### 3. エージェントをゴールまで移動させる。
+- この処理は、`Academy` クラスからコールバックされる `MazeAgent` クラスのコールバック関数 `agent_action()` にて行う。
 - エージェントの次行動 `next_action` は、確率で表現される行動方策 `policy` を元に、`np.random.choice()` メソッドで決定する。
 - 迷路の各格子の位置を 0~8 の番号で管理しているので、これに従って、行動 {"Up","Right","Down","Left"} による次状態 `_state` =0~8 を指定する。<br>
     - 例えば、上に移動するときは次状態 `_state` の数字が3小さくなるなど。
@@ -251,73 +252,75 @@ class MazePolicyGradientBrain
 - while ループで、エージェントがゴールに辿り着くまで、これらのエージェントの移動処理を繰り返す。
 
 ```python
-[MazePolicyGradientBrain.py]
-class MazePolicyGradientBrain
+[MazeAgent.py]
+class MazeAgent
     ...
-    def goal_maze( self, policy ):
+    def agent_action( self, episode ) :
         """
-        行動方策に基づき、迷宮のゴール地点までエージェントを移動
+        各エピソードでのエージェントのアクションを記述
+        ・Academy からコールされるコールバック関数
+
+        [Args]
+            episode : 現在のエピソード数
+        [Returns]
+            done : bool
+                エピソードの完了フラグ
         """
+        done = False            # エピソードの完了フラグ
+        stop_epsilon = 0.001    # エピソードの完了のための行動方策の差分値
+
+        #self._brain.reset_brain()
+        print( "現在のエピソード数：", episode )
+
+        policy = self._brain.get_policy()
+
+        #------------------------------------------------------------
+        # 行動方策に基づき、エージェントを迷路のゴールまで移動させる。
+        #------------------------------------------------------------
+        # エージェントの状態を再初期化して、開始位置に設定する。
         self.agent_reset()
 
-        #------------------------------------------------
         # Goal にたどり着くまでループ
-        #------------------------------------------------
         while(1):
-            #------------------------------------------------
-            # 行動方針の確率に従った次のエージェントの action
-            #------------------------------------------------
-            action = self._brain.action()
-            next_action = np.random.choice( 
-                action,
-                p = policy[ self._state, : ]
-            )
-
+            # Brain のロジックに従ったエージェント次の行動
+            next_action = self._brain.next_action( state = self._state )
+            
             # エージェントの移動
             if next_action == "Up":
                 self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
-                self._action = 0
+                action = 0
             elif next_action == "Right":
                 self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
-                self._action = 1
+                action = 1
             elif next_action == "Down":
                 self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
-                self._action = 2
+                action = 2
             elif next_action == "Left":
                 self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
-                self._action = 3
+                action = 3
 
             # 現在の状態の行動を設定
-            self._action_history[-1] = self._action
+            self._action_history[-1] = action
 
             # 次の状態を追加
             self._states_history.append( self._state )
             self._action_history.append( np.nan )       # 次の状態での行動はまだ分からないので NaN 値を入れておく。
 
-            #------------------------------------------------
             # ゴールの指定
-            #------------------------------------------------
-            # ゴール地点なら、報酬
             if( self._state == 8 ):
-                self.add_reword( 1.0 )
-                break
+                self.add_reword( 1.0 )  # ゴール地点なら、報酬
+                break                       
 
-        return
-
-
-    def agent_action( self, step ) :
-        """
-        各エピソードでのエージェントのアクションを記述
-        ・Academy からコールされるコールバック関数
-        """
-        ...
-        # 行動方策に基づき、エージェントを迷路のゴールまで移動させる。
-        self.goal_maze( policy )
         print( "迷路を解くのにかかったステップ数：" + str( len(self._states_history) ) )
 
+        #------------------------------------------------------------
         # エージェントのゴールまでの履歴を元に、行動方策を更新
+        #------------------------------------------------------------
         new_policy = self._brain.decision_policy()
 
+        #------------------------------------------------------------
+        # エピソードの完了判定処理
+        #------------------------------------------------------------
         # 前回の行動方針との差分が十分小さくなれば学習を終了する。
         delta_policy = np.sum( np.abs( new_policy - policy ) )
         print( "前回の行動方針との差分：", delta_policy )
@@ -326,6 +329,7 @@ class MazePolicyGradientBrain
             done = True
 
         return
+
 ```
 
 
