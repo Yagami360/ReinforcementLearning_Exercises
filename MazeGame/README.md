@@ -243,13 +243,45 @@ class MazePolicyGradientBrain
     [ 0.5         0.5         0.          0.        ]]
     ```
 
-#### 3. エージェントをゴールまで移動させる。
+
+#### 3. 以下の 3.1 ~ 3.2 の処理を、エピソード `episode` 毎に繰り返す。
+
+##### 3-1. エージェントをゴールまで移動させる。
 - この処理は、`Academy` クラスからコールバックされる `MazeAgent` クラスのコールバック関数 `agent_action()` にて行う。
+- まず、`agent_reset()` メソッドをコールし、エージェントの状態を初期位置にリセットする。
 - エージェントの次行動 `next_action` は、確率で表現される行動方策 `policy` を元に、`np.random.choice()` メソッドで決定する。
-- 迷路の各格子の位置を 0~8 の番号で管理しているので、これに従って、行動 {"Up","Right","Down","Left"} による次状態 `_state` =0~8 を指定する。<br>
+- 迷路の各格子の位置を 0 ~ 8 の番号で管理しているので、これに従って、行動 {"Up","Right","Down","Left"} による次状態 `_state` =0 ~ 8 を指定する。<br>
     - 例えば、上に移動するときは次状態 `_state` の数字が3小さくなるなど。
 - この際、エージェントの状態の履歴 `_states_history` と行動の履歴 `_action_history` を保管しておく。（後述の方策勾配法に基づく行動方策のためのパラメーターの更新処理で利用するため）
 - while ループで、エージェントがゴールに辿り着くまで、これらのエージェントの移動処理を繰り返す。
+
+```python
+[Academy.py]
+class Academy( object ):
+    ...
+    def academy_step( self ):
+        """
+        エピソードを１ステップ間隔実行する。
+        """
+        for episode in range( 0,self._max_episode ):
+            for agent in self._agents:
+                agent.agent_step( episode )
+                agent.agent_action( episode )
+
+                # 全ての Agent が完了時に break するように要修正
+                if ( agent.IsDone() == True ):
+                    break
+                
+            if ( agent.IsDone() == True ):
+                break
+
+        # Academy と全 Agents のエピソードを完了
+        self._done = True
+        for agent in self._agents:
+            agent.agent_on_done()
+
+        return
+```
 
 ```python
 [MazeAgent.py]
@@ -262,14 +294,8 @@ class MazeAgent
 
         [Args]
             episode : 現在のエピソード数
-        [Returns]
-            done : bool
-                エピソードの完了フラグ
         """
-        done = False            # エピソードの完了フラグ
-        stop_epsilon = 0.001    # エピソードの完了のための行動方策の差分値
-
-        #self._brain.reset_brain()
+        ...
         print( "現在のエピソード数：", episode )
 
         policy = self._brain.get_policy()
@@ -312,12 +338,48 @@ class MazeAgent
                 break                       
 
         print( "迷路を解くのにかかったステップ数：" + str( len(self._states_history) ) )
+        ...
+```
 
+##### 3.2. エージェントのゴールまでの履歴を元に、方策勾配法に従って、行動方策を更新する。
+
+```python
+[MazeAgent.py]
+class MazeAgent
+    ...
+    def agent_action( self, episode ) :
+        """
+        各エピソードでのエージェントのアクションを記述
+        ・Academy からコールされるコールバック関数
+
+        [Args]
+            episode : 現在のエピソード数
+        """
+        ...
         #------------------------------------------------------------
         # エージェントのゴールまでの履歴を元に、行動方策を更新
         #------------------------------------------------------------
         new_policy = self._brain.decision_policy()
+        ...
+```
 
+#### 4. 前回の行動方針との差分が十分小さければ、学習が完了したとみなし、エピソードを完了する。
+
+```python
+[MazeAgent.py]
+class MazeAgent
+    ...
+    def agent_action( self, episode ) :
+        """
+        各エピソードでのエージェントのアクションを記述
+        ・Academy からコールされるコールバック関数
+
+        [Args]
+            episode : 現在のエピソード数
+        """
+        done = False            # エピソードの完了フラグ
+        stop_epsilon = 0.001    # エピソードの完了のための行動方策の差分値
+        ...
         #------------------------------------------------------------
         # エピソードの完了判定処理
         #------------------------------------------------------------
@@ -329,7 +391,6 @@ class MazeAgent
             done = True
 
         return
-
 ```
 
 
