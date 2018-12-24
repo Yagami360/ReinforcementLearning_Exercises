@@ -1,8 +1,11 @@
 # ReinforcementLearning_Exercises_Python
-強化学習の練習コード集。<br>
+強化学習の練習コード集。（実装中）<br>
 分かりやすいように、各フォルダ毎で完結したコード一式になっています。<br>
 
-> 実装中...
+強化学習の背景理論は、以下のサイトに記載してあります。<br>
+
+- [強化学習](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md)
+
 
 ## ■ 動作環境
 

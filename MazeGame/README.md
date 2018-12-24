@@ -15,14 +15,15 @@
 1. [コード説明＆実行結果](#コード説明＆実行結果)
     1. [等確率による迷路検索問題 : `main1.py`](#コード説明＆実行結果１)
     1. [方策勾配法による迷路検索問題 : `main2.py`](#コード説明＆実行結果２)
+    1. [Sarsaによる迷路検索問題 : `main3.py`](#コード説明＆実行結果３)
+    1. Q学習による迷路検索問題 : `main4.py`
+    1. モンテカルロ法による迷路検索問題 : `main5.py`
+1. 背景理論
+    1. [【外部リンク】強化学習 / 方策反復法](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md#%E6%96%B9%E7%AD%96%E5%8F%8D%E5%BE%A9%E6%B3%95)
+    1. [【外部リンク】強化学習 / モンテカルロ法による価値推定](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md#%E3%83%A2%E3%83%B3%E3%83%86%E3%82%AB%E3%83%AB%E3%83%AD%E6%B3%95%E3%81%AB%E3%82%88%E3%82%8B%E4%BE%A1%E5%80%A4%E6%8E%A8%E5%AE%9A)
+    1. [【外部リンク】強化学習 / Sarsa](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md#Sarsa)
+    1. [【外部リンク】強化学習 / Q学習](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md#Q%E5%AD%A6%E7%BF%92)
 
-<!--
-1. [使用するライブラリ](#使用するライブラリ)
-1. [使用するデータセット](#使用するデータセット)
-1. [背景理論](#背景理論)
-    1. [背景理論１](#背景理論１)
-    1. [](#)
--->
 
 ## ■ 動作環境
 
@@ -60,8 +61,13 @@
 ### ◎ 方策勾配法による迷路検索問題 : `main2.py`
 方策反復法の具体例なアルゴリズムの１つである方策勾配法によって、迷路探索問題を解く。<br>
 
-![mazegame_policygradient1](https://user-images.githubusercontent.com/25688193/50348392-f4f00e00-057b-11e9-805a-8ee3a84b26f2.gif)<br>
+#### ☆ コードの実行結果
 
+- 以下のアニメーションは、方策勾配法によって、学習した行動方策 π に基づく迷路探索問題の探索結果である。<br>
+    ![mazegame_policygradient1](https://user-images.githubusercontent.com/25688193/50348392-f4f00e00-057b-11e9-805a-8ee3a84b26f2.gif)<br>
+    > 先の等確率による迷路検索問題 `main1.py` とは異なり、最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
+
+- xxx
 ```python
 エピソードのステップ数： 1
 迷路を解くのにかかったステップ数：23
@@ -109,18 +115,235 @@
 エピソードのステップ数： 4999
 迷路を解くのにかかったステップ数：5
 前回の行動方針との差分： 6.82023858042e-05
-
-最終的な policy の値
-_policy : 
- [[ 0.          0.01222508  0.98777492  0.        ]
- [ 0.          0.28989193  0.          0.71010807]
- [ 0.          0.          0.40313477  0.59686523]
- [ 0.01068343  0.9813875   0.00792907  0.        ]
- [ 0.          0.          0.98764577  0.01235423]
- [ 1.          0.          0.          0.        ]
- [ 1.          0.          0.          0.        ]
- [ 0.01129659  0.98870341  0.          0.        ]]
 ```
+
+- 初回の行動方策 policy の値
+
+|状態 s|行動 a0="Up"|行動 a1="Right"|行動 a2="Down"|行動 a3="Left"|
+|---|---|---|---|---|
+|s0|0.|0.5|0.5|0.|
+|s1|0.|0.5|0.|0.5|
+|s2|0.|0.|0.5|0.5|
+|s3|0.33333333|0.33333333|0.33333333|0.|
+|s4|0.|0.|0.5|0.5|
+|s5|1.|0.|0.|0.|
+|s6|1.|0.|0.|0.|
+|s7|0.5|0.5|0.|0.|
+
+- 方策勾配法による学習後の行動方策の値
+
+|状態 s|行動 a0="Up"|行動 a1="Right"|行動 a2="Down"|行動 a3="Left"|
+|---|---|---|---|---|
+|s0|0.|0.01222508|0.98777492|0.|
+|s1|0.|0.28989193|0.|0.71010807|
+|s2|0.|0.|0.40313477|0.59686523|
+|s3|0.01068343|0.9813875|0.00792907|0.|
+|s4|0.|0.|0.98764577|0.01235423|
+|s5|1.|0.|0.|0.|
+|s6|1.|0.|0.|0.|
+|s7|0.01129659|0.98870341|0.|0.|
+
+
+#### ☆ コードの内容説明
+本コードの大まかな流れは、以下のようになる。<br>
+
+#### 1. エージェントの行動方策 `_policy` のためのパラメーター `_brain_parameters` を初期化する。
+- この初期化処理は、`MazePolicyGradientBrain` クラスのコンストラクタとそのコンストラクタ内でコールされる `MazePolicyGradientBrain.init__brain_parameters()` メソッドにて行う。<br>
+- パラメーター `_brain_parameters` の値は、行を状態 {s0,s1,s2,s3,s4,s5,s6,s7} 、列を行動 {"Up","Right","Down","Left"} とする表形式表現で実装する。（※行動方策を表形式で実装するために、これに対応するパラメーターも表形式で実装する。）<br>
+- 進行方向に壁があって進めない様子を表現するために、壁で進めない方向には `np.nan` で初期化する。<br>
+- 尚、状態 s8 は、ゴール状態で行動方策がないため、これに対応するパラメーターも定義しないようにする。<br>
+
+```python
+[MazePolicyGradientBrain.py]
+class MazePolicyGradientBrain
+    ...
+    def __init__( self ):
+        ...
+        self._brain_parameters = self.init__brain_parameters()
+        ...
+        return
+
+    def init__brain_parameters( self ):
+        """
+        方策パラメータを初期化
+        """
+        # 表形式（行：状態 s、列：行動 a）
+        brain_parameters = np.array(
+            [   # a0="Up", a1="Right", a3="Down", a4="Left"
+                [ np.nan, 1,        1,         np.nan ], # s0
+                [ np.nan, 1,        np.nan,    1 ],      # s1
+                [ np.nan, np.nan,   1,         1 ],      # s2
+                [ 1,      1,        1,         np.nan ], # s3
+                [ np.nan, np.nan,   1,         1 ],      # s4
+                [ 1,      np.nan,   np.nan,    np.nan ], # s5
+                [ 1,      np.nan,   np.nan,    np.nan ], # s6
+                [ 1,      1,        np.nan,    np.nan ], # s7
+            ]
+        )
+        return brain_parameters
+```
+
+#### 2. softmax 関数に従って、パラメーター `_brain_parameters` から行動方策 `_policy` を求める。
+- この処理の初回処理（＝初回の行動方策の算出）は、`MazePolicyGradientBrain` クラスのコンストラクタからコールされる `convert_into_policy_from_brain_parameters()` メソッドにて行う。<br>
+- それ以降のエピソードでの処理は、`MazePolicyGradientBrain` クラスの `decision_policy()` メソッドからコールされる `convert_into_policy_from_brain_parameters()` メソッドにて行う。<br>
+
+```python
+[MazePolicyGradientBrain.py]
+class MazePolicyGradientBrain
+    ...
+    def __init__( self ):
+        ...
+        self._brain_parameters = self.init__brain_parameters()
+        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+        return
+    
+    def convert_into_policy_from_brain_parameters( self, brain_parameters ):
+        """
+        方策パラメータから、行動方針 [policy] を決定する
+        ・softmax 関数で確率を計算
+        """
+        beta = 1.0
+        [m, n] = brain_parameters.shape
+        policy = np.zeros( shape = (m,n) )
+
+        theta = brain_parameters
+        exp_theta = np.exp( beta * theta )
+
+        for i in range(0, m):
+            # 割合の計算
+            policy[i, :] = exp_theta[i, :] / np.nansum( exp_theta[i, :] )
+
+        # NAN 値は 0 に変換
+        policy = np.nan_to_num( policy )
+
+        return policy
+
+    def decision_policy( self ):
+        """
+        行動方針を決定する
+        """
+        ...
+
+        # 行動の方策のためのパラメーターを元に、行動方策を決定する。
+        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+
+        return self._policy
+```
+
+- ここで、初期化後の行動方策 `_policy` の値は、以下のような値になる。<br>
+    ```python
+    _policy : 
+    [[ 0.          0.5         0.5         0.        ]
+    [ 0.          0.5         0.          0.5       ]
+    [ 0.          0.          0.5         0.5       ]
+    [ 0.33333333  0.33333333  0.33333333  0.        ]
+    [ 0.          0.          0.5         0.5       ]
+    [ 1.          0.          0.          0.        ]
+    [ 1.          0.          0.          0.        ]
+    [ 0.5         0.5         0.          0.        ]]
+    ```
+
+#### 3. エージェントをゴールまで移動させる。
+- エージェントの次行動 `next_action` は、確率で表現される行動方策 `policy` を元に、`np.random.choice()` メソッドで決定する。
+- 迷路の各格子の位置を 0~8 の番号で管理しているので、これに従って、行動 {"Up","Right","Down","Left"} による次状態 `_state` =0~8 を指定する。<br>
+    - 例えば、上に移動するときは次状態 `_state` の数字が3小さくなるなど。
+- この際、エージェントの状態の履歴 `_states_history` と行動の履歴 `_action_history` を保管しておく。（後述の方策勾配法に基づく行動方策のためのパラメーターの更新処理で利用するため）
+- while ループで、エージェントがゴールに辿り着くまで、これらのエージェントの移動処理を繰り返す。
+
+```python
+[MazePolicyGradientBrain.py]
+class MazePolicyGradientBrain
+    ...
+    def goal_maze( self, policy ):
+        """
+        行動方策に基づき、迷宮のゴール地点までエージェントを移動
+        """
+        self.agent_reset()
+
+        #------------------------------------------------
+        # Goal にたどり着くまでループ
+        #------------------------------------------------
+        while(1):
+            #------------------------------------------------
+            # 行動方針の確率に従った次のエージェントの action
+            #------------------------------------------------
+            action = self._brain.action()
+            next_action = np.random.choice( 
+                action,
+                p = policy[ self._state, : ]
+            )
+
+            # エージェントの移動
+            if next_action == "Up":
+                self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
+                self._action = 0
+            elif next_action == "Right":
+                self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
+                self._action = 1
+            elif next_action == "Down":
+                self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
+                self._action = 2
+            elif next_action == "Left":
+                self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+                self._action = 3
+
+            # 現在の状態の行動を設定
+            self._action_history[-1] = self._action
+
+            # 次の状態を追加
+            self._states_history.append( self._state )
+            self._action_history.append( np.nan )       # 次の状態での行動はまだ分からないので NaN 値を入れておく。
+
+            #------------------------------------------------
+            # ゴールの指定
+            #------------------------------------------------
+            # ゴール地点なら、報酬
+            if( self._state == 8 ):
+                self.add_reword( 1.0 )
+                break
+
+        return
+
+
+    def agent_action( self, step ) :
+        """
+        各エピソードでのエージェントのアクションを記述
+        ・Academy からコールされるコールバック関数
+        """
+        ...
+        # 行動方策に基づき、エージェントを迷路のゴールまで移動させる。
+        self.goal_maze( policy )
+        print( "迷路を解くのにかかったステップ数：" + str( len(self._states_history) ) )
+
+        # エージェントのゴールまでの履歴を元に、行動方策を更新
+        new_policy = self._brain.decision_policy()
+
+        # 前回の行動方針との差分が十分小さくなれば学習を終了する。
+        delta_policy = np.sum( np.abs( new_policy - policy ) )
+        print( "前回の行動方針との差分：", delta_policy )
+
+        if( delta_policy < stop_epsilon ):
+            done = True
+
+        return
+```
+
+
+
+<a id="コード説明＆実行結果３"></a>
+
+### ◎ Sarsaによる迷路検索問題 : `main3.py`
+
+- 行動価値関数 Q(s,a) を初期化する。<br>
+    - 行動価値関数 Q(s,a) は、行を状態 s、列を行動 a とする表形式で実装する。<br>
+    - xxx
+    ```python
+    [SarsaBrain.py]
+    ```
+2. xxx
+
+> 実装中...
+
 
 
 ---
