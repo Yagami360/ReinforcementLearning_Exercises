@@ -23,8 +23,6 @@ class MazeAgent( Agent ):
         _states_history : list <state>
             エージェントの状態の履歴
 
-        _action : str
-            上下移動のアクション
         _action_istory : list<action>
             アクションの履歴
 
@@ -37,9 +35,8 @@ class MazeAgent( Agent ):
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
-        self._action = np.nan
         self._action_history = []
-        self._action_history.append( self._action )
+        self._action_history.append( np.nan )
         self.agent_reset()
         return
 
@@ -52,7 +49,6 @@ class MazeAgent( Agent ):
         print( "_observations : \n", self._observations )
         print( "_state : \n", self._state )
         print( "_states_history : \n", self._states_history )
-        print( "_action : \n", self._action )
         print( "_action_history : \n", self._action_history )
         print( "----------------------------------" )
         return
@@ -65,7 +61,6 @@ class MazeAgent( Agent ):
         self._observations = []
         self.add_vector_obs( self._state )
         self.add_vector_obs( self._states_history )
-        self.add_vector_obs( self._action )
         self.add_vector_obs( self._action_history )
         return self._observations
 
@@ -78,67 +73,82 @@ class MazeAgent( Agent ):
         self._state = 0
         self._states_history = []
         self._states_history.append( self._state )
-        self._action = np.nan
         self._action_history = []
-        self._action_history.append( self._action )
+        self._action_history.append( np.nan )
         return
 
-    def state_history( self ):
-        return self._states_history
 
-    def agent_action( self, step ):
+    def agent_action( self, episode ) :
         """
-        現在の状態に基づき、エージェントの実際のアクションを記述する。
+        各エピソードでのエージェントのアクションを記述
+        ・Academy からコールされるコールバック関数
 
-        [Input]
-
+        [Args]
+            episode : 現在のエピソード数
+        [Returns]
+            done : bool
+                エピソードの完了フラグ
         """
-        super().agent_action( step )
-        done = False
+        done = False            # エピソードの完了フラグ
+        stop_epsilon = 0.001    # エピソードの完了のための行動方策の差分値
 
-        #------------------------------------------------
-        # エージェントの意思決定ロジック
-        #------------------------------------------------
-        policy = self._brain.decision_policy()
+        #self._brain.reset_brain()
+        print( "現在のエピソード数：", episode )
 
-        #------------------------------------------------
-        # 行動方針の確率に従った次のエージェントの action
-        #------------------------------------------------
-        action = self._brain.action()
-        #np.random.seed(8)
-        next_action = np.random.choice( 
-            action,
-            p = policy[ self._state, : ]
-        )
-        
-        # エージェントの移動
-        if next_action == "Up":
-            self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
-        elif next_action == "Right":
-            self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
-        elif next_action == "Down":
-            self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
-        elif next_action == "Left":
-            self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+        policy = self._brain.get_policy()
 
-        self._action = next_action
-        self._states_history.append( self._state )
-        self._action_history.append( self._action )
+        #------------------------------------------------------------
+        # 行動方策に基づき、エージェントを迷路のゴールまで移動させる。
+        #------------------------------------------------------------
+        # エージェントの状態を再初期化して、開始位置に設定する。
+        self.agent_reset()
 
-        #------------------------------------------------
-        # 報酬の指定
-        #------------------------------------------------
-        # ゴール地点なら、報酬
-        if( self._state == 8 ):
-            self.add_reword( 1.0 )
-
-        #------------------------------------------------
-        # エピソードの完了
-        #------------------------------------------------
-        # ゴール地点なら、完了フラグ ON
-        if( self._state == 8 ):
-            self.Done()
-            self._states_history.append( self._state )
+        # Goal にたどり着くまでループ
+        while(1):
+            # Brain のロジックに従ったエージェント次の行動
+            next_action = self._brain.next_action( state = self._state )
             
-        return
+            # エージェントの移動
+            if next_action == "Up":
+                self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
+                action = 0
+            elif next_action == "Right":
+                self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
+                action = 1
+            elif next_action == "Down":
+                self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
+                action = 2
+            elif next_action == "Left":
+                self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+                action = 3
 
+            # 現在の状態の行動を設定
+            self._action_history[-1] = action
+
+            # 次の状態を追加
+            self._states_history.append( self._state )
+            self._action_history.append( np.nan )       # 次の状態での行動はまだ分からないので NaN 値を入れておく。
+
+            # ゴールの指定
+            if( self._state == 8 ):
+                self.add_reword( 1.0 )  # ゴール地点なら、報酬
+                break                       
+
+        print( "迷路を解くのにかかったステップ数：" + str( len(self._states_history) ) )
+
+        #------------------------------------------------------------
+        # エージェントのゴールまでの履歴を元に、行動方策を更新
+        #------------------------------------------------------------
+        new_policy = self._brain.decision_policy()
+
+        #------------------------------------------------------------
+        # エピソードの完了判定処理
+        #------------------------------------------------------------
+        # 前回の行動方針との差分が十分小さくなれば学習を終了する。
+        delta_policy = np.sum( np.abs( new_policy - policy ) )
+        print( "前回の行動方針との差分：", delta_policy )
+
+        if( delta_policy < stop_epsilon ):
+            done = True
+
+        return

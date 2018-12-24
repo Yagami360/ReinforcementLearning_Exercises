@@ -3,7 +3,7 @@
 
 """
     更新情報
-    [18/12/07] : 新規作成
+    [18/12/08] : 新規作成
     [xx/xx/xx] : 
 """
 import numpy as np
@@ -12,37 +12,49 @@ import matplotlib.pyplot as plt
 
 # 自作クラス
 from Brain import Brain
+from Agent import Agent
+from MazeAgent import MazeAgent
 
 
-class MazeRamdomBrain( Brain ):
+class MazeSarsaBrain( Brain ):
     """
-    迷宮問題の Brain
+    迷宮問題の Brain。
+    ・Sarsa による迷路検索用のアルゴリズム
     
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _q_function : 行動状態関数 Q(s,a)
+                      行を状態 s, 列を行動 a とする表形式表現
+
+        _epsilon : float
+                   ε-greedy 法の ε 値
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self ):
+    def __init__( self, epsilon = 0.5 ):
         super().__init__()
         self._action = ["Up", "Right", "Down", "Left"]
         self._policy = np.zeros( shape = (8, len(self._action)) )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+        self._q_function = self.init_q_function( brain_parameters = self._brain_parameters )
+        self._epsilon = epsilon
         return
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "MazeRamdomBrain" )
+        print( "MazeSarsaBrain" )
         print( self )
         print( str )
-        print( "_agent : \n", self._agent )
+        print( "_agent : \n", self._agent )        
         print( "_action : \n", self._action )
         print( "_policy : \n", self._policy )
         print( "_observations : \n", self._observations )
         print( "_brain_parameters : \n", self._brain_parameters )
+        print( "_q_function : \n", self._q_function )
+        print( "_epsilon : \n", self._epsilon )
         print( "----------------------------------" )
         return
 
@@ -53,6 +65,7 @@ class MazeRamdomBrain( Brain ):
         self._policy = np.zeros( shape = (8, len(self._action)) )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+        self._q_function = self.init_q_function( brain_parameters = self._brain_parameters )
         return
 
 
@@ -79,6 +92,40 @@ class MazeRamdomBrain( Brain ):
         return brain_parameters
 
 
+    def init_q_function( self, brain_parameters ):
+        """
+        Q 関数を表形式で初期化する。
+        """
+        # エピソードの開始時点では、最適な Q 関数の値は不明なので、ランダム値で初期化
+        # brain_parameters をかけることで、壁方向は np.nan に設定する。
+        [a, b] = brain_parameters.shape
+        q_function = np.random.rand( a, b ) * brain_parameters
+        return q_function
+
+
+    def next_action( self, state ):
+        """
+        Brain のロジックに従って、次の行動を決定する。
+        ・ε-グリーディー法に従った行動選択
+        [Args]
+            state : int
+                現在の状態
+        """
+        # ε-グリーディー法に従った行動選択
+        if( np.random.rand() < self._epsilon ):
+            # ε の確率でランダムな行動を選択
+            next_action = np.random.choice( 
+                self._action,
+                p = self._policy[ state, : ]
+            )
+
+        else:
+            # Q の最大化する行動を選択
+            next_action = self._action[ np.nanargmax( self._q_function[state, :] ) ]
+
+        return next_action
+
+
     def convert_into_policy_from_brain_parameters( self, brain_parameters ):
         """
         方策パラメータから、行動方針 [policy] を決定する
@@ -93,34 +140,3 @@ class MazeRamdomBrain( Brain ):
         policy = np.nan_to_num( policy )
 
         return policy
-
-
-    def next_action( self, state ):
-        """
-        Brain のロジックに従って、次の行動を決定する。
-        [Args]
-            state : int
-                現在の状態
-        """
-        # 行動方策 policy の確率に従って、次の行動を選択
-        next_action = np.random.choice( 
-            self._action,
-            p = self._policy[ state, : ]
-        )
-
-        return next_action
-
-
-    def decision_policy( self ):
-        """
-        行動方針を決定する
-        """
-        # エージェントの状態を取得
-        self._observations = self._agent.collect_observations()
-
-        # 行動の方策のためのパラメーターを更新
-
-        # 行動の方策のためのパラメーターを元に、行動方策を決定する。
-        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
-
-        return self._policy

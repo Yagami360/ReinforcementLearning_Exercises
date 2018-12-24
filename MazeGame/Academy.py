@@ -22,9 +22,9 @@ class Academy( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _max_step : int
-                    エピソード（学習環境のシミュレーション）の最大ステップ回数
-                    最大ステップ数に到達すると、Academy と全 Agent のエピソードを完了する。
+        _max_episode : int
+                       エピソード（学習環境のシミュレーション）の最大回数
+                       最大回数数に到達すると、Academy と全 Agent のエピソードを完了する。
         _agents : list<AgentBase>
 
         _done : bool
@@ -33,8 +33,8 @@ class Academy( object ):
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, max_step = 1000 ):
-        self._max_step = max_step
+    def __init__( self, max_episode = 1 ):
+        self._max_episode = max_episode
         self._agents = []
         self._done = False
         return
@@ -61,10 +61,10 @@ class Academy( object ):
         """
         次のシミュレーションステップ
         """
-        for step in range( 1,self._max_step ):
+        for episode in range( 0,self._max_episode ):
             for agent in self._agents:
-                agent.agent_step( step )
-                agent.agent_action( step )
+                agent.agent_step( episode )
+                agent.agent_action( episode )
 
                 # 全ての Agent が完了時に break するように要修正
                 if ( agent.IsDone() == True ):
@@ -92,10 +92,3 @@ class Academy( object ):
         Academy がエピソードを完了したかの取得
         """
         return self._done
-
-    def draw_academy( self ):
-        """
-        エージェントの学習環境を描写する。
-        """
-
-        return

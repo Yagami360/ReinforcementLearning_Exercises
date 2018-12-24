@@ -58,6 +58,7 @@ class Brain( object ):
 
     def reset_brain( self ):
         """
+        Brain を再初期化する
         """
         self._policy = None
         self._brain_parameters = None

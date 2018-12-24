@@ -31,8 +31,8 @@ class MazePolicyGradientBrain( Brain ):
     def __init__( self ):
         super().__init__()
         self._action = ["Up", "Right", "Down", "Left"]
-        self._policy = 0.0
-        self._brain_parameters = self.init__brain_parameters()
+        self._policy = np.zeros( shape = (8, len(self._action)) )
+        self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         return
 
@@ -49,7 +49,17 @@ class MazePolicyGradientBrain( Brain ):
         print( "----------------------------------" )
         return
 
-    def init__brain_parameters( self ):
+    def reset_brain( self ):
+        """
+        Brain の状態を再初期化する。
+        """
+        self._policy = np.zeros( shape = (8, len(self._action)) )
+        self._brain_parameters = self.init_brain_parameters()
+        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
+        return
+
+
+    def init_brain_parameters( self ):
         """
         方策パラメータを初期化
         """
@@ -71,13 +81,6 @@ class MazePolicyGradientBrain( Brain ):
         )
         return brain_parameters
 
-    def reset_brain( self ):
-        """
-        """
-        self._policy = 0.0
-        self._brain_parameters = self.init__brain_parameters()
-        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
-        return
 
     def update_brain_parameter( self, brain_parameters, state_action_historys, policy, learning_rate = 0.1 ):
         """
@@ -154,6 +157,22 @@ class MazePolicyGradientBrain( Brain ):
         return policy
 
 
+    def next_action( self, state ):
+        """
+        Brain のロジックに従って、次の行動を決定する。
+        [Args]
+            state : int
+                現在の状態
+        """
+        # 行動方策 policy の確率に従って、次の行動を選択
+        next_action = np.random.choice( 
+            self._action,
+            p = self._policy[ state, : ]
+        )
+
+        return next_action
+
+
     def decision_policy( self ):
         """
         行動方針を決定する
@@ -162,7 +181,7 @@ class MazePolicyGradientBrain( Brain ):
         self._observations = self._agent.collect_observations()
         
         state_action_historys = []
-        for s,a in zip( self._observations[1], self._observations[3] ):
+        for s,a in zip( self._observations[1], self._observations[2] ):
             state_action_historys.append( [s,a] )
 
         # 行動の方策のためのパラメーターを更新

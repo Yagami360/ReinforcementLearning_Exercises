@@ -11,10 +11,9 @@ from IPython.display import HTML
 from Academy import Academy
 from MazeAcademy import MazeAcademy
 from Brain import Brain
-from MazePolicyGradientBrain import MazePolicyGradientBrain
+from MazeSarsaBrain import MazeSarsaBrain
 from Agent import Agent
 from MazeAgent import MazeAgent
-from MazePolicyGradientAgent import MazePolicyGradientAgent
 
 
 def main():
@@ -29,13 +28,13 @@ def main():
     # 学習環境、エージェント生成フェイズ
     #-----------------------------------
     # Academy の生成
-    academy = MazeAcademy( max_step = 5000 )
+    academy = MazeAcademy( max_episode = 5000 )
 
     # Brain の生成
-    brain = MazePolicyGradientBrain()
+    brain = MazeSarsaBrain( epsilon = 0.5 )
 
 	# Agent の生成
-    agent = MazePolicyGradientAgent()
+    agent = MazeAgent()
 
     # Agent の Brain を設定（相互参照）
     agent.set_brain( brain )
@@ -104,17 +103,19 @@ def main():
 
     def animate(i):
         '''フレームごとの描画内容'''
-        state = agent.state_history()[i]  # 現在の場所を描く
+        state_history = agent.collect_observations()[1]
+        state = state_history[i]  # 現在の場所を描く
         x = (state % 3) + 0.5  # 状態のx座標は、3で割った余り+0.5
         y = 2.5 - int(state / 3)  # y座標は3で割った商を2.5から引く
         line.set_data(x, y)
         return (line,)
 
     #　初期化関数とフレームごとの描画関数を用いて動画を作成する
+    state_history = agent.collect_observations()[1]
     anim = animation.FuncAnimation(
         fig, animate, 
         init_func=init, 
-        frames=len( agent.state_history() ), 
+        frames=len( state_history ), 
         interval=200, repeat=False
     )
 

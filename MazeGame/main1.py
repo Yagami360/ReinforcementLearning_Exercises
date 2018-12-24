@@ -10,10 +10,12 @@ from IPython.display import HTML
 # 自作モジュール
 from Academy import Academy
 from MazeAcademy import MazeAcademy
-from Brain import Brain
-from MazeRamdomBrain import MazeRamdomBrain
+
 from Agent import Agent
 from MazeAgent import MazeAgent
+
+from Brain import Brain
+from MazeRamdomBrain import MazeRamdomBrain
 
 
 def main():
@@ -28,7 +30,7 @@ def main():
     # 学習環境、エージェント生成フェイズ
     #-----------------------------------
     # Academy の生成
-    academy = MazeAcademy( max_step = 1000 )
+    academy = MazeAcademy( max_episode = 1 )
 
     # Brain の生成
     brain = MazeRamdomBrain()
@@ -91,7 +93,7 @@ def main():
     line, = ax.plot([0.5], [2.5], marker="o", color='g', markersize=60)
 
     #
-    plt.savefig( "MazeGame_Random1.png", dpi = 300, bbox_inches = "tight" )
+    #plt.savefig( "MazeGame_Random1.png", dpi = 300, bbox_inches = "tight" )
         
     #----------------------------------------
     # エージェントの移動の様子を可視化
@@ -103,7 +105,8 @@ def main():
 
     def animate(i):
         '''フレームごとの描画内容'''
-        state = agent.state_history()[i]  # 現在の場所を描く
+        state_history = agent.collect_observations()[1]
+        state = state_history[i]  # 現在の場所を描く
         x = (state % 3) + 0.5  # 状態のx座標は、3で割った余り+0.5
         y = 2.5 - int(state / 3)  # y座標は3で割った商を2.5から引く
         line.set_data(x, y)
@@ -113,7 +116,7 @@ def main():
     anim = animation.FuncAnimation(
         fig, animate, 
         init_func=init, 
-        frames=len( agent.state_history() ), 
+        frames=len( agent.collect_observations()[1] ), 
         interval=200, repeat=False
     )
 
