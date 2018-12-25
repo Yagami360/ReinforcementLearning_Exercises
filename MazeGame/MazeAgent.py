@@ -12,6 +12,15 @@ import numpy as np
 from Agent import Agent
 
 
+# 迷宮探索エージェントの移動方向の KEY と Value
+DICT_AGENT_ACTIONS = {
+    "Up" : 0,     # 上移動
+    "Right" : 1,  # 右移動
+    "Down" : 2,   # 下移動
+    "Left" : 3    # 左移動
+}
+
+
 class MazeAgent( Agent ):
     """
     迷路探索用エージェント。

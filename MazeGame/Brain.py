@@ -8,6 +8,7 @@
 """
 from Agent import Agent
 
+
 class Brain( object ):
     """
     エージェントの意思決定ロジック

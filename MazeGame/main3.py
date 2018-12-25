@@ -29,7 +29,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = 5000 )
+    academy = MazeAcademy( max_episode = 100 )
 
     #-----------------------------------
     # Brain の生成
@@ -53,7 +53,7 @@ def main():
 
     brain = MazeSarsaBrain(
         states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
-        actions = [ "Up", "Right", "Down", "Left" ],
+        actions = [ 0, 1, 2, 3 ],
         brain_parameters = brain_parameters,
         epsilon = 0.5,
         gamma = 0.9,

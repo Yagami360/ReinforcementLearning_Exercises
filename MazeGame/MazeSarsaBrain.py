@@ -83,6 +83,59 @@ class MazeSarsaBrain( Brain ):
         return
 
 
+    def decay_learning_rate( self ):
+        """
+        学習率を減衰させる。
+        """
+        self._learning_rate = self._learning_rate / 2.0
+        return
+
+    def decay_epsilon( self ):
+        """
+        ε-greedy 法の ε 値を減衰させる。
+        """
+        self._epsilon = self._epsilon / 2.0
+        return
+
+    def convert_into_policy_from_brain_parameters( self, brain_parameters ):
+        """
+        方策パラメータから、行動方針 [policy] を決定する
+        """
+        [m, n] = brain_parameters.shape
+        policy = np.zeros( shape = (m,n) )
+        for i in range(0, m):
+            # 割合の計算
+            policy[i, :] = brain_parameters[i, :] / np.nansum( brain_parameters[i, :] )
+
+        # NAN 値は 0 に変換
+        policy = np.nan_to_num( policy )
+
+        return policy
+
+
+    def next_action( self, state ):
+        """
+        Brain のロジックに従って、次の行動を決定する。
+        ・ε-グリーディー法に従った行動選択
+        [Args]
+            state : int
+                現在の状態
+        """
+        # ε-グリーディー法に従った行動選択
+        if( np.random.rand() < self._epsilon ):
+            # ε の確率でランダムな行動を選択
+            next_action = np.random.choice( 
+                self._actions,                  # アクションのリストから抽出
+                p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
+            )
+
+        else:
+            # Q の最大化する行動を選択
+            next_action = self._actions[ np.nanargmax( self._q_function[state, :] ) ]
+
+        return next_action
+
+
     def init_q_function( self, brain_parameters ):
         """
         Q 関数を表形式で初期化する。
@@ -114,74 +167,9 @@ class MazeSarsaBrain( Brain ):
 
         """
         # ゴールした場合
-        if( next_state == 8):
+        if( next_state == 8 ):
             self._q_function[ state, action ] += self._learning_rate * ( reword - self._q_function[ state, action ] )
         else:
             self._q_function[ state, action ] += self._learning_rate * ( reword + self._gamma * self._q_function[ next_state, next_action ] - self._q_function[ state, action ] )
 
         return self._q_function
-
-
-    def next_action( self, state ):
-        """
-        Brain のロジックに従って、次の行動を決定する。
-        ・ε-グリーディー法に従った行動選択
-        [Args]
-            state : int
-                現在の状態
-        """
-        # ε-グリーディー法に従った行動選択
-        if( np.random.rand() < self._epsilon ):
-            # ε の確率でランダムな行動を選択
-            next_action = np.random.choice( 
-                self._actions,                  # アクションのリストから抽出
-                p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
-            )
-
-        else:
-            # Q の最大化する行動を選択
-            next_action = self._actions[ np.nanargmax( self._q_function[state, :] ) ]
-
-        # このメソッドが呼び出される度に、ε の値を徐々に小さくする。
-        self._epsilon = self._epsilon / 2
-
-        return next_action
-
-
-    def convert_into_policy_from_brain_parameters( self, brain_parameters ):
-        """
-        方策パラメータから、行動方針 [policy] を決定する
-        """
-        [m, n] = brain_parameters.shape
-        policy = np.zeros( shape = (m,n) )
-        for i in range(0, m):
-            # 割合の計算
-            policy[i, :] = brain_parameters[i, :] / np.nansum( brain_parameters[i, :] )
-
-        # NAN 値は 0 に変換
-        policy = np.nan_to_num( policy )
-
-        return policy
-
-
-    def decision_policy( self ):
-        """
-        行動方針を決定する
-        """
-        # エージェントの状態を取得
-        self._observations = self._agent.collect_observations()
-        state = self._observations[0]
-        s_a_historys = self._observations[1]
-
-        # 行動の方策のためのパラメーターを更新
-        """
-        self.update_q_function(
-            state = state,
-            action = self._action
-        )
-        """
-
-        # 行動の方策のためのパラメーターを元に、行動方策を決定する。
-        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
-
-        return self._policy

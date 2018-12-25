@@ -12,6 +12,7 @@ import numpy as np
 from Agent import Agent
 from MazeAgent import MazeAgent
 
+
 class MazeTDAgent( MazeAgent ):
     """
     迷路探索用エージェント。
@@ -53,7 +54,6 @@ class MazeTDAgent( MazeAgent ):
             episode : 現在のエピソード数
         """
         done = False            # エピソードの完了フラグ
-        stop_epsilon = 0.001    # エピソードの完了のための行動方策の差分値
 
         print( "現在のエピソード数：", episode )
         policy = self._brain.get_policy()
@@ -64,61 +64,69 @@ class MazeTDAgent( MazeAgent ):
         #------------------------------------------------------------
         # エージェントの状態を再初期化して、開始位置に設定する。
         self.agent_reset()
+        
+        # 初期行動を設定する。（Brain のロジックに従ったエージェント次の行動）
+        action = next_action = self._brain.next_action( state = self._state )
 
         # Goal にたどり着くまでループ
         while(1):
-            # Brain のロジックに従ったエージェント次の行動
-            next_action = self._brain.next_action( state = self._state )
-            
-            # エージェントの移動
-            if next_action == "Up":
-                self._state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
-                action = 0
-            elif next_action == "Right":
-                self._state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
-                action = 1
-            elif next_action == "Down":
-                self._state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
-                action = 2
-            elif next_action == "Left":
-                self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
-                action = 3
+            # 行動を更新
+            action = next_action
 
             # 現在の状態 s の行動 a を設定
             self._s_a_historys[-1][1] = action  # -1 で末端に追加
 
-            # 次の状態 s'と行動 a' を追加
+            # エージェントの移動
+            if action == 0:    # Up
+                next_state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
+            elif action == 1:  # Right
+                next_state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
+            elif action == 2:  # Down
+                next_state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
+            elif action == 3:  # Left
+                next_state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+
+            # 次の状態 s'を追加
             # 次の状態での行動はまだ分からないので NaN 値を入れておく。
-            self._s_a_historys.append( [self._state, np.nan] )
-            
+            self._s_a_historys.append( [next_state, np.nan] )
+
+            # 報酬の指定
+            if( next_state == 8 ):
+                self.add_reword( 1.0 )  # ゴール地点なら、報酬１
+                next_action = np.nan
+            else:
+                self.add_reword( 0.0 )  # ゴール地点なら、報酬なし
+                next_action = self._brain.next_action( state = next_state )
+
             # Q 関数を更新
-            """
-            self._brain.update_q_function(
-                state = self._s_a_historys[-2][0],
+            q_function = self._brain.update_q_function(
+                state = self._state,
+                action = action,
+                next_state = next_state,
+                next_action = next_action,
+                reword = self._reword
             )
-            """
 
             # ゴールの指定
-            if( self._state == 8 ):
-                self.add_reword( 1.0 )  # ゴール地点なら、報酬
-                break                       
+            if( next_state == 8 ):
+                break              
+            else:
+                # 状態と行動を更新：s←s', a←a'
+                self._state = next_state
 
+        #------------------------------------------------------------
+        # １エピソード完了後の処理
+        #------------------------------------------------------------
         print( "迷路を解くのにかかったステップ数：" + str( len(self._s_a_historys) ) )
 
-        #------------------------------------------------------------
-        # エージェントのゴールまでの履歴を元に、行動方策を更新
-        #------------------------------------------------------------
-        new_policy = self._brain.decision_policy()
+        # このメソッドが呼び出される度に、ε の値を徐々に小さくする。
+        #self._brain.decay_learning_rate()
+        self._brain.decay_epsilon()
 
-        #------------------------------------------------------------
-        # エピソードの完了判定処理
-        #------------------------------------------------------------
-        # 前回の行動方針との差分が十分小さくなれば学習を終了する。
-        delta_policy = np.sum( np.abs( new_policy - policy ) )
-        print( "前回の行動方針との差分：", delta_policy )
-
-        if( delta_policy < stop_epsilon ):
-            done = True
-
+        # 前回のエピソードの Q 関数との差分
+        """
+        delta_q_function = np.sum( np.abs( new_policy - policy ) )
+        print( "前回のエピソードの Q 関数との差分：", delta_q_function )
+        """
 
         return
