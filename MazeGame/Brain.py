@@ -33,8 +33,8 @@ class Brain( object ):
     """
     def __init__(
         self,
-        states = [],
-        actions = []
+        states,
+        actions
     ):
         self._agent = None
         self._states = states
@@ -49,7 +49,7 @@ class Brain( object ):
         print( self )
         print( str )
         print( "_agent : \n", self._agent )
-        print( "states : \n", self.states )
+        print( "_states : \n", self._states )
         print( "_actions : \n", self._actions )
         print( "_observations : \n", self._observations )
         print( "_policy : \n", self._policy )

@@ -21,24 +21,28 @@ class MazeRamdomBrain( Brain ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _brain_parameters : 動的な型
-                行動方策 π を決定するためのパラメーター
+        _brain_parameters : list< [int,int] >
+                行動方策 π を決定するためのパラメーター Θ
+                ※ 行動方策を表形式で実装するために、これに対応するパラメーターも表形式で実装する。
+                ※ 進行方向に壁があって進めない様子を表現するために、壁で進めない方向には `np.nan` で初期化する。
+                ※ 尚、状態 s8 は、ゴール状態で行動方策がないため、これに対応するパラメーターも定義しないようにする。
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
     def __init__( 
         self, 
-        states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
-        actions = [ "Up", "Right", "Down", "Left" ]
+        states,
+        actions,
+        brain_parameters,
     ):
         super().__init__( states, actions )
         self._states = states
         self._actions = actions
+        self._brain_parameters = brain_parameters
         self._policy = np.zeros(
-            shape = ( len(self._states), len(self._actions) ) 
+            shape = ( len(self._states) - 1, len(self._actions) ) 
         )
-        self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         return
 
@@ -56,41 +60,7 @@ class MazeRamdomBrain( Brain ):
         print( "----------------------------------" )
         return
 
-    def reset_brain( self ):
-        """
-        Brain を再初期化する。
-        """
-        self._policy = np.zeros(
-            shape = ( len(self._states), len(self._actions) ) 
-        )
-        self._brain_parameters = self.init_brain_parameters()
-        self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
-        return
-
-
-    def init_brain_parameters( self ):
-        """
-        方策パラメータを初期化
-        """
-        # 表形式（行：状態 s、列：行動 a）
-        # ※行動方策を表形式で実装するために、これに対応するパラメーターも表形式で実装する。
-        # 進行方向に壁があって進めない様子を表現するために、壁で進めない方向には `np.nan` で初期化する。
-        # 尚、状態 s8 は、ゴール状態で行動方策がないため、これに対応するパラメーターも定義しないようにする。
-        brain_parameters = np.array(
-            [   # a0="Up", a1="Right", a3="Down", a4="Left"
-                [ np.nan, 1,        1,         np.nan ], # s0
-                [ np.nan, 1,        np.nan,    1 ],      # s1
-                [ np.nan, np.nan,   1,         1 ],      # s2
-                [ 1,      1,        1,         np.nan ], # s3
-                [ np.nan, np.nan,   1,         1 ],      # s4
-                [ 1,      np.nan,   np.nan,    np.nan ], # s5
-                [ 1,      np.nan,   np.nan,    np.nan ], # s6
-                [ 1,      1,        np.nan,    np.nan ], # s7
-            ]
-        )
-        return brain_parameters
-
-
+        
     def convert_into_policy_from_brain_parameters( self, brain_parameters ):
         """
         方策パラメータから、行動方針 [policy] を決定する
