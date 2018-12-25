@@ -59,7 +59,7 @@ class Academy( object ):
 
     def academy_step( self ):
         """
-        エピソードを実行する。
+        エピソードを１ステップ間隔実行する。
         """
         for episode in range( 0,self._max_episode ):
             for agent in self._agents:

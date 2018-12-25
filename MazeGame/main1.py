@@ -32,7 +32,10 @@ def main():
     academy = MazeAcademy( max_episode = 1 )
 
     # Brain の生成
-    brain = MazeRamdomBrain()
+    brain = MazeRamdomBrain(
+        states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
+        actions = [ "Up", "Right", "Down", "Left" ]
+    )
 
 	# Agent の生成
     agent = MazeAgent()
@@ -104,19 +107,20 @@ def main():
 
     def animate(i):
         '''フレームごとの描画内容'''
-        state_history = agent.collect_observations()[1]
-        state = state_history[i]  # 現在の場所を描く
+        _, s_a_historys = agent.collect_observations()
+        state = s_a_historys[i][0]  # 現在の場所を描く
         x = (state % 3) + 0.5  # 状態のx座標は、3で割った余り+0.5
         y = 2.5 - int(state / 3)  # y座標は3で割った商を2.5から引く
         line.set_data(x, y)
         return (line,)
 
     #　初期化関数とフレームごとの描画関数を用いて動画を作成する
+    _, s_a_historys = agent.collect_observations()
     anim = animation.FuncAnimation(
         fig, animate, 
-        init_func=init, 
-        frames=len( agent.collect_observations()[1] ), 
-        interval=200, repeat=False
+        init_func = init, 
+        frames = len( s_a_historys ), 
+        interval = 200, repeat = False
     )
 
     HTML( anim.to_jshtml() )

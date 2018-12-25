@@ -35,8 +35,6 @@ class Agent( object ):
         self._observations = []
         self._reword = 0.0
         self._done = False
-        self.agent_reset()
-
         return
 
     def print( self, str ):

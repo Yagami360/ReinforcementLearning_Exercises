@@ -19,28 +19,28 @@ class Brain( object ):
     [protected] 変数名の前にアンダースコア _ を付ける
         _agent : Agent
             この Brain を持つ Agent への参照
-
-        _action : サブクラスにて動的に型を決定する
-                  エージェント取りうるアクション（上移動、下移動など）
-
+        _actions : サブクラスにて動的に型を決定する
+                  エージェント取りうるアクション（上移動、下移動など）のリスト
+        _states : サブクラスにて動的に型を決定する
+                  エージェント取りうる状態のリスト
         _observations : list<動的な型>
                 エージェントが観測できる状態
-
         _policy : 動的な型
                 行動方策 π。確率値（0~1）
-
-        _brain_parameters : 動的な型
-                行動方策 π を決定するためのパラメーター
                 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self ):
+    def __init__(
+        self,
+        states = [],
+        actions = []
+    ):
         self._agent = None
-        self._action = None
-        self._observations = None
+        self._states = states
+        self._actions = actions
+        self._observations = []
         self._policy = None
-        self._brain_parameters = None
         return
 
     def print( self, str ):
@@ -49,10 +49,10 @@ class Brain( object ):
         print( self )
         print( str )
         print( "_agent : \n", self._agent )
-        print( "_action : \n", self._action )
+        print( "states : \n", self.states )
+        print( "_actions : \n", self._actions )
         print( "_observations : \n", self._observations )
         print( "_policy : \n", self._policy )
-        print( "_brain_parameters : \n", self._brain_parameters )
         print( "----------------------------------" )
         return
 
@@ -61,7 +61,6 @@ class Brain( object ):
         Brain を再初期化する
         """
         self._policy = None
-        self._brain_parameters = None
         return
 
     def get_policy( self ):
@@ -72,11 +71,11 @@ class Brain( object ):
         self._agent = agent
         return
 
-    def action( self ):
+    def get_actions( self ):
         """
-        Action を取得
+        エージェント取りうるアクション Action のリストを取得
         """
-        return self._action
+        return self._actions
 
     def decision_policy( self ):
         """

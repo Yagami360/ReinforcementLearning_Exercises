@@ -24,16 +24,26 @@ class MazePolicyGradientBrain( Brain ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _brain_parameters : 動的な型
+                行動方策 π を決定するためのパラメーター
         _learning_rate : float
                 学習率
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, learning_rate ):
-        super().__init__()
-        self._action = ["Up", "Right", "Down", "Left"]
-        self._policy = np.zeros( shape = (8, len(self._action)) )
+    def __init__( 
+        self, 
+        states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
+        actions = [ "Up", "Right", "Down", "Left" ],
+        learning_rate = 0.1
+    ):
+        super().__init__( states, actions )
+        self._states = states
+        self._actions = actions
+        self._policy = np.zeros(
+            shape = ( len(self._states), len(self._actions) ) 
+        )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         self._learning_rate = learning_rate
@@ -44,8 +54,9 @@ class MazePolicyGradientBrain( Brain ):
         print( "MazePolicyGradientBrain" )
         print( self )
         print( str )
-        print( "_agent : \n", self._agent )        
-        print( "_action : \n", self._action )
+        print( "_agent : \n", self._agent )
+        print( "_states : \n", self._states )
+        print( "_actions : \n", self._actions )
         print( "_policy : \n", self._policy )
         print( "_observations : \n", self._observations )
         print( "_brain_parameters : \n", self._brain_parameters )
@@ -57,7 +68,9 @@ class MazePolicyGradientBrain( Brain ):
         """
         Brain の状態を再初期化する。
         """
-        self._policy = np.zeros( shape = (8, len(self._action)) )
+        self._policy = np.zeros(
+            shape = ( len(self._states), len(self._actions) ) 
+        )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         return
@@ -86,7 +99,7 @@ class MazePolicyGradientBrain( Brain ):
         return brain_parameters
 
 
-    def update_brain_parameter( self, brain_parameters, state_action_historys, policy ):
+    def update_brain_parameter( self, brain_parameters, s_a_historys, policy ):
         """
         方策勾配法に従って、行動方策のためのパラメーターを更新する。
         Θ(s_i,a_j) = Θ(s_i,a_j) + η * ΔΘ(s,a_j)
@@ -95,13 +108,13 @@ class MazePolicyGradientBrain( Brain ):
         [Args]
             brain_parameters : ndarry / shape =[m,n]
                 更新前の行動方策のためのパラメーター
-            state_action_historys : list<state>
+            s_a_historys : list<state>
                 エージェントの状態と行動の履歴 [ [0,Down],[1,Up],...]
             learning_rate : float
                 学習率
 
         """
-        n_steps = len( state_action_historys ) - 1 # ゴールまでの総ステップ数
+        n_steps = len( s_a_historys ) - 1 # ゴールまでの総ステップ数
         if( n_steps == 0):
             n_steps = 1
 
@@ -119,10 +132,10 @@ class MazePolicyGradientBrain( Brain ):
                 # thetaがnanでない場合
                 if( np.isnan( brain_parameters[i,j] ) == False ):
                     # エージェントの状態履歴から、状態 i のもののみを取り出す
-                    SA_i = [SA for SA in state_action_historys if SA[0] == i]
+                    SA_i = [SA for SA in s_a_historys if SA[0] == i]
 
                     # 
-                    SA_ij = [ SA for SA in state_action_historys if SA == [i, j] ]
+                    SA_ij = [ SA for SA in s_a_historys if SA == [i, j] ]
 
                     #
                     N_i = len(SA_i)    # 状態iで行動した総回数
@@ -170,8 +183,8 @@ class MazePolicyGradientBrain( Brain ):
         """
         # 行動方策 policy の確率に従って、次の行動を選択
         next_action = np.random.choice( 
-            self._action,
-            p = self._policy[ state, : ]
+            self._actions,                  # アクションのリストから抽出
+            p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
         )
 
         return next_action
@@ -184,14 +197,10 @@ class MazePolicyGradientBrain( Brain ):
         # エージェントの状態を取得
         self._observations = self._agent.collect_observations()
         
-        state_action_historys = []
-        for s,a in zip( self._observations[1], self._observations[2] ):
-            state_action_historys.append( [s,a] )
-
         # 行動の方策のためのパラメーターを更新
         self._brain_parameters = self.update_brain_parameter(
             brain_parameters = self._brain_parameters,
-            state_action_historys = state_action_historys,
+            s_a_historys = self._observations[1],
             policy = self._policy
         )
 

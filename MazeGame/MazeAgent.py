@@ -20,11 +20,8 @@ class MazeAgent( Agent ):
     [protected] 変数名の前にアンダースコア _ を付ける
         _state : int
             エージェントの状態 s
-        _states_history : list <state>
-            エージェントの状態の履歴
-
-        _action_istory : list<action>
-            アクションの履歴
+        _s_a_historys : list< [int,int] >
+            エピソードの状態と行動の履歴
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -33,11 +30,8 @@ class MazeAgent( Agent ):
     def __init__( self, brain = None ):
         super().__init__( brain )
         self._state = 0
-        self._states_history = []
-        self._states_history.append( self._state )
-        self._action_history = []
-        self._action_history.append( np.nan )
-        self.agent_reset()
+        self._s_a_historys = [ [ self._state, np.nan ] ]
+        self.collect_observations()
         return
 
     def print( self, str ):
@@ -47,9 +41,9 @@ class MazeAgent( Agent ):
         print( str )
         print( "_brain : \n", self._brain )
         print( "_observations : \n", self._observations )
+        print( "_done : \n", self._done )
         print( "_state : \n", self._state )
-        print( "_states_history : \n", self._states_history )
-        print( "_action_history : \n", self._action_history )
+        print( "_s_a_historys : \n", self._s_a_historys )
         print( "----------------------------------" )
         return
     
@@ -60,8 +54,7 @@ class MazeAgent( Agent ):
         """
         self._observations = []
         self.add_vector_obs( self._state )
-        self.add_vector_obs( self._states_history )
-        self.add_vector_obs( self._action_history )
+        self.add_vector_obs( self._s_a_historys )
         return self._observations
 
 
@@ -71,10 +64,8 @@ class MazeAgent( Agent ):
         """
         super().agent_reset()
         self._state = 0
-        self._states_history = []
-        self._states_history.append( self._state )
-        self._action_history = []
-        self._action_history.append( np.nan )
+        self._s_a_historys = [ [ self._state, np.nan ] ]
+        self.collect_observations()
         return
 
 
@@ -85,16 +76,11 @@ class MazeAgent( Agent ):
 
         [Args]
             episode : 現在のエピソード数
-        [Returns]
-            done : bool
-                エピソードの完了フラグ
         """
         done = False            # エピソードの完了フラグ
         stop_epsilon = 0.001    # エピソードの完了のための行動方策の差分値
 
-        #self._brain.reset_brain()
         print( "現在のエピソード数：", episode )
-
         policy = self._brain.get_policy()
 
         #------------------------------------------------------------
@@ -122,19 +108,19 @@ class MazeAgent( Agent ):
                 self._state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
                 action = 3
 
-            # 現在の状態の行動を設定
-            self._action_history[-1] = action
+            # 現在の状態 s の行動 a を設定
+            self._s_a_historys[-1][1] = action  # -1 で末端に追加
 
-            # 次の状態を追加
-            self._states_history.append( self._state )
-            self._action_history.append( np.nan )       # 次の状態での行動はまだ分からないので NaN 値を入れておく。
-
+            # 次の状態 s'と行動 a' を追加
+            # 次の状態での行動はまだ分からないので NaN 値を入れておく。
+            self._s_a_historys.append( [self._state, np.nan] )
+            
             # ゴールの指定
             if( self._state == 8 ):
                 self.add_reword( 1.0 )  # ゴール地点なら、報酬
                 break                       
 
-        print( "迷路を解くのにかかったステップ数：" + str( len(self._states_history) ) )
+        print( "迷路を解くのにかかったステップ数：" + str( len(self._s_a_historys) ) )
 
         #------------------------------------------------------------
         # エージェントのゴールまでの履歴を元に、行動方策を更新

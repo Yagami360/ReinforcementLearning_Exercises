@@ -105,20 +105,20 @@ def main():
 
     def animate(i):
         '''フレームごとの描画内容'''
-        state_history = agent.collect_observations()[1]
-        state = state_history[i]  # 現在の場所を描く
+        _, s_a_historys = agent.collect_observations()
+        state = s_a_historys[i][0]  # 現在の場所を描く
         x = (state % 3) + 0.5  # 状態のx座標は、3で割った余り+0.5
         y = 2.5 - int(state / 3)  # y座標は3で割った商を2.5から引く
         line.set_data(x, y)
         return (line,)
 
     #　初期化関数とフレームごとの描画関数を用いて動画を作成する
-    state_history = agent.collect_observations()[1]
+    _, s_a_historys = agent.collect_observations()
     anim = animation.FuncAnimation(
         fig, animate, 
-        init_func=init, 
-        frames=len( state_history ), 
-        interval=200, repeat=False
+        init_func = init, 
+        frames = len( s_a_historys ), 
+        interval = 200, repeat = False
     )
 
     HTML( anim.to_jshtml() )

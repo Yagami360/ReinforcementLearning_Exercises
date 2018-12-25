@@ -37,10 +37,18 @@ class MazeSarsaBrain( Brain ):
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, epsilon = 0.5, gamma = 0.9, learning_rate = 0.1 ):
-        super().__init__()
-        self._action = ["Up", "Right", "Down", "Left"]
-        self._policy = np.zeros( shape = (8, len(self._action)) )
+    def __init__(
+        self,
+        states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
+        actions = [ "Up", "Right", "Down", "Left" ],
+        epsilon = 0.5, gamma = 0.9, learning_rate = 0.1 
+    ):
+        super().__init__( states, actions )
+        self._states = states
+        self._actions = actions
+        self._policy = np.zeros(
+            shape = ( len(self._states), len(self._actions) )
+        )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         self._q_function = self.init_q_function( brain_parameters = self._brain_parameters )
@@ -54,8 +62,9 @@ class MazeSarsaBrain( Brain ):
         print( "MazeSarsaBrain" )
         print( self )
         print( str )
-        print( "_agent : \n", self._agent )        
-        print( "_action : \n", self._action )
+        print( "_agent : \n", self._agent )
+        print( "_states : \n", self._states )
+        print( "_actions : \n", self._actions )
         print( "_policy : \n", self._policy )
         print( "_observations : \n", self._observations )
         print( "_brain_parameters : \n", self._brain_parameters )
@@ -70,7 +79,9 @@ class MazeSarsaBrain( Brain ):
         """
         Brain を再初期化する。
         """
-        self._policy = np.zeros( shape = (8, len(self._action)) )
+        self._policy = np.zeros(
+            shape = ( len(self._states), len(self._actions) )
+        )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         self._q_function = self.init_q_function( brain_parameters = self._brain_parameters )
@@ -151,13 +162,13 @@ class MazeSarsaBrain( Brain ):
         if( np.random.rand() < self._epsilon ):
             # ε の確率でランダムな行動を選択
             next_action = np.random.choice( 
-                self._action,
-                p = self._policy[ state, : ]
+                self._actions,                  # アクションのリストから抽出
+                p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
             )
 
         else:
             # Q の最大化する行動を選択
-            next_action = self._action[ np.nanargmax( self._q_function[state, :] ) ]
+            next_action = self._actions[ np.nanargmax( self._q_function[state, :] ) ]
 
         # このメソッドが呼び出される度に、ε の値を徐々に小さくする。
         self._epsilon = self._epsilon / 2
@@ -187,18 +198,16 @@ class MazeSarsaBrain( Brain ):
         """
         # エージェントの状態を取得
         self._observations = self._agent.collect_observations()
-        
-        state_action_historys = []
-        for s,a in zip( self._observations[1], self._observations[2] ):
-            state_action_historys.append( [s,a] )
+        state = self._observations[0]
+        s_a_historys = self._observations[1]
 
         # 行動の方策のためのパラメーターを更新
-        self._brain_parameters = self.update_brain_parameter(
-            brain_parameters = self._brain_parameters,
-            state_action_historys = state_action_historys,
-            policy = self._policy,
-            learning_rate = 0.1
+        """
+        self.update_q_function(
+            state = state,
+            action = self._action
         )
+        """
 
         # 行動の方策のためのパラメーターを元に、行動方策を決定する。
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )

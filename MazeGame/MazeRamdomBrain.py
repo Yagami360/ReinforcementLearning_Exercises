@@ -17,18 +17,27 @@ from Brain import Brain
 class MazeRamdomBrain( Brain ):
     """
     迷宮問題の Brain
-    
+    ・経路選択ロジックは、等確率な方向から１つを無作為選択
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _brain_parameters : 動的な型
+                行動方策 π を決定するためのパラメーター
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self ):
-        super().__init__()
-        self._action = ["Up", "Right", "Down", "Left"]
-        self._policy = np.zeros( shape = (8, len(self._action)) )
+    def __init__( 
+        self, 
+        states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
+        actions = [ "Up", "Right", "Down", "Left" ]
+    ):
+        super().__init__( states, actions )
+        self._states = states
+        self._actions = actions
+        self._policy = np.zeros(
+            shape = ( len(self._states), len(self._actions) ) 
+        )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         return
@@ -39,7 +48,8 @@ class MazeRamdomBrain( Brain ):
         print( self )
         print( str )
         print( "_agent : \n", self._agent )
-        print( "_action : \n", self._action )
+        print( "_states : \n", self._states )
+        print( "_actions : \n", self._actions )
         print( "_policy : \n", self._policy )
         print( "_observations : \n", self._observations )
         print( "_brain_parameters : \n", self._brain_parameters )
@@ -50,7 +60,9 @@ class MazeRamdomBrain( Brain ):
         """
         Brain を再初期化する。
         """
-        self._policy = np.zeros( shape = (8, len(self._action)) )
+        self._policy = np.zeros(
+            shape = ( len(self._states), len(self._actions) ) 
+        )
         self._brain_parameters = self.init_brain_parameters()
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         return
@@ -104,8 +116,8 @@ class MazeRamdomBrain( Brain ):
         """
         # 行動方策 policy の確率に従って、次の行動を選択
         next_action = np.random.choice( 
-            self._action,
-            p = self._policy[ state, : ]
+            self._actions,                  # アクションのリストから抽出
+            p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
         )
 
         return next_action
