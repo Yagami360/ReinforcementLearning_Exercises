@@ -3,42 +3,35 @@
 
 """
     更新情報
-    [18/12/04] : 新規作成
+    [18/12/25] : 新規作成
     [xx/xx/xx] : 
 """
 import numpy as np
 
 # 自作クラス
 from Agent import Agent
+from MazeAgent import MazeAgent
 
-
-class MazeAgent( Agent ):
+class MazeTDAgent( MazeAgent ):
     """
     迷路探索用エージェント。
-    ・迷路のスタートからゴールまでの１エピソード毎に、行動方策を更新する。
-    ・方策反復法での使用を想定している。
+    ・迷宮探索の１ステップ毎に、行動方策を更新する。
+    ・価値反復法（Sarsa, Q学習など）での使用を想定している。
 
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _state : int
-            エージェントの状態 s
-        _s_a_historys : list< [int,int] >
-            エピソードの状態と行動の履歴
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
     def __init__( self, brain = None ):
         super().__init__( brain )
-        self._state = 0
-        self._s_a_historys = [ [ self._state, np.nan ] ]
-        self.collect_observations()
         return
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "MazeAgent" )
+        print( "MazeTDAgent" )
         print( self )
         print( str )
         print( "_brain : \n", self._brain )
@@ -48,27 +41,6 @@ class MazeAgent( Agent ):
         print( "_s_a_historys : \n", self._s_a_historys )
         print( "----------------------------------" )
         return
-    
-    def collect_observations( self ):
-        """
-        Agent が観測している State を Brain に提供する。
-        ・Brain が、エージェントの状態を取得時にコールバックする。
-        """
-        self._observations = []
-        self.add_vector_obs( self._state )
-        self.add_vector_obs( self._s_a_historys )
-        return self._observations
-
-
-    def agent_reset( self ):
-        """
-        エージェントの再初期化処理
-        """
-        super().agent_reset()
-        self._state = 0
-        self._s_a_historys = [ [ self._state, np.nan ] ]
-        self.collect_observations()
-        return
 
 
     def agent_action( self, episode ) :
@@ -76,7 +48,7 @@ class MazeAgent( Agent ):
         各エピソードでのエージェントのアクションを記述
         ・Academy からコールされるコールバック関数
         ・迷路のスタートからゴールまでを、１エピソードとする。
-
+        ・迷路検索の１ステップ毎に、行動方策を更新する。
         [Args]
             episode : 現在のエピソード数
         """
@@ -119,6 +91,13 @@ class MazeAgent( Agent ):
             # 次の状態での行動はまだ分からないので NaN 値を入れておく。
             self._s_a_historys.append( [self._state, np.nan] )
             
+            # Q 関数を更新
+            """
+            self._brain.update_q_function(
+                state = self._s_a_historys[-2][0],
+            )
+            """
+
             # ゴールの指定
             if( self._state == 8 ):
                 self.add_reword( 1.0 )  # ゴール地点なら、報酬
@@ -140,5 +119,6 @@ class MazeAgent( Agent ):
 
         if( delta_policy < stop_epsilon ):
             done = True
+
 
         return

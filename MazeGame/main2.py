@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from IPython.display import HTML
 
+
 # 自作モジュール
 from Academy import Academy
 from MazeAcademy import MazeAcademy

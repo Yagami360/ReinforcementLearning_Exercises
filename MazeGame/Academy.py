@@ -92,3 +92,4 @@ class Academy( object ):
         Academy がエピソードを完了したかの取得
         """
         return self._done
+
