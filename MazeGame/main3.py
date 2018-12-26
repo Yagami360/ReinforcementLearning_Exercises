@@ -13,7 +13,7 @@ from MazeAcademy import MazeAcademy
 from Brain import Brain
 from MazeSarsaBrain import MazeSarsaBrain
 from Agent import Agent
-from MazeTDAgent import MazeTDAgent
+from MazeValueIterationAgent import MazeValueIterationAgent
 
 
 def main():
@@ -63,7 +63,11 @@ def main():
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = MazeTDAgent()
+    agent = MazeValueIterationAgent(
+        brain = brain,
+        gamma = 0.9,
+        state0 = 5
+    )
 
     # Agent の Brain を設定（相互参照）
     agent.set_brain( brain )

@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 # 自作クラス
 from Brain import Brain
 from Agent import Agent
-from MazeAgent import MazeAgent
 
 
 class MazeSarsaBrain( Brain ):
@@ -113,9 +112,9 @@ class MazeSarsaBrain( Brain ):
         return policy
 
 
-    def next_action( self, state ):
+    def action( self, state ):
         """
-        Brain のロジックに従って、次の行動を決定する。
+        Brain のロジックに従って、現在の状態 s での行動 a を決定する。
         ・ε-グリーディー法に従った行動選択
         [Args]
             state : int
@@ -124,16 +123,16 @@ class MazeSarsaBrain( Brain ):
         # ε-グリーディー法に従った行動選択
         if( np.random.rand() < self._epsilon ):
             # ε の確率でランダムな行動を選択
-            next_action = np.random.choice( 
+            action = np.random.choice( 
                 self._actions,                  # アクションのリストから抽出
                 p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
             )
 
         else:
             # Q の最大化する行動を選択
-            next_action = self._actions[ np.nanargmax( self._q_function[state, :] ) ]
+            action = self._actions[ np.nanargmax( self._q_function[state, :] ) ]
 
-        return next_action
+        return action
 
 
     def init_q_function( self, brain_parameters ):

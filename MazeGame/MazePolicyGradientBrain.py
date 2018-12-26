@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 # 自作クラス
 from Brain import Brain
 from Agent import Agent
-from MazeAgent import MazeAgent
 
 
 class MazePolicyGradientBrain( Brain ):
@@ -145,20 +144,20 @@ class MazePolicyGradientBrain( Brain ):
         return policy
 
 
-    def next_action( self, state ):
+    def action( self, state ):
         """
-        Brain のロジックに従って、次の行動を決定する。
+        Brain のロジックに従って、現在の状態 s での行動 a を決定する。
         [Args]
             state : int
                 現在の状態
         """
-        # 行動方策 policy の確率に従って、次の行動を選択
-        next_action = np.random.choice( 
+        # 行動方策 policy の確率に従って、状態 s での行動 a を選択
+        action = np.random.choice( 
             self._actions,                  # アクションのリストから抽出
             p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
         )
 
-        return next_action
+        return action
 
 
     def decision_policy( self ):

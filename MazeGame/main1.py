@@ -12,7 +12,7 @@ from Academy import Academy
 from MazeAcademy import MazeAcademy
 
 from Agent import Agent
-from MazeAgent import MazeAgent
+from MazePolicyIterationAgent import MazePolicyIterationAgent
 
 from Brain import Brain
 from MazeRamdomBrain import MazeRamdomBrain
@@ -55,14 +55,18 @@ def main():
 
     brain = MazeRamdomBrain(
         states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
-        actions = [ "Up", "Right", "Down", "Left" ],
+        actions = [ 0, 1, 2, 3 ],
         brain_parameters = brain_parameters
     )
 
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = MazeAgent()
+    agent = MazePolicyIterationAgent(
+        brain = brain,
+        gamma = 0.9,
+        state0 = 0
+    )
 
     # Agent の Brain を設定（相互参照）
     agent.set_brain( brain )

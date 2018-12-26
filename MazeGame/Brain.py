@@ -77,16 +77,3 @@ class Brain( object ):
         エージェント取りうるアクション Action のリストを取得
         """
         return self._actions
-
-    def decision_policy( self ):
-        """
-        行動方針を決定する
-        """
-        # エージェントの状態を取得
-        self._observations = self._agent.collect_observations()
-
-        # 行動の方策のためのパラメーターを更新
-
-        # 行動の方策のためのパラメーターを元に、行動方策を決定する。
-
-        return self._policy

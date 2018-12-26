@@ -13,7 +13,7 @@ from Academy import Academy
 from MazeAcademy import MazeAcademy
 
 from Agent import Agent
-from MazeAgent import MazeAgent
+from MazePolicyIterationAgent import MazePolicyIterationAgent
 
 from Brain import Brain
 from MazePolicyGradientBrain import MazePolicyGradientBrain
@@ -33,7 +33,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = 5000 )
+    academy = MazeAcademy( max_episode = 2000 )
 
     #-----------------------------------
     # Brain の生成
@@ -57,7 +57,7 @@ def main():
 
     brain = MazePolicyGradientBrain( 
         states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
-        actions = [ "Up", "Right", "Down", "Left" ],
+        actions = [ 0, 1, 2, 3 ],
         brain_parameters = brain_parameters,
         learning_rate = 0.1
     )
@@ -65,7 +65,11 @@ def main():
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = MazeAgent()
+    agent = MazePolicyIterationAgent(
+        brain = brain,
+        gamma = 0.9,
+        state0 = 0
+    )
 
     # Agent の Brain を設定（相互参照）
     agent.set_brain( brain )
