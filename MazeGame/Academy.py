@@ -61,7 +61,7 @@ class Academy( object ):
         """
         エピソードを１ステップ間隔実行する。
         """
-        for episode in range( 0, self._max_episode + 1 ):
+        for episode in range( 0, self._max_episode ):
             for agent in self._agents:
                 agent.agent_step( episode )
                 agent.agent_action( episode )

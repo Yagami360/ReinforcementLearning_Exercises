@@ -81,6 +81,11 @@ class MazeSarsaBrain( Brain ):
         print( "----------------------------------" )
         return
 
+    def get_q_function( self ):
+        """
+        Q 関数の値を取得する。
+        """
+        return self._q_function
 
     def decay_learning_rate( self ):
         """

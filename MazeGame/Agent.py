@@ -74,6 +74,9 @@ class Agent( object ):
         print( "----------------------------------" )
         return
 
+    def get_s_a_historys( self ):
+        return self._s_a_historys
+
     def collect_observations( self ):
         """
         Agent が観測している State を Brain に提供する。

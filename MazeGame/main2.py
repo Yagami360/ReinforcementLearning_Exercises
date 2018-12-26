@@ -19,6 +19,12 @@ from Brain import Brain
 from MazePolicyGradientBrain import MazePolicyGradientBrain
 
 
+# 設定可能な定数
+NUM_EPISODE = 2000           # エピソード試行回数
+AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
+BRAIN_LEARNING_RATE = 0.1   # 学習率
+BRAIN_GAMMDA = 0.9          # 割引率
+
 
 def main():
     """
@@ -33,7 +39,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = 2000 )
+    academy = MazeAcademy( max_episode = NUM_EPISODE )
 
     #-----------------------------------
     # Brain の生成
@@ -59,7 +65,7 @@ def main():
         states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
         actions = [ 0, 1, 2, 3 ],
         brain_parameters = brain_parameters,
-        learning_rate = 0.1
+        learning_rate = BRAIN_LEARNING_RATE
     )
 
     #-----------------------------------
@@ -67,8 +73,8 @@ def main():
     #-----------------------------------
     agent = MazePolicyIterationAgent(
         brain = brain,
-        gamma = 0.9,
-        state0 = 0
+        gamma = BRAIN_GAMMDA,
+        state0 = AGENT_INIT_STATE
     )
 
     # Agent の Brain を設定（相互参照）
@@ -138,7 +144,7 @@ def main():
 
     def animate(i):
         '''フレームごとの描画内容'''
-        _, s_a_historys = agent.collect_observations()
+        s_a_historys = agent.get_s_a_historys()
         state = s_a_historys[i][0]  # 現在の場所を描く
         x = (state % 3) + 0.5  # 状態のx座標は、3で割った余り+0.5
         y = 2.5 - int(state / 3)  # y座標は3で割った商を2.5から引く
@@ -146,7 +152,7 @@ def main():
         return (line,)
 
     #　初期化関数とフレームごとの描画関数を用いて動画を作成する
-    _, s_a_historys = agent.collect_observations()
+    s_a_historys = agent.get_s_a_historys()
     anim = animation.FuncAnimation(
         fig, animate, 
         init_func = init, 

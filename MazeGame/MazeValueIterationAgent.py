@@ -21,6 +21,10 @@ class MazeValueIterationAgent( Agent ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _q_function_historys : list< [int, float, float] > / shape = [n_episode, n_state, n_action]
+            各エピソード完了後の Q 関数の値の履歴
+        _v_function_historys : list< [int, float] > / shape = [n_episode, n_state]
+            各エピソード完了後の V 関数の値の履歴
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -32,6 +36,8 @@ class MazeValueIterationAgent( Agent ):
         state0 = 0
     ):
         super().__init__( brain, gamma, state0 )
+        self._q_function_historys = []
+        self._v_function_historys = []
         return
 
 
@@ -48,8 +54,16 @@ class MazeValueIterationAgent( Agent ):
         print( "_state : \n", self._state )
         print( "_action : \n", self._action )
         print( "_s_a_historys : \n", self._s_a_historys )
+        #print( "_q_function_historys : \n", self._q_function_historys )
+        #print( "_v_function_historys : \n", self._v_function_historys )
         print( "----------------------------------" )
         return
+
+    def get_q_function_historys( self ):
+        return self._q_function_historys
+
+    def get_v_function_historys( self ):
+        return self._v_function_historys
 
     def collect_observations( self ):
         """
@@ -59,6 +73,8 @@ class MazeValueIterationAgent( Agent ):
         self._observations = []
         self.add_vector_obs( self._state )
         self.add_vector_obs( self._s_a_historys )
+        self.add_vector_obs( self._q_function_historys )
+        self.add_vector_obs( self._v_function_historys )
         return self._observations
 
 
@@ -68,8 +84,12 @@ class MazeValueIterationAgent( Agent ):
         ・Academy からコールされるコールバック関数
         ・迷路のスタートからゴールまでを、１エピソードとする。
         ・迷路検索の１ステップ毎に、行動方策を更新する。
+
         [Args]
             episode : 現在のエピソード数
+        [Returns]
+            done : bool
+                   エピソードの完了フラグ
         """
         done = False            # エピソードの完了フラグ
 
@@ -150,10 +170,28 @@ class MazeValueIterationAgent( Agent ):
         #self._brain.decay_learning_rate()
         self._brain.decay_epsilon()
 
-        # 前回のエピソードの Q 関数との差分
-        """
-        delta_q_function = np.sum( np.abs( new_policy - policy ) )
-        print( "前回のエピソードの Q 関数との差分：", delta_q_function )
-        """
+        # エピソード開始の価値関数との差分
+        if( episode == 0 ):  
+            # 初回エピソードの場合は、履歴に前回値がないので、初期値を push
+            # deep copy したものを append
+            copy_q_function = self._brain.get_q_function().copy()
+            self._q_function_historys.append( copy_q_function )
+            copy_v_function = np.nanmax( copy_q_function, axis = 1 )
+            self._v_function_historys.append( copy_v_function )
 
-        return
+        #delta_q_function = np.sum( np.abs( q_function - self._q_function_historys[-1] ) )
+        #print( "エピソードの Q 関数との差分：", delta_q_function )
+        
+        # 状態価値関数 V の算出
+        new_v_function = np.nanmax( q_function, axis = 1 )
+        v_function = np.nanmax( self._q_function_historys[-1], axis = 1 )
+        delta_v_function = np.sum( np.abs( new_v_function - v_function ) )
+        print( "V 関数の大きさ：", np.abs( new_v_function ) )
+        print( "前回のエピソードの V 関数との差分：", delta_v_function )
+
+        # エピソード完了後の価値関数の値を保管
+        # deep copy したものを append
+        self._q_function_historys.append( q_function.copy() )
+        self._v_function_historys.append( new_v_function )
+
+        return done

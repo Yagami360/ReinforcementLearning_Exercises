@@ -59,7 +59,7 @@ class MazePolicyIterationAgent( Agent ):
         print( "_s_a_historys : \n", self._s_a_historys )
         print( "----------------------------------" )
         return
-    
+
     def collect_observations( self ):
         """
         Agent が観測している State を Brain に提供する。
@@ -79,6 +79,9 @@ class MazePolicyIterationAgent( Agent ):
 
         [Args]
             episode : 現在のエピソード数
+        [Returns]
+            done : bool
+                   エピソードの完了フラグ
         """
         done = False            # エピソードの完了フラグ
         stop_epsilon = 0.001    # エピソードの完了のための行動方策の差分値
@@ -141,4 +144,4 @@ class MazePolicyIterationAgent( Agent ):
         if( delta_policy < stop_epsilon ):
             done = True
 
-        return
+        return done

@@ -64,16 +64,22 @@ class Brain( object ):
         self._policy = None
         return
 
-    def get_policy( self ):
-        return self._policy
 
-        
-    def set_agent( self, agent ):
-        self._agent = agent
-        return
+    def get_policy( self ):
+        """
+        行動方策を取得する。
+        """
+        return self._policy
 
     def get_actions( self ):
         """
         エージェント取りうるアクション Action のリストを取得
         """
         return self._actions
+    
+    def set_agent( self, agent ):
+        """
+        この Brain をもつエージェントを設定する。
+        """
+        self._agent = agent
+        return
