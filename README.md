@@ -12,14 +12,19 @@
 - Python : 3.6
 - TensorFlow : 1.8.0
 - Anaconda : 5.0.1
+
+<!--
 - Unity : 2018.2.18f1
 - Unity ML-Agents : v0.5 (Beta)
-
+-->
 
 ### ◎ 強化学習環境
 
-- OpenAIGym
+- OpenAI Gym
+
+<!--
 - [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents)
+-->
 
 ### ◎ 機械学習ライブラリ
 <!--
@@ -37,10 +42,6 @@ https://www.tensorflow.org </br>
 > TensorBorad : </br>
 https://deepage.net/tensorflow/2017/04/25/tensorboard.html </br>
 http://tensorflow.classcat.com/2016/02/13/tensorflow-how-tos-graph-visualization/</br>
-
-> ニューラルネットワーク :</br>
->> OverView :</br>
-https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/</br>
 -->
 
 ### ◎ 検証用データセット
@@ -48,8 +49,16 @@ https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/</br>
 
 ## ■ 項目（フォルダ別）
 
-1. [./MazeGame](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeGame)<br>
-1. ./MazeGame_Unity_ML-Agents
+1. 迷宮探索問題
+    1. [./MazeSimple_Ramdom](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Ramdom)
+    1. [./MazeSimple_PolicyGD](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_PolicyGD)
+    1. ./MazeSimple_MonteCarlo
+    1. [./MazeSimple_Sarsa](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Sarsa)
+    1. ./MazeSimple_Qleaning
+    1. ./MazeGame_Unity_ML-Agents
+1. CartPole
+    1. ./CartPole_Sarsa_OpenAIGym
+    1. ./CartPole_Qleaning_OpenAIGym
 
 
 ## ■ 参考文献＆サイト
@@ -60,5 +69,7 @@ https://www.tensorflow.org/versions/r0.12/api_docs/python/nn/</br>
 
 - [Unityはじめる機械学習・強化学習 Unity ML-Agents実践ゲームプログラミング](https://www.amazon.co.jp/Unity%E3%81%A7%E3%81%AF%E3%81%98%E3%82%81%E3%82%8B%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92%E3%83%BB%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92-Unity-ML-Agents%E5%AE%9F%E8%B7%B5%E3%82%B2%E3%83%BC%E3%83%A0%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0-%E5%B8%83%E7%95%99%E5%B7%9D-%E8%8B%B1%E4%B8%80/dp/4862464181?SubscriptionId=AKIAJMYP6SDQFK6N4QZA&amp&tag=cloudstudy09-22&amp&linkCode=xm2&amp&camp=2025&amp&creative=165953&amp&creativeASIN=4862464181)<br>
 
+<!--
 - [Reinforcement Learning in Unity](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Design.md)<br>
 - [ML-Agents（ver0.5）の環境導入方法まとめ（Windows版）](http://enjoy-unity.net/ml-agents/ver0-5_matome/)<br>
+-->
