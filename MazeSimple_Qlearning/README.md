@@ -76,7 +76,7 @@ class MazeQlearningBrain( Brain ):
 
 - cf : Sarsa
 ```python
-MazeSarsaBrain.py
+[MazeSarsaBrain.py]
 class MazeSarsaBrain( Brain ):
     ...
     def update_q_function( self, state, action, next_state, next_action, reword ):
