@@ -1,6 +1,6 @@
-# Sarsaによる迷路検索問題
-強化学習の学習環境用の迷路探索問題。<br>
-等確率で表現された４つの移動候補（上下左右）から１つの方向をランダムに選択し、これを繰り返すことで、最終的に目的地に到着させる。<br>
+# Sarsaによる単純な迷路検索問題
+強化学習の学習環境用の単純な迷路探索問題。<br>
+価値反復法のアルゴリズムであって、方策オン型TD制御アルゴリズムである Sarsa によって、単純な迷路探索問題を解く。<br>
 
 <!--
 単純な迷路探索問題を、Unity ML-Agents のフレームワーク（`Academy`,`Brain`,`Agent`クラス など）を参考にして実装しています。<br>
@@ -42,12 +42,12 @@ BRAIN_GAMMDA = 0.9          # 割引率
 ## ■ コード説明＆実行結果
 
 ### ◎ コードの実行結果
-> 記載中...
-
 ![mazesimple_sarsa](https://user-images.githubusercontent.com/25688193/50488132-56b0ec00-0a44-11e9-8efc-341615e7e2ee.gif)<br>
 
-![mazasimple_sarsa_1-1_episode100](https://user-images.githubusercontent.com/25688193/50488170-7c3df580-0a44-11e9-88b1-cfeb3bfaba0e.png)<br>
+![image](https://user-images.githubusercontent.com/25688193/50519003-24fb5c00-0afc-11e9-9002-381aebb8aea3.png)<br>
 
+> ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
+> ※ 尚、状態 S8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。<br>
 
 
 ### ◎ コードの説明

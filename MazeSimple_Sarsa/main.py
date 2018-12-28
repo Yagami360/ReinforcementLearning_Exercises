@@ -160,36 +160,174 @@ def main():
     )
 
     HTML( anim.to_jshtml() )
-    anim.save( "MazeSimple_Sarsa.gifepisode{}".format(NUM_EPISODE), writer = 'imagemagick' )
+    anim.save( "MazeSimple_Sarsa_episode{}.gif".format(NUM_EPISODE), writer = 'imagemagick' )
 
 
     #---------------------------------------------
-    # 状態 s0 ~ s8 での状態価値関数の値を plot
+    # 状態 s0 ~ s7 での状態価値関数の値を plot
+    # ※ 状態 s8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。
     #---------------------------------------------
     # 各エピソードでの状態価値関数
     v_function_historys = agent.get_v_function_historys()
-    #abs_v_function = np.abs( new_v_function )
+    
+    # list<ndarray> / shape=[n_episode,n_state] 
+    # → list[ndarray] / shape = [n_episode,]
     v_function_historys_s0 = []
+    v_function_historys_s1 = []
+    v_function_historys_s2 = []
+    v_function_historys_s3 = []
+    v_function_historys_s4 = []
+    v_function_historys_s5 = []
+    v_function_historys_s6 = []
+    v_function_historys_s7 = []
+
     for v_function in v_function_historys :
         v_function_historys_s0.append( v_function[0] )
+        v_function_historys_s1.append( v_function[1] )
+        v_function_historys_s2.append( v_function[2] )
+        v_function_historys_s3.append( v_function[3] )
+        v_function_historys_s4.append( v_function[4] )
+        v_function_historys_s5.append( v_function[5] )
+        v_function_historys_s6.append( v_function[6] )
+        v_function_historys_s7.append( v_function[7] )
+
+
+    plt.clf()
 
     # S0
-    plt.clf()
+    plt.subplot( 3, 3, 1 )
     plt.plot(
-        range(0,NUM_EPISODE), v_function_historys_s0[1:],
+        range(0,NUM_EPISODE+1), v_function_historys_s0,
         label = 'S0',
         linestyle = '-',
         #linewidth = 2,
         color = 'black'
     )
-    plt.title( "V functions" )
-    plt.legend( loc = 'best' )
-    plt.xlim( 0, NUM_EPISODE )
+    plt.title( "V functions / S0" )
+    plt.xlim( 0, NUM_EPISODE+1 )
     #plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
-   
+
+    # S1
+    plt.subplot( 3, 3, 2 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s1,
+        label = 'S1',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+    plt.title( "V functions / S1" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+
+    # S2
+    plt.subplot( 3, 3, 3 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s2,
+        label = 'S2',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+
+    plt.title( "V functions / S2" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+
+    # S3
+    plt.subplot( 3, 3, 4 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s3,
+        label = 'S3',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+
+    plt.title( "V functions / S3" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+
+    # S4
+    plt.subplot( 3, 3, 5 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s4,
+        label = 'S4',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+
+    plt.title( "V functions / S4" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+    
+    # S5
+    plt.subplot( 3, 3, 6 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s5,
+        label = 'S5',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+    plt.title( "V functions / S5" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+
+    # S6
+    plt.subplot( 3, 3, 7 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s6,
+        label = 'S6',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+
+    plt.title( "V functions / S6" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+
+    # S7
+    plt.subplot( 3, 3, 8 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s7,
+        label = 'S7',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+
+    plt.title( "V functions / S7" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+    
+
     plt.savefig( "MazaSimple_Sarsa_1-1_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
