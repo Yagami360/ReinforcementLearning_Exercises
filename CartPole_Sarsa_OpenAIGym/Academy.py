@@ -75,6 +75,7 @@ class Academy( object ):
         self._agents.append( agent )
         return
 
+
     def academy_run( self ):
         """
         """
@@ -85,6 +86,9 @@ class Academy( object ):
 
             # 時間ステップを 1ステップづつ進める
             for time_step in range( 0 ,self._max_time_step ):
+                # 学習環境の動画のフレームを追加
+                self.add_frame()
+
                 for agent in self._agents:
                     agent.agent_step( episode, time_step )
 
@@ -93,4 +97,19 @@ class Academy( object ):
             for agent in self._agents:
                 agent.agent_on_done()
 
+        return
+
+
+    def add_frame( self ):
+        """
+        強化学習の環境の１フレームをリストに追加する
+        """
+        #frame = None
+        #self._frames.append( frame )
+        return
+
+    def display_frames( self, file_name ):
+        """
+        Displays a list of frames
+        """
         return

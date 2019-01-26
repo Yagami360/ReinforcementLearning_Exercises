@@ -77,12 +77,6 @@ class Agent( object ):
     def get_s_a_historys( self ):
         return self._s_a_historys
 
-    def set_observations( self, observations ):
-        """
-        """
-        self._observations = observations
-        return
-
 
     def set_brain( self, brain ):
         """
@@ -98,14 +92,14 @@ class Agent( object ):
         self._observations.append( observation )
         return
 
-    def Done( self ):
+    def done( self ):
         """
         エピソードを完了にする。
         """
         self._done = True
         return
 
-    def IsDone( self ):
+    def is_done( self ):
         """
         Academy がエピソードを完了したかの取得
         """

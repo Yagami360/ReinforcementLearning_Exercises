@@ -9,9 +9,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# OpenAI Gym
-import gym
-
 # 動画の描写関数用
 from JSAnimation.IPython_display import display_animation
 from matplotlib import animation
@@ -31,13 +28,13 @@ class CartPoleAcademy( Academy ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _env : OpenAIGym の ENV
+
         _max_episode : int
                        エピソードの最大回数
                        最大回数数に到達すると、Academy と全 Agent のエピソードを完了する。
         _max_time_step : int
                         時間ステップの最大回数
-
-        _env : OpenAI Gym の ENV
 
         _agents : list<AgentBase>
 
@@ -47,29 +44,14 @@ class CartPoleAcademy( Academy ):
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, max_episode = 1, max_time_step = 100 ):
+    def __init__( self, env, max_episode = 1, max_time_step = 100 ):
+        self._env = env
         self._max_episode = max_episode
         self._max_time_step = max_time_step
-        self._env = gym.make( "CartPole-v0" )
         self._agents = []
         self._done = False
         self._frames = []
         return
-
-
-    def get_num_states( self ):
-        """
-        エージェントの状態数を取得する
-        """
-        num_states = self._env.observation_space.shape[0]
-        return num_states
-
-    def get_num_actions( self ):
-        """
-        エージェントの状態数を取得する
-        """
-        num_actions = self._env.action_space.n
-        return num_actions
 
 
     def academy_reset( self ):
@@ -82,14 +64,8 @@ class CartPoleAcademy( Academy ):
                 agent.agent_reset()        
 
         self._done = False
-        observations = self._env.reset()
-        #print( "observations :", observations )
-
-        for agent in self._agents:
-            agent.set_observations( observations )
-
+        self._env.reset()
         return
-
 
     def academy_run( self ):
         """
@@ -102,10 +78,13 @@ class CartPoleAcademy( Academy ):
             # 時間ステップを 1ステップづつ進める
             for time_step in range( 0 ,self._max_time_step ):
                 # 学習環境の動画のフレームを追加
-                #self._frames.append( self._env.render( module="rgb_array") )
+                self.add_frame()
 
                 for agent in self._agents:
-                    agent.agent_step( episode, time_step )
+                    done = agent.agent_step( episode, time_step )
+
+                if( done == True ):
+                    break
 
             # Academy と全 Agents のエピソードを完了
             self._done = True
@@ -115,7 +94,15 @@ class CartPoleAcademy( Academy ):
         return
 
 
-    def display_frames_as_gif( self ):
+    def add_frame( self ):
+        """
+        強化学習環境の１フレームを追加する
+        """
+        frame = self._env.render( mode = "rgb_array" )
+        self._frames.append( frame )
+        return
+
+    def display_frames( self, file_name = "RL_ENV_CartPole-v0.mp4" ):
         """
         Displays a list of frames as a gif, with controls
         """
@@ -136,6 +123,7 @@ class CartPoleAcademy( Academy ):
                    interval=50
         )
 
-        anim.save( 'RL_ENV_{}.mp4'.format( "CartPole-v0" ) )  # 追記：動画の保存です
+        # 動画の保存
+        anim.save( file_name )
         #display( display_animation(anim, default_mode='loop') ) 
         return

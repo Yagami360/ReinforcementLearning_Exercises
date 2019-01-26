@@ -52,8 +52,9 @@ http://tensorflow.classcat.com/2016/02/13/tensorflow-how-tos-graph-visualization
     1. [./MazeSimple_PolicyGD](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_PolicyGD)
     1. ./MazeGame_Unity_ML-Agents
 1. CartPole
-    1. ./CartPole_Sarsa_OpenAIGym
+    1. [./CartPole_Sarsa_OpenAIGym](#https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_Sarsa_OpenAIGym)
     1. ./CartPole_Qleaning_OpenAIGym
+    1. ./CartPole_DQN_PyTorch_OpenAIGym
 1. その他
     1. [./Processing_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/Processing_OpenAIGym)
 

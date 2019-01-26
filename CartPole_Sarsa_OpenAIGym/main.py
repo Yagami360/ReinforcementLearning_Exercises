@@ -28,7 +28,7 @@ from CartPoleAgent import CartPoleAgent
 #--------------------------------
 #RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
 NUM_EPISODE = 3             # エピソード試行回数
-NUM_TIME_STEP = 50          # １エピソードの時間ステップの最大数
+NUM_TIME_STEP = 200          # １エピソードの時間ステップの最大数
 
 NUM_DIZITIZED = 6           # 各状態の離散値への分割数
 BRAIN_LEARNING_RATE = 0.1   # 学習率
@@ -49,17 +49,20 @@ def main():
     #===================================
     # 学習環境、エージェント生成フェイズ
     #===================================
+    # OpenAI-Gym の ENV を作成
+    env = gym.make( "CartPole-v0" )
+
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
+    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
 
     #-----------------------------------
     # Brain の生成
     #-----------------------------------
     brain = CartPoleSarsaBrain(
-        n_states = academy.get_num_states(),
-        n_actions = academy.get_num_actions(),
+        n_states = env.observation_space.shape[0],
+        n_actions = env.action_space.n,
         epsilon = BRAIN_GREEDY_EPSILON,
         gamma = BRAIN_GAMMDA,
         learning_rate = BRAIN_LEARNING_RATE,
@@ -70,6 +73,7 @@ def main():
 	# Agent の生成
     #-----------------------------------
     agent = CartPoleAgent(
+        env = env,
         brain = brain,
         gamma = BRAIN_GAMMDA
     )
@@ -94,10 +98,10 @@ def main():
     #===================================
     # 学習結果の描写処理
     #===================================
+    academy.display_frames()
 
     #---------------------------------------------
     # 状態 s0 ~ s7 での状態価値関数の値を plot
-    # ※ 状態 s8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。
     #---------------------------------------------
 
     print("Finish main()")
