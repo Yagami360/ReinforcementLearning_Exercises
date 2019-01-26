@@ -147,8 +147,8 @@ class Agent( object ):
             done : bool
                    エピソードの完了フラグ
         """
-        done = False
-        return done
+        self._done = False
+        return self._done
     
     def agent_action( self, episode, time_step ):
         """
@@ -163,8 +163,8 @@ class Agent( object ):
             done : bool
                    エピソードの完了フラグ
         """
-        done = False
-        return done
+        self._done = False
+        return self._done
 
 
     def agent_on_done( self ):

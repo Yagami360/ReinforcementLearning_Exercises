@@ -72,6 +72,8 @@ class CartPoleAcademy( Academy ):
         """
         # エピソードを試行
         for episode in range( 0, self._max_episode ):
+            print( "現在のエピソード数：", episode )
+
             # 学習環境を RESET
             self.academy_reset()
 

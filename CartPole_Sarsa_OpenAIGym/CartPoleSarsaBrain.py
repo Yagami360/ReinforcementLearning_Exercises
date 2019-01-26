@@ -89,11 +89,12 @@ class CartPoleSarsaBrain( Brain ):
         self._learning_rate = self._learning_rate / 2.0
         return
 
-    def decay_epsilon( self ):
+    def decay_epsilon( self, episode ):
         """
         ε-greedy 法の ε 値を減衰させる。
         """
-        self._epsilon = self._epsilon / 2.0
+        #self._epsilon = self._epsilon / 2.0
+        self._epsilon = 0.5 * ( 1 / (episode + 1) )
         return
 
     def digitize_state( self, observations ):
@@ -123,13 +124,12 @@ class CartPoleSarsaBrain( Brain ):
                 現在の状態
         """
         # ε-グリーディー法に従った行動選択
-        if( np.random.rand() < self._epsilon ):
-            # ε の確率でランダムな行動を選択
-            action = np.random.choice( self._n_actions )
-
-        else:
+        if( self._epsilon <= np.random.uniform(0,1) ):
             # Q の最大化する行動を選択
             action = np.nanargmax( self._q_function[state, :] )
+        else:
+            # ε の確率でランダムな行動を選択
+            action = np.random.choice( self._n_actions )
 
         return action
 
@@ -153,7 +153,7 @@ class CartPoleSarsaBrain( Brain ):
         [Returns]
 
         """
-        q_funtion_next = max( self._q_function[ next_state, : ] )
+        q_funtion_next = max( self._q_function[next_state][:] )
         self._q_function[ state, action ] += self._learning_rate * ( reword + self._gamma * q_funtion_next - self._q_function[ state, action ] )
 
         return self._q_function

@@ -27,9 +27,8 @@ from CartPoleAgent import CartPoleAgent
 # 設定可能な定数
 #--------------------------------
 #RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
-NUM_EPISODE = 3             # エピソード試行回数
-NUM_TIME_STEP = 200          # １エピソードの時間ステップの最大数
-
+NUM_EPISODE = 1000          # エピソード試行回数
+NUM_TIME_STEP = 200         # １エピソードの時間ステップの最大数
 NUM_DIZITIZED = 6           # 各状態の離散値への分割数
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
