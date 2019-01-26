@@ -14,18 +14,12 @@
 - OpenAI Gym : 0.10.9
 - TensorFlow : 1.8.0
 
-<!--
-- Unity : 2018.2.18f1
-- Unity ML-Agents : v0.5 (Beta)
--->
-
 ### ◎ 強化学習環境
 
 - OpenAI Gym
-
-<!--
-- [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents)
--->
+- Unity : 2018.2.18f1
+- Unity ML-Agents : v0.5 (Beta)
+    - [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents)
 
 ### ◎ 機械学習ライブラリ
 <!--
@@ -52,10 +46,10 @@ http://tensorflow.classcat.com/2016/02/13/tensorflow-how-tos-graph-visualization
 
 1. 迷宮探索問題
     1. [./MazeSimple_Ramdom](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Ramdom)
-    1. [./MazeSimple_PolicyGD](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_PolicyGD)
     1. ./MazeSimple_MonteCarlo
     1. [./MazeSimple_Sarsa](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Sarsa)
     1. [./MazeSimple_Qlearning](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Qlearning)
+    1. [./MazeSimple_PolicyGD](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_PolicyGD)
     1. ./MazeGame_Unity_ML-Agents
 1. CartPole
     1. ./CartPole_Sarsa_OpenAIGym
