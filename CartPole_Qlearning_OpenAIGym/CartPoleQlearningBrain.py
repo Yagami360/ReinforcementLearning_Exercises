@@ -15,10 +15,10 @@ from Brain import Brain
 from Agent import Agent
 
 
-class CartPoleSarsaBrain( Brain ):
+class CartPoleQlearningBrain( Brain ):
     """
-    倒立振子課題（CArtPole）の Brain。
-    ・Sarsa による迷路検索用のアルゴリズム
+    倒立振子課題（CartPole）の Brain。
+    ・Qlearning によるアルゴリズム
     
     [public]
 
@@ -145,8 +145,6 @@ class CartPoleSarsaBrain( Brain ):
                 現在の行動 a
             next_state : int
                 次の状態 s'
-            next_action : str
-                次の行動 a'
             reword : float
                 報酬
         
@@ -155,7 +153,6 @@ class CartPoleSarsaBrain( Brain ):
         """
         q_funtion_next = max( self._q_function[next_state][:] )
         self._q_function[ state, action ] += self._learning_rate * ( reword + self._gamma * q_funtion_next - self._q_function[ state, action ] )
-        #print( self._q_function[0] )
 
         return self._q_function
 

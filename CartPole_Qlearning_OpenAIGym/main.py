@@ -18,7 +18,7 @@ from matplotlib import animation
 from Academy import Academy
 from CartPoleAcademy import CartPoleAcademy
 from Brain import Brain
-from CartPoleSarsaBrain import CartPoleSarsaBrain
+from CartPoleQlearningBrain import CartPoleQlearningBrain
 from Agent import Agent
 from CartPoleAgent import CartPoleAgent
 
@@ -38,7 +38,7 @@ BRAIN_GAMMDA = 0.99         # 割引率
 def main():
     """
 	強化学習の学習環境用の倒立振子課題 CartPole
-    ・エージェントの行動方策の学習ロジックは、Sarsa
+    ・エージェントの行動方策の学習ロジックは、Qlearning
     """
     print("Start main()")
     
@@ -59,7 +59,7 @@ def main():
     #-----------------------------------
     # Brain の生成
     #-----------------------------------
-    brain = CartPoleSarsaBrain(
+    brain = CartPoleQlearningBrain(
         n_states = env.observation_space.shape[0],
         n_actions = env.action_space.n,
         epsilon = BRAIN_GREEDY_EPSILON,
