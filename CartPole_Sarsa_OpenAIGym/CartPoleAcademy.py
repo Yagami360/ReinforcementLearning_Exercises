@@ -72,15 +72,16 @@ class CartPoleAcademy( Academy ):
         """
         # エピソードを試行
         for episode in range( 0, self._max_episode ):
-            print( "現在のエピソード数：", episode )
+            #print( "現在のエピソード数：", episode )
 
             # 学習環境を RESET
             self.academy_reset()
 
             # 時間ステップを 1ステップづつ進める
             for time_step in range( 0 ,self._max_time_step ):
-                # 学習環境の動画のフレームを追加
-                self.add_frame()
+                if( episode % 10 == 0 ):
+                    # 学習環境の動画のフレームを追加
+                    self.add_frame()
 
                 for agent in self._agents:
                     done = agent.agent_step( episode, time_step )
@@ -101,6 +102,7 @@ class CartPoleAcademy( Academy ):
         強化学習環境の１フレームを追加する
         """
         frame = self._env.render( mode = "rgb_array" )
+        #frame = self._env.render( mode = 'human' )
         self._frames.append( frame )
         return
 

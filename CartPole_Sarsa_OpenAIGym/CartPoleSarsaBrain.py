@@ -126,7 +126,7 @@ class CartPoleSarsaBrain( Brain ):
         # ε-グリーディー法に従った行動選択
         if( self._epsilon <= np.random.uniform(0,1) ):
             # Q の最大化する行動を選択
-            action = np.nanargmax( self._q_function[state, :] )
+            action = np.argmax( self._q_function[state, :] )
         else:
             # ε の確率でランダムな行動を選択
             action = np.random.choice( self._n_actions )
@@ -155,6 +155,7 @@ class CartPoleSarsaBrain( Brain ):
         """
         q_funtion_next = max( self._q_function[next_state][:] )
         self._q_function[ state, action ] += self._learning_rate * ( reword + self._gamma * q_funtion_next - self._q_function[ state, action ] )
+        #print( self._q_function[0] )
 
         return self._q_function
 

@@ -105,20 +105,21 @@ class CartPoleAgent( Agent ):
         #-------------------------------------------------------------------
         # 離散化した現在の状態 s_t を元に、行動 a_t を求める
         #-------------------------------------------------------------------
-        action = self._brain.action( state )
         self._brain.decay_epsilon( episode )
+        action = self._brain.action( state )
     
         #-------------------------------------------------------------------
         # 行動の実行により、次の時間での状態 s_{t+1} と報酬 r_{t+1} を求める。
         #-------------------------------------------------------------------
-        observations_next, reward, env_done, info = self._env.step( action )
-        next_state = self._brain.digitize_state( self._observations )
+        observations_next, _, env_done, _ = self._env.step( action )
+        next_state = self._brain.digitize_state( observations_next )
         #print( "env_done :", env_done )
         #print( "info :", info )
 
         #----------------------------------------
         # 報酬の設定
         #----------------------------------------
+        # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
             # 時間ステップの最大回数に近づいたら
             if time_step < 195:
@@ -150,6 +151,6 @@ class CartPoleAgent( Agent ):
         #----------------------------------------
         if( env_done == True ):
             self.done()
-            print( "最終時間ステップ数：", time_step )
+            print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
         
         return self._done

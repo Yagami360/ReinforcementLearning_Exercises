@@ -27,10 +27,10 @@ from CartPoleAgent import CartPoleAgent
 # 設定可能な定数
 #--------------------------------
 #RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
-NUM_EPISODE = 1000          # エピソード試行回数
+NUM_EPISODE = 250           # エピソード試行回数
 NUM_TIME_STEP = 200         # １エピソードの時間ステップの最大数
 NUM_DIZITIZED = 6           # 各状態の離散値への分割数
-BRAIN_LEARNING_RATE = 0.1   # 学習率
+BRAIN_LEARNING_RATE = 0.5   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
 BRAIN_GAMMDA = 0.99         # 割引率
 
@@ -97,7 +97,7 @@ def main():
     #===================================
     # 学習結果の描写処理
     #===================================
-    academy.display_frames()
+    academy.display_frames( file_name = "RL_ENV_CartPole-v0.mp4" )
 
     #---------------------------------------------
     # 状態 s0 ~ s7 での状態価値関数の値を plot
