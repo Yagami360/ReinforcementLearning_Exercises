@@ -8,10 +8,8 @@
 """
 import numpy as np
 import matplotlib.pyplot as plt
-
-# 動画の描写関数用
-from JSAnimation.IPython_display import display_animation
 from matplotlib import animation
+#from JSAnimation.IPython_display import display_animation
 #from IPython.display import display
 
 # 自作クラス
@@ -81,7 +79,7 @@ class CartPoleAcademy( Academy ):
             for time_step in range( 0 ,self._max_time_step ):
                 if( episode % 10 == 0 ):
                     # 学習環境の動画のフレームを追加
-                    self.add_frame()
+                    self.add_frame( episode, time_step )
 
                 for agent in self._agents:
                     done = agent.agent_step( episode, time_step )
@@ -97,16 +95,31 @@ class CartPoleAcademy( Academy ):
         return
 
 
-    def add_frame( self ):
+    def add_frame( self, episode, times_step ):
         """
         強化学習環境の１フレームを追加する
         """
-        frame = self._env.render( mode = "rgb_array" )
-        #frame = self._env.render( mode = 'human' )
+        """
+        plt.figure(3)
+        plt.clf()
+        plt.axis('off')
+        frame = plt.imshow(
+            self._env.render( mode='rgb_array' )
+        )
+        #frame.set_data( env.render(mode='rgb_array') )
+        plt.title(
+            "%s \n Episode: %d , Step: %d" % ( self._env.spec.id, episode, times_step )
+        )
+        
         self._frames.append( frame )
+        """
+
+        frame = self._env.render( mode = "rgb_array" )
+        self._frames.append( frame )
+
         return
 
-    def display_frames( self, file_name = "RL_ENV_CartPole-v0.mp4" ):
+    def display_frames( self, file_name = "RL_ENV_CartPole-v0.gif" ):
         """
         Displays a list of frames as a gif, with controls
         """
@@ -116,7 +129,7 @@ class CartPoleAcademy( Academy ):
         )
         patch = plt.imshow( self._frames[0] )
         plt.axis('off')
-
+        
         def animate(i):
             patch.set_data( self._frames[i] )
 
@@ -128,6 +141,5 @@ class CartPoleAcademy( Academy ):
         )
 
         # 動画の保存
-        anim.save( file_name )
-        #display( display_animation(anim, default_mode='loop') ) 
+        anim.save( file_name, writer = 'imagemagick' )
         return
