@@ -67,6 +67,7 @@ class CartPoleAcademy( Academy ):
 
     def academy_run( self ):
         """
+        学習環境を実行する
         """
         # エピソードを試行
         for episode in range( 0, self._max_episode ):
@@ -99,29 +100,14 @@ class CartPoleAcademy( Academy ):
         """
         強化学習環境の１フレームを追加する
         """
-        """
-        plt.figure(3)
-        plt.clf()
-        plt.axis('off')
-        frame = plt.imshow(
-            self._env.render( mode='rgb_array' )
-        )
-        #frame.set_data( env.render(mode='rgb_array') )
-        plt.title(
-            "%s \n Episode: %d , Step: %d" % ( self._env.spec.id, episode, times_step )
-        )
-        
-        self._frames.append( frame )
-        """
-
-        frame = self._env.render( mode = "rgb_array" )
+        frame = self._env.render( mode='rgb_array' )
         self._frames.append( frame )
 
         return
 
-    def display_frames( self, file_name = "RL_ENV_CartPole-v0.gif" ):
+    def display_frames( self, file_name = "RL_ENV_CartPole-v0.mp4" ):
         """
-        Displays a list of frames as a gif, with controls
+        外部ファイルに動画を保存する。
         """
         plt.figure(
             figsize=( self._frames[0].shape[1]/72.0, self._frames[0].shape[0]/72.0 ),
@@ -141,5 +127,7 @@ class CartPoleAcademy( Academy ):
         )
 
         # 動画の保存
-        anim.save( file_name, writer = 'imagemagick' )
+        #anim.save( file_name, writer = 'imagemagick' )
+        anim.save( file_name )
+
         return

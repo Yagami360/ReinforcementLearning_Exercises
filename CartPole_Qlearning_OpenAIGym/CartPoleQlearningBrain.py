@@ -62,7 +62,7 @@ class CartPoleQlearningBrain( Brain ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "CartPoleSarsaBrain" )
+        print( "CartPoleQlearningBrain" )
         print( self )
         print( str )
         print( "_agent : \n", self._agent )

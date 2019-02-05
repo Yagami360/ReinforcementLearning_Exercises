@@ -78,6 +78,7 @@ class Academy( object ):
 
     def academy_run( self ):
         """
+        学習環境を実行する。
         """
         # エピソードを試行
         for episode in range( 0, self._max_episode ):
@@ -110,6 +111,6 @@ class Academy( object ):
 
     def display_frames( self, file_name ):
         """
-        Displays a list of frames
+        外部ファイルに動画を保存する。
         """
         return

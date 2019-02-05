@@ -77,7 +77,6 @@ class Agent( object ):
     def get_s_a_historys( self ):
         return self._s_a_historys
 
-
     def set_brain( self, brain ):
         """
         エージェントの Brain を設定する。
@@ -150,23 +149,6 @@ class Agent( object ):
         self._done = False
         return self._done
     
-    def agent_action( self, episode, time_step ):
-        """
-        現在の状態に基づき、エージェントの実際のアクションを記述する。
-        ・Academy から各時間ステップ度にコールされるコールバック関数
-
-        [Args]
-            episode : 現在のエピソード数
-            time_step : 現在の時間ステップ
-
-        [Returns]
-            done : bool
-                   エピソードの完了フラグ
-        """
-        self._done = False
-        return self._done
-
-
     def agent_on_done( self ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。

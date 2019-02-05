@@ -97,11 +97,7 @@ def main():
     #===================================
     # 学習結果の描写処理
     #===================================
-    academy.display_frames( file_name = "RL_ENV_CartPole-v0.gif" )
-
-    #---------------------------------------------
-    # 状態 s0 ~ s7 での状態価値関数の値を plot
-    #---------------------------------------------
+    academy.display_frames( file_name = "RL_ENV_CartPole-v0.mp4" )
 
     print("Finish main()")
     return

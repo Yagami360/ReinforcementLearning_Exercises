@@ -17,6 +17,9 @@ from Agent import Agent
 
 class CartPoleAgent( Agent ):
     """
+    OpenAIGym の CartPole のエージェント
+
+    [protected] 変数名の前にアンダースコア _ を付ける
         _env : OpenAI Gym の ENV
 
     """
@@ -30,10 +33,10 @@ class CartPoleAgent( Agent ):
         self._env = env
         
         self._observations = self._env.reset()
-        self._n_succeeded_episode = 0
+        #self._n_succeeded_episode = 0
 
-        self._q_function_historys = []
-        self._v_function_historys = []
+        #self._q_function_historys = []
+        #self._v_function_historys = []
         return
 
     def print( self, str ):
@@ -67,7 +70,6 @@ class CartPoleAgent( Agent ):
         num_actions = self._env.action_space.n
         return num_actions
 
-
     def agent_reset( self ):
         """
         エージェントの再初期化処理
@@ -76,7 +78,6 @@ class CartPoleAgent( Agent ):
         self._reword = 0.0
         self._done = False
         return
-
 
     def agent_step( self, episode, time_step ):
         """
@@ -125,11 +126,11 @@ class CartPoleAgent( Agent ):
             if time_step < 195:
                 # 途中でコケたら、報酬－１
                 self.add_reword( -1 )
-                self._n_succeeded_episode = 0
+                #self._n_succeeded_episode = 0
             else:
                 # 立ったまま終了時は、報酬＋１
                 self.add_reword( 1 )
-                self._n_succeeded_episode += 1
+                #self._n_succeeded_episode += 1
         else:
             # 途中報酬は０
             self.set_reword( 0 )
