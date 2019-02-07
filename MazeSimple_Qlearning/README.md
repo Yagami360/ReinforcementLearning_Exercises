@@ -31,6 +31,9 @@ $ python main.py
 ```python
 [main.py]
 NUM_EPISODE = 100           # エピソード試行回数
+NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
+AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
+AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
@@ -45,14 +48,17 @@ BRAIN_GAMMDA = 0.9          # 割引率
 ![mazesimple_sarsa](https://user-images.githubusercontent.com/25688193/50488132-56b0ec00-0a44-11e9-8efc-341615e7e2ee.gif)<br>
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
-    ![image](https://user-images.githubusercontent.com/25688193/50521885-4fa0e100-0b0b-11e9-888d-38017892311b.png)<br>
+    ![mazasimple_q-learning_1-1_episode100](https://user-images.githubusercontent.com/25688193/52400436-76870580-2b02-11e9-9b92-7f12e0aaccfc.png)<br>
     > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
-    > ※ 尚、状態 S8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。<br>
+    > ※ 尚、終端状態 S8 の状態価値関数は常に０の値となる。<br>
 
+<!--
 - Q 学習 と Sarsa での比較<br>
-    ![image](https://user-images.githubusercontent.com/25688193/50521914-78c17180-0b0b-11e9-9c2d-5685958b61d3.png)<br>
+
+
     > 赤線が Q 学習での状態価値関数 V(s) の変化。青線が、Sarsa での状態価値関数 V(s) の変化。<br>
     > Q 学習のほうが、Sarsa に比べて、収束が早いことが分かる。<br>
+-->
 
 ### ◎ コードの説明
 [Sarsa による単純な迷路検索問題のコード](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Sarsa) から、以下の部分を変更するのみ。<br>

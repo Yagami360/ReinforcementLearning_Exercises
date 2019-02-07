@@ -18,11 +18,9 @@ class Brain( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _agent : Agent
-            この Brain を持つ Agent への参照
-
-        _n_states : int
-        _n_actions : int
+        _agent : <Agent> この Brain を持つ Agent への参照
+        _n_states : <int> 状態の要素数
+        _n_actions : <int> 行動の要素数
                 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -51,12 +49,9 @@ class Brain( object ):
     def reset_brain( self ):
         """
         Brain を再初期化する
-        """
-        
+        """        
         return
 
-
-    
     def set_agent( self, agent ):
         """
         この Brain をもつエージェントを設定する。

@@ -12,7 +12,7 @@ import numpy as np
 from Agent import Agent
 
 
-class MazeValueIterationAgent( Agent ):
+class MazeAgent( Agent ):
     """
     迷路探索用エージェント。
     ・迷宮探索の t→t+1 の１ステップ毎に、価値関数 Q を更新する。
@@ -43,7 +43,7 @@ class MazeValueIterationAgent( Agent ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "MazeValueIterationAgent" )
+        print( "MazeAgent" )
         print( self )
         print( str )
         print( "_brain : \n", self._brain )
@@ -78,33 +78,20 @@ class MazeValueIterationAgent( Agent ):
         return self._observations
 
 
-    def agent_action( self, episode ) :
+    def agent_reset( self ):
         """
-        各エピソードでのエージェントのアクションを記述
-        ・Academy からコールされるコールバック関数
-        ・迷路のスタートからゴールまでを、１エピソードとする。
-        ・迷路検索の１ステップ毎に、行動方策を更新する。
-
-        [Args]
-            episode : 現在のエピソード数
-        [Returns]
-            done : bool
-                   エピソードの完了フラグ
+        エージェントの再初期化処理
         """
-        done = False            # エピソードの完了フラグ
-
-        print( "現在のエピソード数：", episode )
-
-        #----------------------------------------------------------------------
-        # 行動方策に基づき、エージェントを迷路のゴールまで移動させる。
-        # ※ 迷路のスタートからゴールまでを、１エピソードとする。
-        # バックアップ線図 : s0 → a0 → ... s → a → r' → s' → a' → r'' → Q → ...
-        #----------------------------------------------------------------------
+        self._done = False
+        self._reword = 0.0
+        
         # s0 : エージェントの状態を再初期化 s0 して、開始位置に設定する。
         # a0 はまだ分からないので、np.nan
         # _s_a_historys = [s0, np.nan]
-        self.agent_reset()
-        
+        self._state = self._s_a_historys[0][0]
+        self._action = self._s_a_historys[0][1]
+        self._s_a_historys = [ [ self._state, self._action ] ]
+
         # a0 : 初期行動a0 を設定する。（Brain のロジックに従ったエージェント次の行動）
         self._action = next_action = self._brain.action( state = self._state )
         self._s_a_historys[-1][1] = self._action  # -1 で末端に追加
@@ -113,54 +100,90 @@ class MazeValueIterationAgent( Agent ):
         if( self._state == 8 ):
             self.add_reword( 1.0 )  # ゴール地点なら、報酬１
         else:
+            self.add_reword( 0.0 )  # ゴール地点でないなら、報酬なし
+
+
+        return
+
+
+    def agent_step( self, episode, time_step ):
+        """
+        エージェント [Agent] の次の状態を決定する。
+        ・Academy から各時間ステップ度にコールされるコールバック関数
+
+        [Args]
+            episode : 現在のエピソード数
+            time_step : 現在の時間ステップ
+
+        [Returns]
+            done : bool
+                   エピソードの完了フラグ
+        """
+        self._done = False
+
+        #print( "現在のエピソード数：", episode )
+        #print( "現在の時間ステップ数：", time_step )
+
+        #----------------------------------------------------------------------
+        # １時間ステップでの迷宮探索
+        # バックアップ線図 : s_t → a_t → r_(t+1) → s_(t+1) → a_(t+1) → r_(t+2) → Q → ...
+        #----------------------------------------------------------------------
+        # r → a → s' : 行動 a に従った次状態 s' の決定
+        if self._action == 0:    # Up
+            next_state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
+        elif self._action == 1:  # Right
+            next_state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
+        elif self._action == 2:  # Down
+            next_state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
+        elif self._action == 3:  # Left
+            next_state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
+        else:   # np.nan など
+            next_state = self._state
+
+        # s' → a' : 次状態 s' での次行動 a'
+        if( next_state == 8 ):
+            next_action = np.nan
+        else:
+            next_action = self._brain.action( state = next_state )
+
+        # 次の状態 s' と次の行動 a' を履歴に追加
+        self._s_a_historys.append( [next_state, next_action] )
+
+        # a' → r'' : 次行動 a' に対する報酬 r'' の指定
+        if( next_state == 8 ):
+            self.add_reword( 1.0 )  # ゴール地点なら、報酬１
+        else:
             self.add_reword( 0.0 )  # ゴール地点なら、報酬なし
 
-        # Goal にたどり着くまでループ
-        # バックアップ線図 : ... → s → a → r' → s' → a' → r'' → Q → while ループ...
-        while(1):
-            # r → a → s' : 行動 a に従った次状態 s' の決定
-            if self._action == 0:    # Up
-                next_state = self._state - 3  # 上に移動するときは状態の数字が3小さくなる
-            elif self._action == 1:  # Right
-                next_state = self._state + 1  # 右に移動するときは状態の数字が1大きくなる
-            elif self._action == 2:  # Down
-                next_state = self._state + 3  # 下に移動するときは状態の数字が3大きくなる
-            elif self._action == 3:  # Left
-                next_state = self._state - 1  # 左に移動するときは状態の数字が1小さくなる
 
-            # s' → a' : 次状態 s' での次行動 a'
-            if( next_state == 8 ):
-                next_action = np.nan
-            else:
-                next_action = self._brain.action( state = next_state )
+        # s,a,s',r',a' → Q : Q 関数を更新
+        self._brain.update_q_function(
+            state = self._state,
+            action = self._action,
+            next_state = next_state,
+            next_action = next_action,
+            reword = self._reword
+        )
 
-            # 次の状態 s' と次の行動 a' を履歴に追加
-            self._s_a_historys.append( [next_state, next_action] )
+        # ゴールの指定
+        if( next_state == 8 ):
+            self._state = next_state
+            self._action = next_action
+            self._done = True              
+        else:
+            # 状態と行動を更新：s←s', a←a'
+            self._state = next_state
+            self._action = next_action
+            self._done = False              
 
-            # a' → r'' : 次行動 a' に対する報酬 r'' の指定
-            if( next_state == 8 ):
-                self.add_reword( 1.0 )  # ゴール地点なら、報酬１
-            else:
-                self.add_reword( 0.0 )  # ゴール地点なら、報酬なし
+        return self._done
 
 
-            # s,a,s',r',a' → Q : Q 関数を更新
-            q_function = self._brain.update_q_function(
-                state = self._state,
-                action = self._action,
-                next_state = next_state,
-                next_action = next_action,
-                reword = self._reword
-            )
-
-            # ゴールの指定
-            if( next_state == 8 ):
-                break              
-            else:
-                # 状態と行動を更新：s←s', a←a'
-                self._state = next_state
-                self._action = next_action
-
+    def agent_on_done( self, episode ):
+        """
+        Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
+        ・Academy からコールされるコールバック関数
+        """
         #------------------------------------------------------------
         # １エピソード完了後の処理
         #------------------------------------------------------------
@@ -169,6 +192,8 @@ class MazeValueIterationAgent( Agent ):
         # このメソッドが呼び出される度に、ε の値を徐々に小さくする。
         #self._brain.decay_learning_rate()
         self._brain.decay_epsilon()
+
+        q_function = self._brain.get_q_function()
 
         # エピソード開始の価値関数との差分
         if( episode == 0 ):  
@@ -194,4 +219,5 @@ class MazeValueIterationAgent( Agent ):
         self._q_function_historys.append( q_function.copy() )
         self._v_function_historys.append( new_v_function )
 
-        return done
+        return
+

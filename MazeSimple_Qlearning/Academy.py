@@ -16,7 +16,8 @@ from Agent import Agent
 
 class Academy( object ):
     """
-    エージェントの学習環境
+    エージェントの強化学習環境
+    ・強化学習モデルにおける環境 Enviroment に対応
     ・学習や推論を行うための設定を行う。
     
     [public]
@@ -25,6 +26,8 @@ class Academy( object ):
         _max_episode : int
                        エピソード（学習環境のシミュレーション）の最大回数
                        最大回数数に到達すると、Academy と全 Agent のエピソードを完了する。
+        _max_time_step : int
+                        時間ステップの最大回数
         _agents : list<AgentBase>
 
         _done : bool
@@ -33,8 +36,9 @@ class Academy( object ):
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, max_episode = 1 ):
+    def __init__( self, max_episode = 1, max_time_step = 100 ):
         self._max_episode = max_episode
+        self._max_time_step = max_time_step
         self._agents = []
         self._done = False
         return
@@ -50,6 +54,19 @@ class Academy( object ):
         self._done = False
         return
 
+    def done( self ):
+        """
+        エピソードを完了にする。
+        """
+        self._done = True
+        return
+
+    def is_done( self ):
+        """
+        Academy がエピソードを完了したかの取得
+        """
+        return self._done
+
     def add_agent( self, agent ):
         """
         学習環境にエージェントを追加する。
@@ -57,39 +74,49 @@ class Academy( object ):
         self._agents.append( agent )
         return
 
-    def academy_step( self ):
+
+    def academy_run( self ):
         """
-        エピソードを１ステップ間隔実行する。
+        学習環境を実行する
         """
+        # エピソードを試行
         for episode in range( 0, self._max_episode ):
-            for agent in self._agents:
-                agent.agent_step( episode )
-                agent.agent_action( episode )
+            print( "現在のエピソード数：", episode )
 
-                # 全ての Agent が完了時に break するように要修正
-                if ( agent.IsDone() == True ):
+            # 学習環境を RESET
+            self.academy_reset()
+
+            # 時間ステップを 1ステップづつ進める
+            for time_step in range( 0 ,self._max_time_step ):
+                if( episode % 10 == 0 ):
+                    # 学習環境の動画のフレームを追加
+                    self.add_frame( episode, time_step )
+
+                for agent in self._agents:
+                    done = agent.agent_step( episode, time_step )
+
+                if( done == True ):
                     break
-                
-            if ( agent.IsDone() == True ):
-                break
 
-        # Academy と全 Agents のエピソードを完了
-        self._done = True
-        for agent in self._agents:
-            agent.agent_on_done()
+            # Academy と全 Agents のエピソードを完了
+            self._done = True
+            for agent in self._agents:
+                agent.agent_on_done( episode )
 
         return
 
-    def Done( self ):
+
+    def add_frame( self, episode, times_step ):
         """
-        エピソードを完了にする。
+        強化学習の環境の１フレームをリストに追加する
         """
-        self._done = True
+        #frame = None
+        #self._frames.append( frame )
         return
 
-    def IsDone( self ):
+    def display_frames( self, file_name ):
         """
-        Academy がエピソードを完了したかの取得
+        外部ファイルに動画を保存する。
         """
-        return self._done
+        return
 

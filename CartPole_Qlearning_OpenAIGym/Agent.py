@@ -17,26 +17,14 @@ class Agent( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _brain : Brain
-                エージェントの Brain への参照
-
-        _observations : list<動的な型>
-            エージェントが観測できる状態
-
-        _reword : float
-            収益
-        _gamma : float
-            収益の割引率
-
-        _done : bool
-            エピソードの完了フラグ
-
-        _state : int
-            エージェントの現在の状態 s
-        _action : int
-            エピソードの現在の行動 a
-        _s_a_historys : list< [int,int] >
-            エピソードの状態と行動の履歴
+        _brain : <Brain> エージェントの Brain への参照
+        _observations : list<動的な型> エージェントが観測できる状態
+        _reword : <float> 収益
+        _gamma : <float> 収益の割引率
+        _done : <bool> エピソードの完了フラグ
+        _state : <int> エージェントの現在の状態 s
+        _action : <int> エピソードの現在の行動 a
+        _s_a_historys : list< [int,int] > エピソードの状態と行動の履歴
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -149,10 +137,13 @@ class Agent( object ):
         self._done = False
         return self._done
     
-    def agent_on_done( self ):
+    def agent_on_done( self, episode ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
+
+        [Args]
+            episode : <int> 現在のエピソード数
         """
         return
 

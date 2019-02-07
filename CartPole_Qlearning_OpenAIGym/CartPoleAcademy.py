@@ -28,26 +28,15 @@ class CartPoleAcademy( Academy ):
     [protected] 変数名の前にアンダースコア _ を付ける
         _env : OpenAIGym の ENV
 
-        _max_episode : int
-                       エピソードの最大回数
-                       最大回数数に到達すると、Academy と全 Agent のエピソードを完了する。
-        _max_time_step : int
-                        時間ステップの最大回数
-
-        _agents : list<AgentBase>
-
-        _done : bool
-            エピソードが完了したかのフラグ
-
+        _frames : list<>
+            動画のフレーム（１つの要素が１画像のフレーム）
+        
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
     def __init__( self, env, max_episode = 1, max_time_step = 100 ):
+        super().__init__( max_episode, max_time_step )
         self._env = env
-        self._max_episode = max_episode
-        self._max_time_step = max_time_step
-        self._agents = []
-        self._done = False
         self._frames = []
         return
 
@@ -91,7 +80,7 @@ class CartPoleAcademy( Academy ):
             # Academy と全 Agents のエピソードを完了
             self._done = True
             for agent in self._agents:
-                agent.agent_on_done()
+                agent.agent_on_done( episode )
 
         return
 

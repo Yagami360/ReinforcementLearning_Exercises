@@ -55,14 +55,14 @@ class Academy( object ):
         self._done = False
         return
 
-    def Done( self ):
+    def done( self ):
         """
         エピソードを完了にする。
         """
         self._done = True
         return
 
-    def IsDone( self ):
+    def is_done( self ):
         """
         Academy がエピソードを完了したかの取得
         """
@@ -96,7 +96,7 @@ class Academy( object ):
             # Academy と全 Agents のエピソードを完了
             self._done = True
             for agent in self._agents:
-                agent.agent_on_done()
+                agent.agent_on_done( episode )
 
         return
 

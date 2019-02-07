@@ -7,8 +7,6 @@
     [xx/xx/xx] : 
 """
 import numpy as np
-import matplotlib.pyplot as plt
-
 
 # 自作クラス
 from Brain import Brain
@@ -139,14 +137,10 @@ class CartPoleQlearningBrain( Brain ):
         Q 関数の値を更新する。
 
         [Args]
-            state : int
-                現在の状態 s
-            action : str
-                現在の行動 a
-            next_state : int
-                次の状態 s'
-            reword : float
-                報酬
+            state : <int> 現在の状態 s のインデックス
+            action : <int> 現在の行動 a
+            next_state : <int> 次の状態 s'
+            reword : <float> 報酬
         
         [Returns]
 
