@@ -98,7 +98,7 @@ class Academy( object ):
                     dones.append( done )
 
                 # 全エージェントが完了した場合
-                if( dones == True ):
+                if( all(dones) == True ):
                     break
 
             # Academy と全 Agents のエピソードを完了

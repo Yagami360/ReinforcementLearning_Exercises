@@ -181,13 +181,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s0,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s0,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S0" )
@@ -203,13 +203,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s1,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s1,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S1" )
@@ -225,13 +225,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s2,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s2,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S2" )
@@ -247,13 +247,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s3,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s3,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S3" )
@@ -269,13 +269,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s4,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s4,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S4" )
@@ -291,13 +291,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s5,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s5,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S5" )
@@ -313,13 +313,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s6,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s6,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S6" )
@@ -335,13 +335,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s7,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s7,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S7" )
@@ -357,13 +357,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys1_s8,
         linestyle = '-', #linewidth = 2,
-        color = 'red', marker = "o",
+        color = 'red',
         label = "Q-learning"
     )
     plt.plot(
         range(0,NUM_EPISODE+1), v_function_historys2_s8,
         linestyle = '-', #linewidth = 2,
-        color = 'blue', marker = "x",
+        color = 'blue',
         label = "Sarsa"
     )
     plt.title( "V function / S8" )

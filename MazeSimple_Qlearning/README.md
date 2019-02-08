@@ -48,14 +48,14 @@ BRAIN_GAMMDA = 0.9          # 割引率
 ![mazesimple_sarsa](https://user-images.githubusercontent.com/25688193/50488132-56b0ec00-0a44-11e9-8efc-341615e7e2ee.gif)<br>
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
-    ![mazasimple_q-learning_1-1_episode100](https://user-images.githubusercontent.com/25688193/52459235-4e9dad80-2ba7-11e9-9bf0-8c5c5189214c.png)<br>
+    ![image](https://user-images.githubusercontent.com/25688193/52465111-be6c6200-2bc0-11e9-8a8e-27dc96d61797.png)<br>
     > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
     > ※ 尚、終端状態 S8 の状態価値関数は常に０の値となる。<br>
 
 - Q 学習 と Sarsa での比較<br>
-    ![mazasimple_q-learning_sarsa_1-1_episode100](https://user-images.githubusercontent.com/25688193/52460400-6841f380-2bad-11e9-8ec7-84d43e0007c8.png)<br>
+    ![image](https://user-images.githubusercontent.com/25688193/52464920-15be0280-2bc0-11e9-8a99-ee406f5b8300.png)<br>
     > 赤線が Q 学習での状態価値関数 V(s) の変化。青線が、Sarsa での状態価値関数 V(s) の変化。<br>
-    > Q 学習のほうが、Sarsa に比べて、収束が早いことが分かる。<br>
+    > Q 学習のほうが、Sarsa に比べて、落ち込みが少なく、収束が早い傾向が見てとれる。<br>
 
 ### ◎ コードの説明
 [Sarsa による単純な迷路検索問題のコード](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Sarsa) から、以下の部分を変更するのみ。<br>

@@ -48,8 +48,7 @@ BRAIN_GAMMDA = 0.9          # 割引率
 ![mazesimple_sarsa](https://user-images.githubusercontent.com/25688193/50488132-56b0ec00-0a44-11e9-8efc-341615e7e2ee.gif)<br>
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
-
-    ![mazasimple_sarsa_1-1_episode100](https://user-images.githubusercontent.com/25688193/52459182-ef3f9d80-2ba6-11e9-9b58-341f45936292.png)<br>
+    ![image](https://user-images.githubusercontent.com/25688193/52464407-f7ef9e00-2bbd-11e9-85c0-ce957b0d69fe.png)<br>
     > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
     > ※ 尚、状態 S8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。<br>
 
