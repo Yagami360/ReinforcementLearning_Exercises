@@ -119,7 +119,9 @@ class MazeAgent( Agent ):
             done : bool
                    エピソードの完了フラグ
         """
-        self._done = False
+        # 既にエピソードが完了状態なら、そのまま return して、全エージェントの完了を待つ
+        if( self._done == True):
+            return self._done
 
         #print( "現在のエピソード数：", episode )
         #print( "現在の時間ステップ数：", time_step )

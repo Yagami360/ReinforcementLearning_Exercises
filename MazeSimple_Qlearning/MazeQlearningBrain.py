@@ -166,7 +166,8 @@ class MazeQlearningBrain( Brain ):
         """
         # ゴールした場合
         if( next_state == 8 ):
-            self._q_function[ state, action ] += self._learning_rate * ( reword - self._q_function[ state, action ] )
+            if( action != np.nan ):
+                self._q_function[ state, action ] += self._learning_rate * ( reword - self._q_function[ state, action ] )
         else:
             # Qlearning : self._gamma * np.nanmax( self._q_function[ next_state, : ] )
             # Sarsa : self._gamma * self._q_function[ next_state, action ]

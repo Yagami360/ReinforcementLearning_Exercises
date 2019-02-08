@@ -88,14 +88,17 @@ class Academy( object ):
 
             # 時間ステップを 1ステップづつ進める
             for time_step in range( 0 ,self._max_time_step ):
+                dones = []
                 if( episode % 10 == 0 ):
                     # 学習環境の動画のフレームを追加
                     self.add_frame( episode, time_step )
 
                 for agent in self._agents:
                     done = agent.agent_step( episode, time_step )
+                    dones.append( done )
 
-                if( done == True ):
+                # 全エージェントが完了した場合
+                if( dones == True ):
                     break
 
             # Academy と全 Agents のエピソードを完了
