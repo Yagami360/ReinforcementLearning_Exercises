@@ -13,10 +13,13 @@ from MazeAcademy import MazeAcademy
 from Brain import Brain
 from MazeSarsaBrain import MazeSarsaBrain
 from Agent import Agent
-from MazeValueIterationAgent import MazeValueIterationAgent
+from MazeAgent import MazeAgent
 
 # 設定可能な定数
 NUM_EPISODE = 100           # エピソード試行回数
+NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
+AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
+AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
@@ -36,7 +39,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = NUM_EPISODE )
+    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
 
     #-----------------------------------
     # Brain の生成
@@ -59,8 +62,8 @@ def main():
     )
 
     brain = MazeSarsaBrain(
-        states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
-        actions = [ 0, 1, 2, 3 ],
+        n_states = AGANT_NUM_STATES,
+        n_actions = AGANT_NUM_ACTIONS,
         brain_parameters = brain_parameters,
         epsilon = BRAIN_GREEDY_EPSILON,
         gamma = BRAIN_GAMMDA,
@@ -70,7 +73,7 @@ def main():
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = MazeValueIterationAgent(
+    agent = MazeAgent(
         brain = brain,
         gamma = BRAIN_GAMMDA,
         state0 = AGENT_INIT_STATE
@@ -89,7 +92,7 @@ def main():
     #===================================
     # エピソードの実行
     #===================================
-    academy.academy_step()
+    academy.academy_run()
     agent.print( "after simulation" )
     brain.print( "after simulation" )
 
@@ -180,6 +183,7 @@ def main():
     v_function_historys_s5 = []
     v_function_historys_s6 = []
     v_function_historys_s7 = []
+    v_function_historys_s8 = []
 
     for v_function in v_function_historys :
         v_function_historys_s0.append( v_function[0] )
@@ -190,7 +194,7 @@ def main():
         v_function_historys_s5.append( v_function[5] )
         v_function_historys_s6.append( v_function[6] )
         v_function_historys_s7.append( v_function[7] )
-
+        v_function_historys_s8.append( 0 )
 
     plt.clf()
 
@@ -205,7 +209,7 @@ def main():
     )
     plt.title( "V functions / S0" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -221,7 +225,7 @@ def main():
     )
     plt.title( "V functions / S1" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -238,7 +242,7 @@ def main():
 
     plt.title( "V functions / S2" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -255,7 +259,7 @@ def main():
 
     plt.title( "V functions / S3" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -272,7 +276,7 @@ def main():
 
     plt.title( "V functions / S4" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -288,7 +292,7 @@ def main():
     )
     plt.title( "V functions / S5" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -305,7 +309,7 @@ def main():
 
     plt.title( "V functions / S6" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -322,11 +326,27 @@ def main():
 
     plt.title( "V functions / S7" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    #plt.ylim( [0, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
     
+    # S8
+    plt.subplot( 3, 3, 9 )
+    plt.plot(
+        range(0,NUM_EPISODE+1), v_function_historys_s8,
+        label = 'S8',
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+
+    plt.title( "V functions / S8" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
 
     plt.savefig( "MazaSimple_Sarsa_1-1_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
     plt.show()

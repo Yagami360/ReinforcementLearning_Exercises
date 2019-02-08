@@ -23,39 +23,33 @@ class MazeSarsaBrain( Brain ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _brain_parameters : list< int, int >
+        _brain_parameters : list <float> / shape = [n_states, n_actions]
                 行動方策 π を決定するためのパラメーター Θ
                 ※ 行動方策を表形式で実装するために、これに対応するパラメーターも表形式で実装する。
                 ※ 進行方向に壁があって進めない様子を表現するために、壁で進めない方向には `np.nan` で初期化する。
                 ※ 尚、状態 s8 は、ゴール状態で行動方策がないため、これに対応するパラメーターも定義しないようにする。
 
-        _q_function : 行動状態関数 Q(s,a)
+        _policy : list<float> / shape = [n_states, n_actions]
+        _q_function : list<float> / shape = [n_states, n_actions] 
+                      行動状態関数 Q(s,a)
                       行を状態 s, 列を行動 a とする表形式表現
-
-        _epsilon : float
-                   ε-greedy 法の ε 値
-        _gamma : float
-                割引利得の γ 値
-        _learning_rate : float
-                学習率
+        _epsilon : <float> ε-greedy 法の ε 値
+        _gamma : <float> 割引利得の γ 値
+        _learning_rate : <float> 学習率
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
     def __init__(
         self,
-        states,
-        actions,
+        n_states,
+        n_actions,
         brain_parameters,
         epsilon = 0.5, gamma = 0.9, learning_rate = 0.1 
     ):
-        super().__init__( states, actions )
-        self._states = states
-        self._actions = actions
+        super().__init__( n_states, n_actions )
         self._brain_parameters = brain_parameters
-        self._policy = np.zeros(
-            shape = ( len(self._states), len(self._actions) )
-        )
+        self._policy = np.zeros( shape = ( self._n_states, self._n_actions ) )
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
         self._q_function = self.init_q_function( brain_parameters = self._brain_parameters )
         self._epsilon = epsilon
@@ -69,10 +63,9 @@ class MazeSarsaBrain( Brain ):
         print( self )
         print( str )
         print( "_agent : \n", self._agent )
-        print( "_states : \n", self._states )
-        print( "_actions : \n", self._actions )
+        print( "_n_states : \n", self._n_states )
+        print( "_n_actions : \n", self._n_actions )
         print( "_policy : \n", self._policy )
-        print( "_observations : \n", self._observations )
         print( "_brain_parameters : \n", self._brain_parameters )
         print( "_q_function : \n", self._q_function )
         print( "_epsilon : \n", self._epsilon )
@@ -126,16 +119,23 @@ class MazeSarsaBrain( Brain ):
                 現在の状態
         """
         # ε-グリーディー法に従った行動選択
-        if( np.random.rand() < self._epsilon ):
+        if( self._epsilon >= np.random.rand() ):
             # ε の確率でランダムな行動を選択
+            action = np.random.choice( self._n_actions, p = self._policy[ state, : ] )
+            """
             action = np.random.choice( 
                 self._actions,                  # アクションのリストから抽出
                 p = self._policy[ state, : ]    # 抽出は、policy の確率に従う
             )
+            """
 
         else:
             # Q の最大化する行動を選択
-            action = self._actions[ np.nanargmax( self._q_function[state, :] ) ]
+            action = np.nanargmax( self._q_function[state, :] )
+            #action = self._actions[ np.nanargmax( self._q_function[state, :] ) ]
+
+        if( action == np.nan ):
+            action = 0
 
         return action
 
@@ -156,20 +156,19 @@ class MazeSarsaBrain( Brain ):
         Q 関数の値を更新する。
 
         [Args]
-            state : int
-                現在の状態 s
-            action : str
-                現在の行動 a
-            next_state : int
-                次の状態 s'
-            next_action : str
-                次の行動 a'
-            reword : float
-                報酬
-        
+            state : <int> 現在の状態 s
+            action : <int> 現在の行動 a
+            next_state : <int> 次の状態 s'
+            next_action : <int> 次の行動 a'
+            reword : <float> 報酬
         [Returns]
 
         """
+        """
+        if( next_action == np.nan ):
+            next_state = action
+        """
+
         # ゴールした場合
         if( next_state == 8 ):
             self._q_function[ state, action ] += self._learning_rate * ( reword - self._q_function[ state, action ] )

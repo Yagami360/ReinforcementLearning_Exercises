@@ -119,7 +119,7 @@ class MazeSarsaBrain( Brain ):
                 現在の状態
         """
         # ε-グリーディー法に従った行動選択
-        if( self._epsilon <= np.random.rand() ):
+        if( self._epsilon >= np.random.rand() ):
             # ε の確率でランダムな行動を選択
             action = np.random.choice( self._n_actions, p = self._policy[ state, : ] )
             """

@@ -133,7 +133,7 @@ class CartPoleAgent( Agent ):
                 #self._n_succeeded_episode += 1
         else:
             # 途中報酬は０
-            self.set_reword( 0 )
+            self.add_reword( 0 )
 
         #print( "reward :", self._reword )
 

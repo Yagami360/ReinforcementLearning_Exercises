@@ -17,26 +17,14 @@ class Agent( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _brain : Brain
-                エージェントの Brain への参照
-
-        _observations : list<動的な型>
-            エージェントが観測できる状態
-
-        _reword : float
-            収益
-        _gamma : float
-            収益の割引率
-
-        _done : bool
-            エピソードの完了フラグ
-
-        _state : int
-            エージェントの現在の状態 s
-        _action : int
-            エピソードの現在の行動 a
-        _s_a_historys : list< [int,int] >
-            エピソードの状態と行動の履歴
+        _brain : <Brain> エージェントの Brain への参照
+        _observations : list<動的な型> エージェントが観測できる状態
+        _reword : <float> 収益
+        _gamma : <float> 収益の割引率
+        _done : <bool> エピソードの完了フラグ
+        _state : <int> エージェントの現在の状態 s
+        _action : <int> エピソードの現在の行動 a
+        _s_a_historys : list< [int,int] > エピソードの状態と行動の履歴
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -100,14 +88,14 @@ class Agent( object ):
         self._observations.append( observation )
         return
 
-    def Done( self ):
+    def done( self ):
         """
         エピソードを完了にする。
         """
         self._done = True
         return
 
-    def IsDone( self ):
+    def is_done( self ):
         """
         Academy がエピソードを完了したかの取得
         """
@@ -130,7 +118,6 @@ class Agent( object ):
         #self._gamma = self._gamma * self._gamma     # γ^t
         return self._reword
 
-
     def agent_reset( self ):
         """
         エージェントの再初期化処理
@@ -142,39 +129,29 @@ class Agent( object ):
         self._s_a_historys = [ [ self._state, self._action ] ]
         return
 
-    def agent_step( self, step ):
+    def agent_step( self, episode, time_step ):
         """
         エージェント [Agent] の次の状態を決定する。
-        ・Academy からコールされるコールバック関数
+        ・Academy から各時間ステップ度にコールされるコールバック関数
+
         [Args]
-            step : 学習環境のシミュレーションステップ
+            episode : <int> 現在のエピソード数
+            time_step : <int> 現在の時間ステップ
 
         [Returns]
-            done : bool
-                   シミュレーションの完了フラグ
+            done : <bool> エピソードの完了フラグ
         """
-        done = False
-        return done
+        self._done = False
+        return self._done
     
-    def agent_action( self, episode ):
-        """
-        現在の状態に基づき、エージェントの実際のアクションを記述する。
-        ・Academy から１回のエピソード毎にコールされるコールバック関数
 
-        [Args]
-            episode : 現在のエピソード数
-        [Returns]
-            done : bool
-                   エピソードの完了フラグ
-        """
-        done = False
-        return done
-
-
-    def agent_on_done( self ):
+    def agent_on_done( self, episode ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
+
+        [Args]
+            episode : <int> 現在のエピソード数
         """
         return
 

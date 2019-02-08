@@ -26,7 +26,8 @@ class MazeAcademy( Academy ):
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, max_episode = 1 ):
+    def __init__( self, max_episode = 1, max_time_step = 100 ):
         super().__init__( max_episode )
+        #self._frames = []
         return
 

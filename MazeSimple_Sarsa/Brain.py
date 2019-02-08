@@ -18,30 +18,21 @@ class Brain( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _agent : Agent
-            この Brain を持つ Agent への参照
-        _actions : サブクラスにて動的に型を決定する
-                  エージェント取りうるアクション（上移動、下移動など）のリスト
-        _states : サブクラスにて動的に型を決定する
-                  エージェント取りうる状態のリスト
-        _observations : list<動的な型>
-                エージェントが観測できる状態
-        _policy : 動的な型
-                行動方策 π。確率値（0~1）
+        _agent : <Agent> この Brain を持つ Agent への参照
+        _n_states : <int> 状態の要素数
+        _n_actions : <int> 行動の要素数
                 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
     def __init__(
         self,
-        states,
-        actions
+        n_states,
+        n_actions
     ):
         self._agent = None
-        self._states = states
-        self._actions = actions
-        self._observations = []
-        self._policy = None
+        self._n_states = n_states
+        self._n_actions = n_actions
         return
 
     def print( self, str ):
@@ -50,10 +41,8 @@ class Brain( object ):
         print( self )
         print( str )
         print( "_agent : \n", self._agent )
-        print( "_states : \n", self._states )
-        print( "_actions : \n", self._actions )
-        print( "_observations : \n", self._observations )
-        print( "_policy : \n", self._policy )
+        print( "_n_states : \n", self._n_states )
+        print( "_n_actions : \n", self._n_actions )
         print( "----------------------------------" )
         return
 
@@ -63,19 +52,6 @@ class Brain( object ):
         """
         self._policy = None
         return
-
-
-    def get_policy( self ):
-        """
-        行動方策を取得する。
-        """
-        return self._policy
-
-    def get_actions( self ):
-        """
-        エージェント取りうるアクション Action のリストを取得
-        """
-        return self._actions
     
     def set_agent( self, agent ):
         """
