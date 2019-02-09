@@ -130,11 +130,7 @@ class MazeAgent( Agent ):
 
         # 次の状態 s' と次の行動 a' を履歴に追加
         self._s_a_historys.append( [next_state, next_action] )
-
-        # Brain の更新処理
-        self._brain.update()
-        policy = self._brain.get_policy()
-
+        
         # a' → r'' : 次行動 a' に対する報酬 r'' の指定
         if( next_state == 8 ):
             self.add_reword( 1.0 )  # ゴール地点なら、報酬１
@@ -165,6 +161,25 @@ class MazeAgent( Agent ):
         # １エピソード完了後の処理
         #------------------------------------------------------------
         print( "迷路を解くのにかかったステップ数：" + str( len(self._s_a_historys) ) )
+
+        #------------------------------------------------------------
+        # エージェントのゴールまでの履歴を元に、行動方策を更新
+        #------------------------------------------------------------
+        policy = self._brain.get_policy()
+        self._brain.update( self._s_a_historys )
+        new_policy = self._brain.get_policy()
+
+        #------------------------------------------------------------
+        # 学習の完了判定処理
+        #------------------------------------------------------------
+        stop_epsilon = 0.001    # 学習完了のための行動方策の差分値
+
+        # 前回の行動方針との差分が十分小さくなれば学習を終了する。
+        delta_policy = np.sum( np.abs( new_policy - policy ) )
+        print( "前回の行動方針との差分：", delta_policy )
+
+        if( delta_policy < stop_epsilon ):
+            pass    # 予約コード（何かしらの学習完了処理）
 
         return
 

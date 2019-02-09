@@ -27,6 +27,10 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
+NUM_EPISODE = 1             # エピソード試行回数
+NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
+AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
+AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_GAMMDA = 0.9          # 割引率
 ```

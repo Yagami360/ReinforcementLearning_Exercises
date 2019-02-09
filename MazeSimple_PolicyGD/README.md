@@ -29,7 +29,10 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
-NUM_EPISODE = 2000          # エピソード試行回数
+NUM_EPISODE = 5000          # エピソード試行回数
+NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
+AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
+AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GAMMDA = 0.9          # 割引率
@@ -123,7 +126,8 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |s7|0.01129659|0.98870341|0.|0.|
 
 
-### ◎ コードの内容説明（要修正...）
+### ◎ コードの内容説明
+<!--
 本コードの大まかな流れは、以下のようになる。<br>
 
 ### 1. エージェントの行動方策 `_policy` のためのパラメーター `_brain_parameters` を初期化する。
@@ -371,3 +375,4 @@ class MazeAgent
 
         return
 ```
+-->

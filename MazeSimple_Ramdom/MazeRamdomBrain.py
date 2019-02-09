@@ -56,7 +56,9 @@ class MazeRamdomBrain( Brain ):
         print( "----------------------------------" )
         return
 
-        
+    def get_policy( self ):
+        return self._policy
+
     def convert_into_policy_from_brain_parameters( self, brain_parameters ):
         """
         方策パラメータから、行動方針 [policy] を決定する
@@ -100,4 +102,4 @@ class MazeRamdomBrain( Brain ):
         # 行動の方策のためのパラメーターを元に、行動方策を決定する。
         self._policy = self.convert_into_policy_from_brain_parameters( self._brain_parameters )
 
-        return self._policy
+        return

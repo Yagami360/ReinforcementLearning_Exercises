@@ -13,14 +13,17 @@ from Academy import Academy
 from MazeAcademy import MazeAcademy
 
 from Agent import Agent
-from MazePolicyIterationAgent import MazePolicyIterationAgent
+from MazeAgent import MazeAgent
 
 from Brain import Brain
 from MazePolicyGDBrain import MazePolicyGDBrain
 
 
 # 設定可能な定数
-NUM_EPISODE = 2000           # エピソード試行回数
+NUM_EPISODE = 5000          # エピソード試行回数
+NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
+AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
+AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GAMMDA = 0.9          # 割引率
@@ -39,7 +42,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = NUM_EPISODE )
+    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
 
     #-----------------------------------
     # Brain の生成
@@ -62,8 +65,8 @@ def main():
     )
 
     brain = MazePolicyGDBrain( 
-        states = [ "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8" ],
-        actions = [ 0, 1, 2, 3 ],
+        n_states = AGANT_NUM_STATES,
+        n_actions = AGANT_NUM_ACTIONS,
         brain_parameters = brain_parameters,
         learning_rate = BRAIN_LEARNING_RATE
     )
@@ -71,7 +74,7 @@ def main():
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = MazePolicyIterationAgent(
+    agent = MazeAgent(
         brain = brain,
         gamma = BRAIN_GAMMDA,
         state0 = AGENT_INIT_STATE
@@ -90,7 +93,7 @@ def main():
     #===================================
     # エピソードの実行
     #===================================
-    academy.academy_step()
+    academy.academy_run()
     agent.print( "after simulation" )
     brain.print( "after simulation" )
 
