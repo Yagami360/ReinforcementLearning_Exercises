@@ -154,20 +154,63 @@ class CartPoleDQNBrain( Brain ):
         return self._optimizer
 
 
-    def predict( self ):
+    def predict( self, batch, state_batch, action_batch, reward_batch, non_final_next_states ):
         """
         教師信号となる行動価値関数を求める
 
         [Args]
         [Returns]
         """
+        #--------------------------------------------------------------------
         # ネットワークを推論モードへ切り替え（PyTorch特有の処理）
+        #--------------------------------------------------------------------
         self._model.eval()
 
+        #--------------------------------------------------------------------
         # 構築したDQNのネットワークが出力する Q(s,a) を求める。
+        # 学習用データをモデルに流し込む
+        # model(引数) で呼び出せるのは、__call__ をオーバライトしているため
+        #--------------------------------------------------------------------
+        # outputs / shape = batch_size * _n_actions
+        outputs = self._model( state_batch )
+        #print( "outputs :", outputs )
+
+        # outputs から実際にエージェントが選択した action を取り出す
+        # gather(...) : 
+        # dim = 1 : 列方向
+        # index = action_batch : エージェントが実際に選択した行動は action_batch 
+        self._q_function = outputs.gather( 1, action_batch )
+        #print( "_q_function :", self._q_function )
+
+        #--------------------------------------------------------------------
+        #
+        #--------------------------------------------------------------------
+        # 全部 0 で初期化
+        next_state_values = torch.zeros( self._batch_size )
+
+        # CartPole が done ではなく、next_state が存在するインデックス用のマスク
+        non_final_mask = torch.ByteTensor(
+            tuple( map(lambda s: s is not None,batch.next_state) )
+        )
+        #print( "non_final_mask :", non_final_mask )
+
+        next_outputs = self._model( non_final_next_states )
+        #print( "next_outputs :", next_outputs )
+        next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
+        #print( "next_state_values :", next_state_values )
+
+        #--------------------------------------------------------------------
+        # 教師信号となる推定行動価値関数を求める
+        #--------------------------------------------------------------------
+        self._expected_q_function = reward_batch + self._gamma * next_state_values
+
+        return
 
     def fit( self ):
         """
+        モデルを学習し、
+        [Args]
+        [Returns]
         """
         return
 
@@ -240,21 +283,22 @@ class CartPoleDQNBrain( Brain ):
         #-----------------------------------------
         self._memory.push( state = state, action = action, next_state = next_state, reward = reward )
 
+        # 学習用データがミニバッチサイズ以下ならば、以降の処理は行わない
+        if( len(self._memory) < self._batch_size ):
+            return
+
         #-----------------------------------------        
         # ミニバッチデータを取得する
         #-----------------------------------------
-        state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_mini_batch( self._batch_size )
-
-        #if( state_batch == None ):
-        #    return
+        batch, state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_mini_batch( self._batch_size )
 
         #-----------------------------------------
         # 教師信号となる推定行動価値関数を求める 
         #-----------------------------------------
-        self.predict()
+        self.predict( batch, state_batch, action_batch, reward_batch, non_final_next_states )
 
         #-----------------------------------------
-        #
+        # ネットワークを学習し、パラメーターを更新する。
         #-----------------------------------------
         self.fit()
 

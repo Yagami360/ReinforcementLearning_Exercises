@@ -99,7 +99,7 @@ class ExperienceReplay( object ):
         #----------------------------------------------------------------------
         # メモリサイズがまだミニバッチサイズより小さい場合は、処理を行わない
         if( len(self._memory) < batch_size ):
-            return None, None, None, None
+            return None, None, None, None, None
 
         # ミニバッチサイズ以上ならば、学習用データを pop する
         transitions = self.pop( batch_size )
@@ -108,7 +108,7 @@ class ExperienceReplay( object ):
         # 取り出したデータをミニバッチ学習用に reshape
         # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size / shape = 32 * 4
         # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
-        batch = batch = Transition( *zip(*transitions) )
+        batch = Transition( *zip(*transitions) )
         #print( "batch :", batch )
 
         #
@@ -119,4 +119,4 @@ class ExperienceReplay( object ):
             [s for s in batch.next_state if s is not None]
         )
 
-        return state_batch, action_batch, reward_batch, non_final_next_states
+        return batch, state_batch, action_batch, reward_batch, non_final_next_states
