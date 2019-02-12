@@ -1,4 +1,4 @@
-# ReinforcementLearning_Exercises_Python
+# ReinforcementLearning_Exercises
 強化学習の練習コード集。（実装中）<br>
 分かりやすいように、各フォルダ毎で完結したコード一式になっています。<br>
 
@@ -12,17 +12,18 @@
 - Python : 3.6
 - Anaconda : 5.0.1
 - OpenAI Gym : 0.10.9
-- TensorFlow : 1.8.0
+- PyTorch : 1.0.0
 
+<!--
 ### ◎ 強化学習環境
-
 - OpenAI Gym
 - Unity : 2018.2.18f1
 - Unity ML-Agents : v0.5 (Beta)
     - [Unity ML-Agents](https://github.com/Unity-Technologies/ml-agents)
-
-### ◎ 機械学習ライブラリ
+-->
 <!--
+
+### ◎ 機械学習用フレームワーク
 https://www.tensorflow.org </br>
 
 > GitHub : 
@@ -39,8 +40,9 @@ https://deepage.net/tensorflow/2017/04/25/tensorboard.html </br>
 http://tensorflow.classcat.com/2016/02/13/tensorflow-how-tos-graph-visualization/</br>
 -->
 
+<!--
 ### ◎ 検証用データセット
-
+-->
 
 ## ■ 項目（フォルダ別）
 
@@ -54,7 +56,7 @@ http://tensorflow.classcat.com/2016/02/13/tensorflow-how-tos-graph-visualization
 1. CartPole
     1. ./CartPole_Sarsa_OpenAIGym
     1. [./CartPole_Qleaning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_Qlearning_OpenAIGym)
-    1. ./CartPole_DQN_PyTorch_OpenAIGym
+    1. [./CartPole_DQN_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DQN_PyTorch_OpenAIGym)
 1. その他
     1. [./Processing_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/Processing_OpenAIGym)
 
