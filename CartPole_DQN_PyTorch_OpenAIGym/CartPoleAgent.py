@@ -11,8 +11,12 @@ import numpy as np
 # OpenAI Gym
 import gym
 
+# PyTorch
+import torch
+
 # 自作クラス
 from Agent import Agent
+from ExperienceReplay import ExperienceReplay
 
 
 class CartPoleAgent( Agent ):
@@ -37,6 +41,10 @@ class CartPoleAgent( Agent ):
 
         #self._q_function_historys = []
         #self._v_function_historys = []
+
+        #
+        self._memory = ExperienceReplay( capacity = 10000 )
+
         return
 
     def print( self, str ):
@@ -75,7 +83,7 @@ class CartPoleAgent( Agent ):
         エージェントの再初期化処理
         """
         self._observations = self._env.reset()
-        self._reword = 0.0
+        self._reword = torch.FloatTensor( [0.0] )
         self._done = False
         return
 
@@ -96,13 +104,17 @@ class CartPoleAgent( Agent ):
         if( self._done == True):
             return self._done
 
-        #print( "現在のエピソード数：", episode )
-        #print( "現在の時間ステップ数：", time_step )
+        #-------------------------------------------------------------------
+        # 現在の状態 s_t を求める
+        #-------------------------------------------------------------------
+        # 観測値をそのまま状態として採用する（状態の離散化を行わない）
+        state = self._observations
 
-        #-------------------------------------------------------------------
-        # 離散化した現在の状態 s_t を求める
-        #-------------------------------------------------------------------
-        state = self._brain.digitize_state( self._observations )
+        # numpy → PyTorch 用の型に変換
+        state = torch.from_numpy( state ).type( torch.FloatTensor)
+        
+        # shape = 4 → １*4 に reshape
+        state = torch.unsqueeze( state, dim = 0 )
         #print( "_state :", state )
 
         #-------------------------------------------------------------------
@@ -114,8 +126,14 @@ class CartPoleAgent( Agent ):
         #-------------------------------------------------------------------
         # 行動の実行により、次の時間での状態 s_{t+1} と報酬 r_{t+1} を求める。
         #-------------------------------------------------------------------
-        observations_next, _, env_done, _ = self._env.step( action )
-        next_state = self._brain.digitize_state( observations_next )
+        observations_next, _, env_done, _ = self._env.step( action.item() )
+
+        # 観測値をそのまま状態として採用する（状態の離散化を行わない）
+        next_state = observations_next
+        
+        # numpy → PyTorch 用の型に変換
+        next_state = torch.from_numpy( next_state ).type( torch.FloatTensor)
+
         #print( "env_done :", env_done )
         #print( "info :", info )
 
@@ -127,17 +145,23 @@ class CartPoleAgent( Agent ):
             # 時間ステップの最大回数に近づいたら
             if time_step < 195:
                 # 途中でコケたら、報酬－１
-                self.add_reword( -1 )
+                self.add_reword( torch.FloatTensor( [-1.0] ) )
                 #self._n_succeeded_episode = 0
             else:
                 # 立ったまま終了時は、報酬＋１
-                self.add_reword( 1 )
+                self.add_reword( torch.FloatTensor( [1.0] ) )
                 #self._n_succeeded_episode += 1
         else:
             # 途中報酬は０
-            self.set_reword( 0 )
+            self.set_reword( torch.FloatTensor( [0.0] ) )
 
         #print( "reward :", self._reword )
+
+        #----------------------------------------
+        # 経験に基づく学習用データを追加
+        #----------------------------------------
+        self._memory.push( state = state, action = action, next_state = next_state, reword = self._reword )
+        self._memory.create_memory( batch_size = 32 )
 
         #----------------------------------------
         # 価値関数の更新

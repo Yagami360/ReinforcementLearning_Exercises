@@ -7,6 +7,7 @@
     [xx/xx/xx] : 
 """
 import numpy as np
+import random
 
 # 自作クラス
 from Brain import Brain
@@ -29,13 +30,12 @@ class CartPoleDQNBrain( Brain ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _n_dizitzed : <int> 各状態を離散化する分割数
         _epsilon : <float> ε-greedy 法の ε 値
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
 
-        _q_function : <float,float> 行動状態関数 Q(s,a) / 行を状態 s, 列を行動 a とする表形式表現
-        _expected_q_function : <float,float> 推定行動状態関数 Q(s,a) / 行を状態 s, 列を行動 a とする表形式表現
+        _q_function : <> 行動状態関数 Q(s,a)
+        _expected_q_function : <> 推定行動状態関数 Q(s,a,θ)
 
         _model : <torch.nn.Sequential> モデルのオブジェクト
         _loss_fn : <torch.> モデルの損失関数
@@ -48,11 +48,9 @@ class CartPoleDQNBrain( Brain ):
         self,
         n_states,
         n_actions,
-        epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001 ,
-        n_dizitzed = 6
+        epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001
     ):
         super().__init__( n_states, n_actions )
-        self._n_dizitzed = n_dizitzed
         self._epsilon = epsilon
         self._gamma = gamma
         self._learning_rate = learning_rate
@@ -60,6 +58,9 @@ class CartPoleDQNBrain( Brain ):
         self._loss_fn = None
         self._optimizer = None
 
+        self._q_function = None
+        self._expected_q_function = None
+        """
         # Qテーブルの作成（行数＝分割数^状態数=6^4=）
         self._q_function = np.random.uniform(
             low = 0, high =1,
@@ -69,7 +70,7 @@ class CartPoleDQNBrain( Brain ):
             low = 0, high =1,
             size = ( self._n_dizitzed ** self._n_states, self._n_actions )
         )
-
+        """
         return
 
     def print( self, str ):
@@ -80,7 +81,6 @@ class CartPoleDQNBrain( Brain ):
         print( "_agent : \n", self._agent )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
-        print( "_n_dizitzed : \n", self._n_dizitzed )
         print( "_epsilon : \n", self._epsilon )
         print( "_gamma : \n", self._gamma )
         print( "_learning_rate : \n", self._learning_rate )
@@ -174,17 +174,6 @@ class CartPoleDQNBrain( Brain ):
         """
         return
 
-
-
-        return
-
-    def decay_learning_rate( self ):
-        """
-        学習率を減衰させる。
-        """
-        self._learning_rate = self._learning_rate / 2.0
-        return
-
     def decay_epsilon( self, episode ):
         """
         ε-greedy 法の ε 値を減衰させる。
@@ -192,23 +181,6 @@ class CartPoleDQNBrain( Brain ):
         #self._epsilon = self._epsilon / 2.0
         self._epsilon = 0.5 * ( 1 / (episode + 1) )
         return
-
-    def digitize_state( self, observations ):
-        """
-        観測したエージェントの observations を離散化する。
-        """
-        def bins( clip_min, clip_max, num ):
-            return np.linspace( clip_min, clip_max, num + 1 )[1:-1]
-
-        cart_pos, cart_v, pole_angle, pole_v = observations
-
-        digitized = [
-            np.digitize( cart_pos, bins = bins(-2.4, 2.4, self._n_dizitzed) ),
-            np.digitize( cart_v, bins = bins(-3.0, 3.0, self._n_dizitzed) ),
-            np.digitize( pole_angle, bins = bins(-0.5, 0.5, self._n_dizitzed) ),
-            np.digitize( pole_v, bins = bins(-2.0, 2.0, self._n_dizitzed) )
-        ]
-        return sum( [x * (self._n_dizitzed**i) for i, x in enumerate(digitized)] )
 
 
     def action( self, state ):
@@ -221,11 +193,34 @@ class CartPoleDQNBrain( Brain ):
         """
         # ε-グリーディー法に従った行動選択
         if( self._epsilon <= np.random.uniform(0,1) ):
+            #------------------------------
             # Q の最大化する行動を選択
-            action = np.argmax( self._q_function[state, :] )
+            #------------------------------
+            # model を推論モードに切り替える（PyTorch特有の処理）
+            self._model.eval()
+
+            # 微分を行わない処理の範囲を with 構文で囲む
+            with torch.no_grad():
+                # テストデータをモデルに流し込み、モデルの出力を取得する
+                outputs = self._model( state )
+                #print( "outputs :", outputs )
+                #print( "outputs.data :", outputs.data )
+
+                # dim = 1 ⇒ 列方向で最大値をとる
+                # Returns : (Tensor, LongTensor)
+                _, max_index = torch.max( outputs.data, dim = 1 )
+                #print( "max_index :", max_index )
+
+                # .view(1,1) : [torch.LongTensor of size 1] → size 1×1 に reshape
+                action = max_index.view(1,1)
+                #print( "action :", action )
+
         else:
             # ε の確率でランダムな行動を選択
-            action = np.random.choice( self._n_actions )
+            #action = np.random.choice( self._n_actions )
+            action = torch.LongTensor(
+                [ [random.randrange(self._n_actions)] ]
+            )
 
         return action
 
@@ -243,8 +238,7 @@ class CartPoleDQNBrain( Brain ):
         [Returns]
 
         """
-        q_funtion_next = max( self._q_function[next_state][:] )
-        self._q_function[ state, action ] += self._learning_rate * ( reword + self._gamma * q_funtion_next - self._q_function[ state, action ] )
+        self.fit()
 
         return self._q_function
 

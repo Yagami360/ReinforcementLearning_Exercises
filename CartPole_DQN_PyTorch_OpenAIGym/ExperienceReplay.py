@@ -90,10 +90,19 @@ class ExperienceReplay( object ):
         [Args]
         [Returns]
         """
+        # メモリサイズがまだミニバッチサイズより小さい場合は、処理を行わない
+        if( len(self._memory) < batch_size ):
+            return
+
         #------------------------------------------------
         # ミニバッチ処理用のデータセットの作成
         #------------------------------------------------
         transtions = self.pop( batch_size )
+        print( "transtions :", transtions )
+
+        # 取り出したデータをミニバッチ学習用に reshape
+        # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size
+        # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size)
 
         return
 

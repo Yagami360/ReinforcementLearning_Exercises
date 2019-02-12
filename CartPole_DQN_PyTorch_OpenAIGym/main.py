@@ -28,7 +28,7 @@ from Brain import Brain
 from CartPoleDQNBrain import CartPoleDQNBrain
 from Agent import Agent
 from CartPoleAgent import CartPoleAgent
-
+from ExperienceReplay import ExperienceReplay
 
 #--------------------------------
 # 設定可能な定数
@@ -36,8 +36,8 @@ from CartPoleAgent import CartPoleAgent
 #RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
 NUM_EPISODE = 200               # エピソード試行回数
 NUM_TIME_STEP = 500             # １エピソードの時間ステップの最大数
-NUM_DIZITIZED = 6               # 各状態の離散値への分割数
 BRAIN_LEARNING_RATE = 0.0001    # 学習率
+BRAIN_BATCH_SIZE = 1            # ミニバッチサイズ(32)
 BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
 BRAIN_GAMMDA = 0.99             # 割引率
 MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセットのメモリの最大の長さ
@@ -53,6 +53,8 @@ def main():
     # バージョン確認
     print( "OpenAI Gym", gym.__version__ )
     print( "PyTorch :", torch.__version__ )
+
+    np.random.seed(8)
 
     #===================================
     # 学習環境、エージェント生成フェイズ
@@ -73,8 +75,7 @@ def main():
         n_actions = env.action_space.n,
         epsilon = BRAIN_GREEDY_EPSILON,
         gamma = BRAIN_GAMMDA,
-        learning_rate = BRAIN_LEARNING_RATE,
-        n_dizitzed = NUM_DIZITIZED
+        learning_rate = BRAIN_LEARNING_RATE
     )
     
     # モデルの構造を定義する。

@@ -46,3 +46,17 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 
 ## ■ デバッグ情報
+
+```python
+[main1_1.py]
+outputs : tensor([[0.1276, 0.1241]])
+index : tensor([0])
+action : tensor([[0]])
+```
+
+```python
+[main.py]
+_state : tensor([ 0.0049, -0.0017,  0.0443, -0.0200])
+outputs : tensor([-0.0438,  0.0833])
+RuntimeError: Dimension out of range (expected to be in range of [-1, 0], but got 1)
+```
