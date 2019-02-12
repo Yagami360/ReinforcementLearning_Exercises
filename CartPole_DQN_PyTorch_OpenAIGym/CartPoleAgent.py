@@ -16,7 +16,6 @@ import torch
 
 # 自作クラス
 from Agent import Agent
-from ExperienceReplay import ExperienceReplay
 
 
 class CartPoleAgent( Agent ):
@@ -41,10 +40,6 @@ class CartPoleAgent( Agent ):
 
         #self._q_function_historys = []
         #self._v_function_historys = []
-
-        #
-        self._memory = ExperienceReplay( capacity = 10000 )
-
         return
 
     def print( self, str ):
@@ -124,7 +119,7 @@ class CartPoleAgent( Agent ):
         action = self._brain.action( state )
     
         #-------------------------------------------------------------------
-        # 行動の実行により、次の時間での状態 s_{t+1} と報酬 r_{t+1} を求める。
+        # 行動の実行により、次の時間での状態 s_{t+1} を求める。
         #-------------------------------------------------------------------
         observations_next, _, env_done, _ = self._env.step( action.item() )
 
@@ -134,11 +129,14 @@ class CartPoleAgent( Agent ):
         # numpy → PyTorch 用の型に変換
         next_state = torch.from_numpy( next_state ).type( torch.FloatTensor)
 
+        # shape = 4 → １*4 に reshape
+        next_state = torch.unsqueeze( next_state, dim = 0 )
+
         #print( "env_done :", env_done )
         #print( "info :", info )
 
         #----------------------------------------
-        # 報酬の設定
+        # 報酬 r_{t+1} の設定
         #----------------------------------------
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
@@ -156,12 +154,6 @@ class CartPoleAgent( Agent ):
             self.set_reword( torch.FloatTensor( [0.0] ) )
 
         #print( "reward :", self._reword )
-
-        #----------------------------------------
-        # 経験に基づく学習用データを追加
-        #----------------------------------------
-        self._memory.push( state = state, action = action, next_state = next_state, reword = self._reword )
-        self._memory.create_memory( batch_size = 32 )
 
         #----------------------------------------
         # 価値関数の更新

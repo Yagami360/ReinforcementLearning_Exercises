@@ -12,14 +12,13 @@ import random
 # 自作クラス
 from Brain import Brain
 from Agent import Agent
+from ExperienceReplay import ExperienceReplay
 
 # PyTorch
 import torch
-from torch.utils.data import TensorDataset, DataLoader
 from torch  import nn   # ネットワークの構成関連
 from torch import optim
 import torch.nn.functional as F
-import torchvision      # 画像処理関連
 
 
 class CartPoleDQNBrain( Brain ):
@@ -36,6 +35,7 @@ class CartPoleDQNBrain( Brain ):
 
         _q_function : <> 行動状態関数 Q(s,a)
         _expected_q_function : <> 推定行動状態関数 Q(s,a,θ)
+        _memory : <ExperienceRelay> ExperienceRelayに基づく学習用のデータセット
 
         _model : <torch.nn.Sequential> モデルのオブジェクト
         _loss_fn : <torch.> モデルの損失関数
@@ -48,29 +48,24 @@ class CartPoleDQNBrain( Brain ):
         self,
         n_states,
         n_actions,
-        epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001
+        epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001,
+        batch_size = 32,
+        memory_capacity = 10000
     ):
         super().__init__( n_states, n_actions )
         self._epsilon = epsilon
         self._gamma = gamma
         self._learning_rate = learning_rate
+        self._batch_size = batch_size
+
         self._model = None
         self._loss_fn = None
         self._optimizer = None
 
         self._q_function = None
         self._expected_q_function = None
-        """
-        # Qテーブルの作成（行数＝分割数^状態数=6^4=）
-        self._q_function = np.random.uniform(
-            low = 0, high =1,
-            size = ( self._n_dizitzed ** self._n_states, self._n_actions )
-        )
-        self._expected_q_function = np.random.uniform(
-            low = 0, high =1,
-            size = ( self._n_dizitzed ** self._n_states, self._n_actions )
-        )
-        """
+        self._memory = ExperienceReplay( capacity = memory_capacity )
+
         return
 
     def print( self, str ):
@@ -84,9 +79,11 @@ class CartPoleDQNBrain( Brain ):
         print( "_epsilon : \n", self._epsilon )
         print( "_gamma : \n", self._gamma )
         print( "_learning_rate : \n", self._learning_rate )
+        print( "_batch_size : \n", self._batch_size )
 
         print( "_q_function : \n", self._q_function )
         print( "_expected_q_function : \n", self._expected_q_function )
+        print( "_memory :", self._memory )
 
         print( "_model :\n", self._model )
         print( "_loss_fn :\n", self._loss_fn )
@@ -225,7 +222,7 @@ class CartPoleDQNBrain( Brain ):
         return action
 
 
-    def update_q_function( self, state, action, next_state, reword ):
+    def update_q_function( self, state, action, next_state, reward ):
         """
         Q 関数の値を更新する。
 
@@ -238,6 +235,27 @@ class CartPoleDQNBrain( Brain ):
         [Returns]
 
         """
+        #-----------------------------------------
+        # 経験に基づく学習用データを追加
+        #-----------------------------------------
+        self._memory.push( state = state, action = action, next_state = next_state, reward = reward )
+
+        #-----------------------------------------        
+        # ミニバッチデータを取得する
+        #-----------------------------------------
+        state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_mini_batch( self._batch_size )
+
+        #if( state_batch == None ):
+        #    return
+
+        #-----------------------------------------
+        # 教師信号となる推定行動価値関数を求める 
+        #-----------------------------------------
+        self.predict()
+
+        #-----------------------------------------
+        #
+        #-----------------------------------------
         self.fit()
 
         return self._q_function

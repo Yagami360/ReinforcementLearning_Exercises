@@ -27,11 +27,12 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
-NUM_EPISODE = 200           # エピソード試行回数
-NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
-BRAIN_LEARNING_RATE = 0.5   # 学習率
-BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99         # 割引率
+NUM_EPISODE = 200               # エピソード試行回数
+NUM_TIME_STEP = 500             # １エピソードの時間ステップの最大数
+BRAIN_LEARNING_RATE = 0.0001    # 学習率
+BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
+BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
+BRAIN_GAMMDA = 0.99             # 割引率
 MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセットのメモリの最大の長さ
 ```
 

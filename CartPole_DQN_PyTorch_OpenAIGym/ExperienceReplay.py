@@ -9,11 +9,14 @@
 import numpy as np
 import random
 
+# PyTorch
+import torch
+
 from collections import namedtuple
 
 Transition = namedtuple(
     typename = "Transition",
-    field_names = ( "state", "action", "next_state", "reword" )
+    field_names = ( "state", "action", "next_state", "reward" )
 )
 
 
@@ -53,14 +56,14 @@ class ExperienceReplay( object ):
         print( "_index : \n", self._index )
         return
 
-    def push( self, state, action, next_state, reword ):
+    def push( self, state, action, next_state, reward ):
         """
         学習用のデータのメモリに、データを push する
         [Args]
-            state : <list> 現在の状態 s
-            action : <int> 現在の行動 a
-            next_state : <int> 次の状態 s'
-            reword : <float> 報酬        
+            state : <> 現在の状態 s
+            action : <> 現在の行動 a
+            next_state : <> 次の状態 s'
+            reword : <> 報酬        
         [Returns]
         """
         # 現在のメモリサイズが上限値以下なら、新たに容量を確保する。
@@ -68,7 +71,7 @@ class ExperienceReplay( object ):
             self._memory.append( None )
 
         # nametuple を使用して、メモリに値を格納
-        self._memory[ self._index ] = Transition( state, action, next_state, reword )
+        self._memory[ self._index ] = Transition( state, action, next_state, reward )
 
         # 現在のインデックスをづらす
         self._index = ( self._index + 1 ) % self._capacity
@@ -84,25 +87,36 @@ class ExperienceReplay( object ):
         """
         return random.sample( self._memory, batch_size )
 
-    def create_memory( self, batch_size ):
+
+    def get_mini_batch( self, batch_size ):
         """
-        Experience Replay に基づき、ミニバッチ処理用のデータセットを生成する。
+        ミニバッチデータを取得する
         [Args]
         [Returns]
         """
+        #----------------------------------------------------------------------
+        # Experience Replay に基づき、ミニバッチ処理用のデータセットを生成する。
+        #----------------------------------------------------------------------
         # メモリサイズがまだミニバッチサイズより小さい場合は、処理を行わない
         if( len(self._memory) < batch_size ):
-            return
+            return None, None, None, None
 
-        #------------------------------------------------
-        # ミニバッチ処理用のデータセットの作成
-        #------------------------------------------------
-        transtions = self.pop( batch_size )
-        print( "transtions :", transtions )
+        # ミニバッチサイズ以上ならば、学習用データを pop する
+        transitions = self.pop( batch_size )
+        #print( "transitions :", transitions )
 
         # 取り出したデータをミニバッチ学習用に reshape
-        # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size
-        # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size)
+        # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size / shape = 32 * 4
+        # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
+        batch = batch = Transition( *zip(*transitions) )
+        #print( "batch :", batch )
 
-        return
+        #
+        state_batch = torch.cat( batch.state )
+        action_batch = torch.cat( batch.action )
+        reward_batch = torch.cat( batch.reward )
+        non_final_next_states = torch.cat(
+            [s for s in batch.next_state if s is not None]
+        )
 
+        return state_batch, action_batch, reward_batch, non_final_next_states
