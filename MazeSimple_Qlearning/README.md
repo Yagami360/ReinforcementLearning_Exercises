@@ -69,18 +69,23 @@ BRAIN_GAMMDA = 0.9          # 割引率
 以下のアニメーションは、Q学習による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
 - エピソード：1 回
+
 ![mazesimple_qlearning_episode1](https://user-images.githubusercontent.com/25688193/52711013-1e557500-2fd4-11e9-8d7f-f08ffa4a3112.gif)<br>
 
 - エピソード：5 回
+
 ![mazesimple_qlearning_episode5](https://user-images.githubusercontent.com/25688193/52711052-34fbcc00-2fd4-11e9-8df5-843acd9be81d.gif)<br>
 
 - エピソード：10 回
+
 ![mazesimple_qlearning_episode10](https://user-images.githubusercontent.com/25688193/52711102-4e047d00-2fd4-11e9-8b2c-3980ae48b5db.gif)<br>
 
 - エピソード：50 回
+
 ![mazesimple_qlearning_episode50](https://user-images.githubusercontent.com/25688193/52711147-67a5c480-2fd4-11e9-9f8e-789ed01e0918.gif)<br>
 
 - エピソード：100 回経過
+
 ![mazesimple_qlearning_episode100](https://user-images.githubusercontent.com/25688193/52710953-f534e480-2fd3-11e9-8d43-d49c9ea9b3d3.gif)<br>
 
 

@@ -55,18 +55,23 @@ BRAIN_GAMMDA = 0.9          # 割引率
 以下のアニメーションは、方策勾配法による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
 - エピソード：1 回
+
 ![mazesimple_policygd_episode1](https://user-images.githubusercontent.com/25688193/52711286-cd924c00-2fd4-11e9-894a-573c54c9c642.gif)<br>
 
 - エピソード：100 回
+
 ![mazesimple_policygd_episode100](https://user-images.githubusercontent.com/25688193/52711359-f7e40980-2fd4-11e9-88a8-6a7926cee28f.gif)<br>
 
 - エピソード：500 回
+
 ![mazesimple_policygd_episode500](https://user-images.githubusercontent.com/25688193/52711654-b1db7580-2fd5-11e9-9368-3094d945131c.gif)<br>
 
 - エピソード：1000 回
+
 ![mazesimple_policygd_episode1000](https://user-images.githubusercontent.com/25688193/52711432-206c0380-2fd5-11e9-9f85-32d72ddf8603.gif)<br>
 
 - エピソード：5000 回経過
+
 ![mazesimple_policygd_episode5000](https://user-images.githubusercontent.com/25688193/52711614-92444d00-2fd5-11e9-8260-d3f0be9a254a.gif)<br>
 
 
