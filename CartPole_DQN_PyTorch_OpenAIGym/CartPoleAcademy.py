@@ -83,7 +83,7 @@ class CartPoleAcademy( Academy ):
             # Academy と全 Agents のエピソードを完了
             self._done = True
             for agent in self._agents:
-                agent.agent_on_done( episode )
+                agent.agent_on_done( episode, time_step )
 
         return
 

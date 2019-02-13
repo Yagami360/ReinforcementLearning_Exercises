@@ -66,6 +66,8 @@ class CartPoleDQNBrain( Brain ):
         self._expected_q_function = None
         self._memory = ExperienceReplay( capacity = memory_capacity )
 
+        self._b_loss_init = False
+
         return
 
     def print( self, str ):
@@ -73,7 +75,6 @@ class CartPoleDQNBrain( Brain ):
         print( "CartPoleDQNBrain" )
         print( self )
         print( str )
-        print( "_agent : \n", self._agent )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
         print( "_epsilon : \n", self._epsilon )
@@ -127,16 +128,23 @@ class CartPoleDQNBrain( Brain ):
             self._loss_fn : <> モデルの損失関数
         """
         # smooth L1 関数（＝Huber 関数）
-        """
         self._loss_fn = F.smooth_l1_loss( 
-            input = self._q_function,           # 行動価値関数 Q(s,a;θ) / ミニバッチデータ
-            target = self._expected_q_function  # 推定行動価値関数 Q(s,a;θ)
+            input = self._q_function,                        # 行動価値関数 Q(s,a;θ) / shape = n_batch
+            target = self._expected_q_function.unsqueeze(1)  # 推定行動価値関数 Q(s,a;θ)
         )
-        """
 
-        print( "loss_fn :", self._loss_fn )
+        #print( "loss_fn :", self._loss_fn )
+
+        # loss 値の初回計算フラグ
+        self._b_loss_init = True
+
         return self._loss_fn
 
+    def get_loss( self ):
+        if( self._b_loss_init == True ):
+            return self._loss_fn.data
+        else:
+            return 0.0
 
     def optimizer( self ):
         """
@@ -183,7 +191,7 @@ class CartPoleDQNBrain( Brain ):
         #print( "_q_function :", self._q_function )
 
         #--------------------------------------------------------------------
-        #
+        # 次の状態を求める
         #--------------------------------------------------------------------
         # 全部 0 で初期化
         next_state_values = torch.zeros( self._batch_size )
@@ -196,6 +204,9 @@ class CartPoleDQNBrain( Brain ):
 
         next_outputs = self._model( non_final_next_states )
         #print( "next_outputs :", next_outputs )
+
+        # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
+        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
         next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
         #print( "next_state_values :", next_state_values )
 
@@ -212,6 +223,23 @@ class CartPoleDQNBrain( Brain ):
         [Args]
         [Returns]
         """
+        # モデルを学習モードに切り替える。
+        self._model.train()
+
+        # 損失関数を計算する
+        self.loss()
+
+        # 勾配を 0 に初期化（この初期化処理が必要なのは、勾配がイテレーション毎に加算される仕様のため）
+        self._optimizer.zero_grad()
+
+        # 誤差逆伝搬
+        self._loss_fn.backward()
+
+        # backward() で計算した勾配を元に、設定した optimizer に従って、重みを更新
+        self._optimizer.step()
+
+        #print( "loss :", self._loss_fn.data )
+
         return
 
     def decay_epsilon( self, episode ):

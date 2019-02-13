@@ -24,6 +24,7 @@ class CartPoleAgent( Agent ):
 
     [protected] 変数名の前にアンダースコア _ を付ける
         _env : OpenAI Gym の ENV
+        _losses : list<float> 損失関数の値のリスト（長さはエピソード長）
 
     """
     def __init__( 
@@ -36,6 +37,7 @@ class CartPoleAgent( Agent ):
         self._env = env
         
         self._observations = self._env.reset()
+        self._losses = []
         #self._n_succeeded_episode = 0
 
         #self._q_function_historys = []
@@ -119,27 +121,21 @@ class CartPoleAgent( Agent ):
         action = self._brain.action( state )
     
         #-------------------------------------------------------------------
-        # 行動の実行により、次の時間での状態 s_{t+1} を求める。
+        # 行動を実行する。
         #-------------------------------------------------------------------
         observations_next, _, env_done, _ = self._env.step( action.item() )
-
-        # 観測値をそのまま状態として採用する（状態の離散化を行わない）
-        next_state = observations_next
-        
-        # numpy → PyTorch 用の型に変換
-        next_state = torch.from_numpy( next_state ).type( torch.FloatTensor)
-
-        # shape = 4 → １*4 に reshape
-        next_state = torch.unsqueeze( next_state, dim = 0 )
 
         #print( "env_done :", env_done )
         #print( "info :", info )
 
-        #----------------------------------------
-        # 報酬 r_{t+1} の設定
-        #----------------------------------------
+        #------------------------------------------------------------------
+        # 行動の実行により、次の時間での状態 s_{t+1} 報酬 r_{t+1} を求める。
+        #------------------------------------------------------------------
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
+            # 次の状態は存在しない（＝終端状態）ので、None に設定する
+            next_state = None
+
             # 時間ステップの最大回数に近づいたら
             if time_step < 195:
                 # 途中でコケたら、報酬－１
@@ -150,6 +146,15 @@ class CartPoleAgent( Agent ):
                 self.add_reword( torch.FloatTensor( [1.0] ) )
                 #self._n_succeeded_episode += 1
         else:
+            # 観測値をそのまま状態として採用する（状態の離散化を行わない）
+            next_state = observations_next
+        
+            # numpy → PyTorch 用の型に変換
+            next_state = torch.from_numpy( next_state ).type( torch.FloatTensor)
+
+            # shape = 4 → １*4 に reshape
+            next_state = torch.unsqueeze( next_state, dim = 0 )
+
             # 途中報酬は０
             self.set_reword( torch.FloatTensor( [0.0] ) )
 
@@ -170,6 +175,13 @@ class CartPoleAgent( Agent ):
         #----------------------------------------
         if( env_done == True ):
             self.done()
-            print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
-        
+
         return self._done
+
+
+    def agent_on_done( self, episode, time_step ):
+        print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
+        print( "loss = %0.4f" % self._brain.get_loss() )
+        self._losses.append( self._brain.get_loss() )
+
+        return

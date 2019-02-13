@@ -39,7 +39,7 @@ NUM_TIME_STEP = 500             # １エピソードの時間ステップの最�
 BRAIN_LEARNING_RATE = 0.0001    # 学習率
 BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
 BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99             # 割引率
+BRAIN_GAMMDA = 0.99             # 利得の割引率
 MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセットのメモリの最大の長さ
 
 
@@ -84,7 +84,7 @@ def main():
     brain.model()
 
     # 損失関数を設定する。
-    brain.loss()
+    #brain.loss()
 
     # モデルの最適化アルゴリズムを設定
     brain.optimizer()
@@ -98,9 +98,8 @@ def main():
         gamma = BRAIN_GAMMDA
     )
 
-    # Agent の Brain を設定（相互参照）
+    # Agent の Brain を設定
     agent.set_brain( brain )
-    brain.set_agent( agent )
 
     # 学習環境に作成したエージェントを追加
     academy.add_agent( agent )
@@ -118,7 +117,30 @@ def main():
     #===================================
     # 学習結果の描写処理
     #===================================
-    academy.display_frames( file_name = "RL_ENV_CartPole-v0.mp4" )
+    academy.display_frames( file_name = "RL_ENV_CartPole-v0_DQN.mp4" )
+
+    #-----------------------------------
+    # 損失関数の plot
+    #-----------------------------------
+    losses = agent._losses
+
+    plt.clf()
+    plt.plot(
+        range( 0, NUM_EPISODE ), losses,
+        label = 'mini_batch_size = %d, learning_rate = %0.4f' % ( BRAIN_BATCH_SIZE, BRAIN_LEARNING_RATE ),
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
+    )
+    plt.title( "loss / Smooth L1" )
+    plt.legend( loc = 'best' )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [0, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig( "CartPole_DQN_1-1_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.show()
 
     print("Finish main()")
     return

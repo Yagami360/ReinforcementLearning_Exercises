@@ -137,13 +137,15 @@ class Agent( object ):
         self._done = False
         return self._done
     
-    def agent_on_done( self, episode ):
+    def agent_on_done( self, episode, time_step ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
 
         [Args]
             episode : <int> 現在のエピソード数
+            time_step : エピソード完了時の時間ステップ
+
         """
         return
 
