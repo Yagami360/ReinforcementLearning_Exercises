@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 from matplotlib import animation
 from IPython.display import HTML
@@ -32,6 +33,9 @@ def main():
     ・エージェントの行動方策の学習ロジックは、Sarsa
     """
     print("Start main()")
+
+    np.random.seed(1)
+    random.seed(1)
 
     #===================================
     # 学習環境、エージェント生成フェイズ

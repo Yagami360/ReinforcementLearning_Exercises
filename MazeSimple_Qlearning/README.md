@@ -54,18 +54,35 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |利得の割引率：`BRAIN_GAMMDA`|0.9|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
 
-![mazesimple_sarsa](https://user-images.githubusercontent.com/25688193/50488132-56b0ec00-0a44-11e9-8efc-341615e7e2ee.gif)<br>
-> うまく最短距離でゴールまで到達できていることがわかる。
-
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
-    ![image](https://user-images.githubusercontent.com/25688193/52465111-be6c6200-2bc0-11e9-8a8e-27dc96d61797.png)<br>
-    > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
-    > ※ 尚、終端状態 S8 の状態価値関数は常に０の値となる。<br>
+![image](https://user-images.githubusercontent.com/25688193/52710903-e2baab00-2fd3-11e9-82f6-3d00011914ec.png)<br>
+> ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
+> ※ 尚、終端状態 S8 の状態価値関数は常に０の値となる。<br>
 
 - Q 学習 と Sarsa での比較<br>
-    ![image](https://user-images.githubusercontent.com/25688193/52464920-15be0280-2bc0-11e9-8a99-ee406f5b8300.png)<br>
-    > 赤線が Q 学習での状態価値関数 V(s) の変化。青線が、Sarsa での状態価値関数 V(s) の変化。<br>
-    > Q 学習のほうが、Sarsa に比べて、落ち込みが少なく、収束が早い傾向が見てとれる。<br>
+![image](https://user-images.githubusercontent.com/25688193/52710776-848dc800-2fd3-11e9-87ba-d30f3a96aeeb.png)<br>
+> 赤線が Q 学習での状態価値関数 V(s) の変化。青線が、Sarsa での状態価値関数 V(s) の変化。<br>
+> Q 学習のほうが、Sarsa に比べて、落ち込みが少なく、収束が早い傾向が見てとれる。
+
+<br>
+
+以下のアニメーションは、Q学習による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
+
+- エピソード：1 回
+![mazesimple_qlearning_episode1](https://user-images.githubusercontent.com/25688193/52711013-1e557500-2fd4-11e9-8d7f-f08ffa4a3112.gif)<br>
+
+- エピソード：5 回
+![mazesimple_qlearning_episode5](https://user-images.githubusercontent.com/25688193/52711052-34fbcc00-2fd4-11e9-8df5-843acd9be81d.gif)<br>
+
+- エピソード：10 回
+![mazesimple_qlearning_episode10](https://user-images.githubusercontent.com/25688193/52711102-4e047d00-2fd4-11e9-8b2c-3980ae48b5db.gif)<br>
+
+- エピソード：50 回
+![mazesimple_qlearning_episode50](https://user-images.githubusercontent.com/25688193/52711147-67a5c480-2fd4-11e9-9f8e-789ed01e0918.gif)<br>
+
+- エピソード：100 回経過
+![mazesimple_qlearning_episode100](https://user-images.githubusercontent.com/25688193/52710953-f534e480-2fd3-11e9-8d43-d49c9ea9b3d3.gif)<br>
+
 
 ### ◎ コードの説明
 [Sarsa による単純な迷路検索問題のコード](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Sarsa) から、以下の部分を変更するのみ。<br>

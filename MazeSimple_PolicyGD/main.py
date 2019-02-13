@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from IPython.display import HTML
 
+import random
 
 # 自作モジュール
 from Academy import Academy
@@ -35,6 +36,9 @@ def main():
     ・エージェントの行動方策の学習ロジックは、方策勾配法
     """
     print("Start main()")
+
+    np.random.seed(1)
+    random.seed(1)
 
     #===================================
     # 学習環境、エージェント生成フェイズ

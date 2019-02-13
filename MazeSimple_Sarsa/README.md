@@ -53,13 +53,31 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |利得の割引率：`BRAIN_GAMMDA`|0.9|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
 
-![mazesimple_sarsa](https://user-images.githubusercontent.com/25688193/50488132-56b0ec00-0a44-11e9-8efc-341615e7e2ee.gif)<br>
-> うまく最短距離でゴールまで到達できていることがわかる。
+<br>
+
+以下のアニメーションは、Sarsa による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
+
+- エピソード：1 回
+![mazesimple_sarsa_episode1](https://user-images.githubusercontent.com/25688193/52710524-df72ef80-2fd2-11e9-95a4-923b5c63a847.gif)<br>
+
+- エピソード：5 回
+![mazesimple_sarsa_episode5](https://user-images.githubusercontent.com/25688193/52710562-fa456400-2fd2-11e9-939b-42a0563fc9a3.gif)<br>
+
+- エピソード：10 回
+![mazesimple_sarsa_episode10](https://user-images.githubusercontent.com/25688193/52710615-1ba65000-2fd3-11e9-8b53-a3f55e3f632a.gif)<br>
+
+- エピソード：50 回
+![mazesimple_sarsa_episode50](https://user-images.githubusercontent.com/25688193/52710669-4395b380-2fd3-11e9-85df-4b9d414ac942.gif)<br>
+
+- エピソード：100 回経過
+![mazesimple_sarsa_episode100](https://user-images.githubusercontent.com/25688193/52710334-70959680-2fd2-11e9-92e6-d9d50984eb53.gif)<br>
+
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
-    ![image](https://user-images.githubusercontent.com/25688193/52464407-f7ef9e00-2bbd-11e9-85c0-ce957b0d69fe.png)<br>
-    > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
-    > ※ 尚、状態 S8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。<br>
+
+![image](https://user-images.githubusercontent.com/25688193/52710292-565bb880-2fd2-11e9-875d-69882840fd46.png)<br>
+> ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
+> ※ 尚、状態 S8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。<br>
 
 
 ### ◎ コードの説明

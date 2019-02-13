@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from IPython.display import HTML
 
+import random
+
 # 自作モジュール
 from Academy import Academy
 from MazeAcademy import MazeAcademy
@@ -18,7 +20,7 @@ from Brain import Brain
 from MazeRamdomBrain import MazeRamdomBrain
 
 # 設定可能な定数
-NUM_EPISODE = 1             # エピソード試行回数
+NUM_EPISODE = 1           # エピソード試行回数
 NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
 AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
 AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
@@ -31,6 +33,9 @@ def main():
     ・エージェントの経路選択ロジックは、等確率な方向から１つを無作為選択
     """
     print("Start main()")
+
+    random.seed(8)
+    np.random.seed(8)
 
     #===================================
     # 学習環境、エージェント生成フェイズ
@@ -158,7 +163,7 @@ def main():
     )
 
     HTML( anim.to_jshtml() )
-    anim.save( "MazeSimple_Random.gif", writer = 'imagemagick' )
+    anim.save( "MazeSimple_Random_Episode{}.gif".format(NUM_EPISODE), writer = 'imagemagick' )
 
     print("Finish main()")
     return

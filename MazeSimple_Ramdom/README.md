@@ -41,5 +41,15 @@ BRAIN_GAMMDA = 0.9          # 割引率
 強化学習の学習環境用の迷路探索問題。<br>
 等確率で表現された４つの移動候補（上下左右）から１つの方向をランダムに選択し、これを繰り返すことで、最終的に目的地に到着させる。<br>
 
-![mazegame_random1](https://user-images.githubusercontent.com/25688193/49664161-67e58900-fa94-11e8-8df4-262c46446ddb.gif)<br>
+以下のアニメーションは、このランダムな方策に基づく迷路探索問題の探索結果である。エピソードが経過しても、最短ルートでゴールまで到達できるようにはなっていないことが分かる。<br>
 
+- エピソード：1 回
+![mazesimple_random_episode1](https://user-images.githubusercontent.com/25688193/52712039-c704d400-2fd6-11e9-92e2-e5c6fdaf8599.gif)<br>
+
+- エピソード：50 回
+![mazesimple_random_episode50](https://user-images.githubusercontent.com/25688193/52712041-c79d6a80-2fd6-11e9-85ac-7ff4fa809992.gif)<br>
+
+<!--
+- エピソード：100 回
+![mazesimple_random_episode100](https://user-images.githubusercontent.com/25688193/52712065-de43c180-2fd6-11e9-8314-726205d96c44.gif)<br>
+-->

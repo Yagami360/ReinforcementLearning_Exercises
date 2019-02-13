@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 from IPython.display import HTML
 
+import random
+
 # 自作モジュール
 from Academy import Academy
 from MazeAcademy import MazeAcademy
@@ -33,6 +35,9 @@ def main():
     ・エージェントの行動方策の学習ロジックは、Q学習とSarsaで比較
     """
     print("Start main()")
+
+    np.random.seed(1)
+    random.seed(1)
 
     #===================================
     # 学習環境、エージェント生成フェイズ

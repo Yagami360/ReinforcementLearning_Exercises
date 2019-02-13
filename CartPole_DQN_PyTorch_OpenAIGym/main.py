@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 from matplotlib import animation
 #from IPython.display import HTML
@@ -55,6 +56,8 @@ def main():
     print( "PyTorch :", torch.__version__ )
 
     np.random.seed(8)
+    random.seed(8)
+    torch.manual_seed(8)
 
     #===================================
     # 学習環境、エージェント生成フェイズ
