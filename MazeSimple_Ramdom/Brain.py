@@ -6,8 +6,6 @@
     [18/12/05] : 新規作成
     [xx/xx/xx] : 
 """
-from Agent import Agent
-
 
 class Brain( object ):
     """
@@ -18,7 +16,6 @@ class Brain( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _agent : <Agent> この Brain を持つ Agent への参照
         _n_states : <int> 状態の要素数
         _n_actions : <int> 行動の要素数
                 
@@ -30,7 +27,6 @@ class Brain( object ):
         n_states,
         n_actions
     ):
-        self._agent = None
         self._n_states = n_states
         self._n_actions = n_actions
         return
@@ -40,7 +36,6 @@ class Brain( object ):
         print( "Brain" )
         print( self )
         print( str )
-        print( "_agent : \n", self._agent )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
         print( "----------------------------------" )
@@ -53,10 +48,3 @@ class Brain( object ):
         self._policy = None
         return
     
-    def set_agent( self, agent ):
-        """
-        この Brain をもつエージェントを設定する。
-        """
-        self._agent = agent
-        return
-

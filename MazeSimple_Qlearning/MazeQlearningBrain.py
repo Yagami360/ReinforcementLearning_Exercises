@@ -62,7 +62,6 @@ class MazeQlearningBrain( Brain ):
         print( "MazeQlearningBrain" )
         print( self )
         print( str )
-        print( "_agent : \n", self._agent )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
         print( "_policy : \n", self._policy )

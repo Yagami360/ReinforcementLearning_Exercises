@@ -63,7 +63,6 @@ class CartPoleQlearningBrain( Brain ):
         print( "CartPoleQlearningBrain" )
         print( self )
         print( str )
-        print( "_agent : \n", self._agent )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
         print( "_n_dizitzed : \n", self._n_dizitzed )

@@ -45,9 +45,15 @@ BRAIN_GAMMDA = 0.9          # 割引率
 
 ### ◎ コードの実行結果
 
-- 以下のアニメーションは、方策勾配法によって、学習した行動方策 π に基づく迷路探索問題の探索結果である。<br>
-    ![mazegame_policygradient1](https://user-images.githubusercontent.com/25688193/50348392-f4f00e00-057b-11e9-805a-8ee3a84b26f2.gif)<br>
-    > 最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
+|パラメータ名|値（実行条件１）|
+|---|---|
+|エピソード試行回数：`NUM_EPISODE`|5000|
+|１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
+|学習率：`learning_rate`|0.1|
+|利得の割引率：`BRAIN_GAMMDA`|0.9|
+
+![mazegame_policygradient1](https://user-images.githubusercontent.com/25688193/50348392-f4f00e00-057b-11e9-805a-8ee3a84b26f2.gif)<br>
+> 上記のアニメーションは、方策勾配法によって、学習した行動方策 π に基づく迷路探索問題の探索結果である。うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
 - xxx
 ```python

@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 #from JSAnimation.IPython_display import display_animation
 #from IPython.display import display
+import os.path
 
 # 自作クラス
 from Academy import Academy
@@ -85,6 +86,11 @@ class CartPoleAcademy( Academy ):
             for agent in self._agents:
                 agent.agent_on_done( episode )
 
+            # 動画を保存
+            if( episode % 10 == 0 ):
+                self.save_frames( "RL_ENV_CartPole-v0_Qlearning_Episode{}.gif".format(episode) )
+                self._frames = []
+
         return
 
 
@@ -97,10 +103,11 @@ class CartPoleAcademy( Academy ):
 
         return
 
-    def display_frames( self, file_name = "RL_ENV_CartPole-v0.mp4" ):
+    def save_frames( self, file_name = "RL_ENV_CartPole-v0.mp4" ):
         """
         外部ファイルに動画を保存する。
         """
+        plt.clf()
         plt.figure(
             figsize=( self._frames[0].shape[1]/72.0, self._frames[0].shape[0]/72.0 ),
             dpi=72
@@ -119,7 +126,12 @@ class CartPoleAcademy( Academy ):
         )
 
         # 動画の保存
-        #anim.save( file_name, writer = 'imagemagick' )
-        anim.save( file_name )
+        ftitle, fext = os.path.splitext(file_name)
+        if( fext == ".gif" ):
+            anim.save( file_name, writer = 'imagemagick' )
+        else:
+            anim.save( file_name )
+
+        plt.close()
 
         return

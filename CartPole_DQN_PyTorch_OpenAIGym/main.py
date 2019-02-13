@@ -34,8 +34,8 @@ from ExperienceReplay import ExperienceReplay
 # 設定可能な定数
 #--------------------------------
 #RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
-NUM_EPISODE = 200               # エピソード試行回数
-NUM_TIME_STEP = 500             # １エピソードの時間ステップの最大数
+NUM_EPISODE = 500               # エピソード試行回数
+NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
 BRAIN_LEARNING_RATE = 0.0001    # 学習率
 BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
 BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
@@ -117,7 +117,7 @@ def main():
     #===================================
     # 学習結果の描写処理
     #===================================
-    academy.display_frames( file_name = "RL_ENV_CartPole-v0_DQN.mp4" )
+    #academy.save_frames( file_name = "RL_ENV_CartPole-v0_DQN_Episode{}.gif".format(NUM_EPISODE) )
 
     #-----------------------------------
     # 損失関数の plot

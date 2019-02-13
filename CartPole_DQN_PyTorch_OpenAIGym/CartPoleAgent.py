@@ -181,7 +181,7 @@ class CartPoleAgent( Agent ):
 
     def agent_on_done( self, episode, time_step ):
         print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
-        print( "loss = %0.4f" % self._brain.get_loss() )
+        print( "loss = %0.6f" % self._brain.get_loss() )
         self._losses.append( self._brain.get_loss() )
 
         return

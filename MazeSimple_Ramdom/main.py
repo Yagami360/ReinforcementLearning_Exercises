@@ -75,9 +75,8 @@ def main():
         state0 = AGENT_INIT_STATE
     )
 
-    # Agent の Brain を設定（相互参照）
+    # Agent の Brain を設定
     agent.set_brain( brain )
-    brain.set_agent( agent )
 
     # 学習環境に作成したエージェントを追加
     academy.add_agent( agent )

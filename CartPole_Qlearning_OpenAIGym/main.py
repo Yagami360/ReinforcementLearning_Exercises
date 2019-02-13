@@ -77,9 +77,8 @@ def main():
         gamma = BRAIN_GAMMDA
     )
 
-    # Agent の Brain を設定（相互参照）
+    # Agent の Brain を設定
     agent.set_brain( brain )
-    brain.set_agent( agent )
 
     # 学習環境に作成したエージェントを追加
     academy.add_agent( agent )
@@ -97,7 +96,7 @@ def main():
     #===================================
     # 学習結果の描写処理
     #===================================
-    academy.display_frames( file_name = "RL_ENV_CartPole-v0.mp4" )
+    #academy.save_frames( file_name = "RL_ENV_CartPole-v0.mp4" )
 
     print("Finish main()")
     return

@@ -45,7 +45,16 @@ BRAIN_GAMMDA = 0.9          # 割引率
 ## ■ コード説明＆実行結果
 
 ### ◎ コードの実行結果
+|パラメータ名|値（実行条件１）|
+|---|---|
+|エピソード試行回数：`NUM_EPISODE`|100|
+|１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
+|学習率：`learning_rate`|0.1|
+|利得の割引率：`BRAIN_GAMMDA`|0.9|
+|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
+
 ![mazesimple_sarsa](https://user-images.githubusercontent.com/25688193/50488132-56b0ec00-0a44-11e9-8efc-341615e7e2ee.gif)<br>
+> うまく最短距離でゴールまで到達できていることがわかる。
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
     ![image](https://user-images.githubusercontent.com/25688193/52464407-f7ef9e00-2bbd-11e9-85c0-ce957b0d69fe.png)<br>

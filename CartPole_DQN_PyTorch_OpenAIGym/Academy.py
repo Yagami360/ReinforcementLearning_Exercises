@@ -115,7 +115,7 @@ class Academy( object ):
         #self._frames.append( frame )
         return
 
-    def display_frames( self, file_name ):
+    def save_frames( self, file_name ):
         """
         外部ファイルに動画を保存する。
         """
