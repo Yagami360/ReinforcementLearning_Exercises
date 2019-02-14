@@ -56,7 +56,8 @@ http://tensorflow.classcat.com/2016/02/13/tensorflow-how-tos-graph-visualization
 1. CartPole
     1. ./CartPole_Sarsa_OpenAIGym
     1. [./CartPole_Qleaning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_Qlearning_OpenAIGym)
-    1. [./CartPole_DQN_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DQN_PyTorch_OpenAIGym)
+    1. [./CartPole_DQN2013_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DQN2013_PyTorch_OpenAIGym)
+    1. ./CartPole_DQN2015_PyTorch_OpenAIGym
 1. その他
     1. [./Processing_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/Processing_OpenAIGym)
 
