@@ -34,7 +34,7 @@ from ExperienceReplay import ExperienceReplay
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
-RL_ENV = "CartPole-v0"          # 利用する強化学習環境の課題名
+RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
 NUM_EPISODE = 500               # エピソード試行回数
 NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
 BRAIN_LEARNING_RATE = 0.0001    # 学習率
@@ -47,7 +47,7 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 def main():
     """
 	強化学習の学習環境用の倒立振子課題 CartPole
-    ・エージェントの行動方策の学習ロジックは、DQN (2013年バージョン)
+    ・エージェントの行動方策の学習ロジックは、DQN (2015年Natureバージョン)
     """
     print("Start main()")
     
@@ -84,7 +84,7 @@ def main():
     )
     
     # モデルの構造を定義する。
-    brain.model()
+    #brain.model()
 
     # 損失関数を設定する。
     #brain.loss()
@@ -142,7 +142,7 @@ def main():
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
-    plt.savefig( "{}_DQN2013_1-1_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( "{}_DQN2015_1-1_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
     print("Finish main()")

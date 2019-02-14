@@ -88,7 +88,7 @@ class CartPoleAcademy( Academy ):
 
             # 動画を保存
             if( episode % 10 == 0 ):
-                self.save_frames( "RL_ENV_{}_DQN2013_Episode{}.gif".format( self._env.spec.id, episode) )
+                self.save_frames( "RL_ENV_{}_DQN2015_Episode{}.gif".format( self._env.spec.id, episode) )
                 self._frames = []
 
         return
