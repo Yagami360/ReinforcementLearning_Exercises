@@ -1,6 +1,6 @@
-# Deep Q Network（DQN）による倒立振子課題（CartPole）
+# DQN（2013年バージョンのTargetNetwork非使用）による倒立振子課題（CartPole）
 強化学習の学習環境用の倒立振子課題 CartPole。<br>
-ディープラーニングを用いた強化学習手法であるDQN [Deep Q-Network] によって、単純な２次元の倒立振子課題を解く。<br>
+ディープラーニングを用いた強化学習手法であるDQN [Deep Q-Network] （2013年バージョンのTarget Q-Network非使用）によって、単純な２次元の倒立振子課題を解く。<br>
 
 ## ■ 項目 [Contents]
 1. [動作環境](#動作環境)

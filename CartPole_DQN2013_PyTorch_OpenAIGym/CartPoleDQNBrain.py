@@ -33,7 +33,7 @@ class CartPoleDQNBrain( Brain ):
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
 
-        _q_function : <> 行動状態関数 Q(s,a)
+        _q_function : <> 教師信号である古いパラメーター θ- で固定化された行動状態関数 Q(s,a,θ-)
         _expected_q_function : <> 推定行動状態関数 Q(s,a,θ)
         _memory : <ExperienceRelay> ExperienceRelayに基づく学習用のデータセット
 
@@ -211,7 +211,7 @@ class CartPoleDQNBrain( Brain ):
         #print( "next_state_values :", next_state_values )
 
         #--------------------------------------------------------------------
-        # 教師信号となる推定行動価値関数を求める
+        # ネットワークの出力となる推定行動価値関数を求める
         #--------------------------------------------------------------------
         self._expected_q_function = reward_batch + self._gamma * next_state_values
 
