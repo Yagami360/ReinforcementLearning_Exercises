@@ -3,7 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import random
 from matplotlib import animation
 #from IPython.display import HTML
 
@@ -26,8 +26,8 @@ from CartPoleAgent import CartPoleAgent
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
-#RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
-NUM_EPISODE = 250           # エピソード試行回数
+RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
+NUM_EPISODE = 500           # エピソード試行回数
 NUM_TIME_STEP = 200         # １エピソードの時間ステップの最大数
 NUM_DIZITIZED = 6           # 各状態の離散値への分割数
 BRAIN_LEARNING_RATE = 0.5   # 学習率
@@ -45,16 +45,19 @@ def main():
     # バージョン確認
     print( "OpenAI Gym", gym.__version__ )
 
+    np.random.seed(8)
+    random.seed(8)
+
     #===================================
     # 学習環境、エージェント生成フェイズ
     #===================================
     # OpenAI-Gym の ENV を作成
-    env = gym.make( "CartPole-v0" )
+    env = gym.make( RL_ENV )
 
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
+    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 100 )
 
     #-----------------------------------
     # Brain の生成
@@ -97,6 +100,30 @@ def main():
     # 学習結果の描写処理
     #===================================
     #academy.save_frames( file_name = "RL_ENV_CartPole-v0.mp4" )
+
+    #---------------------------------------------
+    # 利得の履歴の plot
+    #---------------------------------------------
+    reward_historys = agent.get_reward_historys()
+
+    plt.clf()
+    plt.plot(
+        range(0,NUM_EPISODE+1), reward_historys,
+        label = 'gamma = {}'.format(BRAIN_GAMMDA),
+        linestyle = '-',
+        linewidth = 0.5,
+        color = 'black'
+    )
+    plt.title( "Reward History" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [-0.1, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.legend( loc = "lower right" )
+    plt.tight_layout()
+
+    plt.savefig( "{}_Qlearning_Reward_episode{}.png".format( RL_ENV, NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.show()
 
     print("Finish main()")
     return

@@ -68,7 +68,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
+    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 100 )
 
     #-----------------------------------
     # Brain の生成
@@ -122,6 +122,30 @@ def main():
     #===================================
     #academy.save_frames( file_name = "RL_ENV_CartPole-v0_DQN_Episode{}.gif".format(NUM_EPISODE) )
 
+    #---------------------------------------------
+    # 利得の履歴の plot
+    #---------------------------------------------
+    reward_historys = agent.get_reward_historys()
+
+    plt.clf()
+    plt.plot(
+        range(0,NUM_EPISODE+1), reward_historys,
+        label = 'gamma = {}'.format(BRAIN_GAMMDA),
+        linestyle = '-',
+        linewidth = 0.5,
+        color = 'black'
+    )
+    plt.title( "Reward History" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.ylim( [-0.1, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.legend( loc = "lower right" )
+    plt.tight_layout()
+
+    plt.savefig( "{}_DQN2015_Reward_episode{}.png".format( RL_ENV, NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.show()
+
     #-----------------------------------
     # 損失関数の plot
     #-----------------------------------
@@ -142,7 +166,7 @@ def main():
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
-    plt.savefig( "{}_DQN2015_1-1_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( "{}_DQN2015_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
     print("Finish main()")

@@ -26,7 +26,7 @@ AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99         # 割引率
+BRAIN_GAMMDA = 0.9          # 割引率
 
 
 def main():
@@ -141,13 +141,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), reward_historys2,
         label = 'Sarsa / gamma = {}'.format(BRAIN_GAMMDA),
-        linestyle = '--',
+        linestyle = '-',
         #linewidth = 2,
         color = 'blue'
     )
-    plt.title( "Reward History" )
+    plt.title( "Reward HIstory" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.legend( loc = "lower right" )
@@ -226,7 +226,7 @@ def main():
     )
     plt.title( "V function / S0" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
@@ -248,7 +248,7 @@ def main():
     )
     plt.title( "V function / S1" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
@@ -270,7 +270,7 @@ def main():
     )
     plt.title( "V function / S2" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
@@ -292,7 +292,7 @@ def main():
     )
     plt.title( "V function / S3" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
@@ -314,7 +314,7 @@ def main():
     )
     plt.title( "V function / S4" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
@@ -336,7 +336,7 @@ def main():
     )
     plt.title( "V function / S5" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
@@ -380,7 +380,7 @@ def main():
     )
     plt.title( "V function / S7" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
@@ -402,13 +402,13 @@ def main():
     )
     plt.title( "V function / S8" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
     plt.legend( loc = "lower right" )
     plt.grid()
     plt.tight_layout()
 
-    plt.savefig( "MazaSimple_Q-learning_Sarsa_VFunction_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( "MazaSimple_Q-learning_Sarsa_Vfunction_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
     print("Finish main()")

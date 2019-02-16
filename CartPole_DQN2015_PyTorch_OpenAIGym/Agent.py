@@ -25,6 +25,7 @@ class Agent( object ):
         _state : <int> エージェントの現在の状態 s
         _action : <int> エピソードの現在の行動 a
         _s_a_historys : list< [int,int] > エピソードの状態と行動の履歴
+        _reward_historys : list<float> 割引利得の履歴 / shape = [n_episode]
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -43,6 +44,7 @@ class Agent( object ):
         self._state = state0
         self._action = np.nan
         self._s_a_historys = [ [ self._state, self._action ] ]
+        self._reward_historys = [self._reword]
         return
 
     def print( self, str ):
@@ -59,11 +61,24 @@ class Agent( object ):
         print( "_state : \n", self._state )
         print( "_action : \n", self._action )
         print( "_s_a_historys : \n", self._s_a_historys )
+        print( "_reward_historys : \n", self._reward_historys )
         print( "----------------------------------" )
         return
 
     def get_s_a_historys( self ):
         return self._s_a_historys
+
+    def get_reward_historys( self ):
+        return self._reward_historys
+
+    def collect_observations( self ):
+        """
+        Agent が観測している State を Brain に提供する。
+        ・Brain が、エージェントの状態を取得時にコールバックする。
+        """
+        self._observations = []
+        return self._observations
+
 
     def set_brain( self, brain ):
         """
@@ -99,16 +114,13 @@ class Agent( object ):
         self._reword = reword
         return self._reword
 
-    def add_reword( self, reword ):
+    def add_reword( self, reword, time_step ):
         """
         報酬を加算する
         ・割引収益 Rt = Σ_t γ^t r_t+1 になるように報酬を加算する。
         """
-        #
-        self._reword += self._gamma * reword        # γ^t * r_t+1
-        #self._gamma = self._gamma * self._gamma     # γ^t
+        self._reword += ( self._gamma **time_step ) * reword
         return self._reword
-
 
     def agent_reset( self ):
         """
@@ -127,25 +139,23 @@ class Agent( object ):
         ・Academy から各時間ステップ度にコールされるコールバック関数
 
         [Args]
-            episode : 現在のエピソード数
-            time_step : 現在の時間ステップ
+            episode : <int> 現在のエピソード数
+            time_step : <int> 現在の時間ステップ
 
         [Returns]
-            done : bool
-                   エピソードの完了フラグ
+            done : <bool> エピソードの完了フラグ
         """
         self._done = False
         return self._done
     
-    def agent_on_done( self, episode, time_step ):
+
+    def agent_on_done( self, episode ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
 
         [Args]
             episode : <int> 現在のエピソード数
-            time_step : エピソード完了時の時間ステップ
-
         """
         return
 

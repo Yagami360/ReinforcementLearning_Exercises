@@ -96,7 +96,7 @@ class MazeAgent( Agent ):
         # a0 : 初期行動a0 を設定する。（Brain のロジックに従ったエージェント次の行動）
         self._action = next_action = self._brain.action( state = self._state )
         self._s_a_historys[-1][1] = self._action  # -1 で末端に追加
-        
+
         return
 
 
@@ -147,11 +147,10 @@ class MazeAgent( Agent ):
 
         # a' → r'' : 次行動 a' に対する報酬 r'' の指定
         if( next_state == 8 ):
-            # ゴール地点なら、報酬１
-            self.add_reword( 1.0, time_step )
+            self.add_reword( 1.0 )  # ゴール地点なら、報酬１
         else:
-            # ゴール地点なら、小さな負の報酬
-            self.add_reword( -0.01, time_step )
+            # ゴール地点でないなら、負の報酬（）
+            self.add_reword( -0.01 )
 
 
         # s,a,s',r',a' → Q : Q 関数を更新

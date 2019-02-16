@@ -39,9 +39,6 @@ class CartPoleAgent( Agent ):
         self._observations = self._env.reset()
         self._losses = []
         #self._n_succeeded_episode = 0
-
-        #self._q_function_historys = []
-        #self._v_function_historys = []
         return
 
     def print( self, str ):
@@ -56,8 +53,7 @@ class CartPoleAgent( Agent ):
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
         print( "_s_a_historys : \n", self._s_a_historys )
-        #print( "_q_function_historys : \n", self._q_function_historys )
-        #print( "_v_function_historys : \n", self._v_function_historys )
+        print( "_reward_historys : \n", self._reward_historys )
         print( "----------------------------------" )
         return
 
@@ -139,11 +135,11 @@ class CartPoleAgent( Agent ):
             # 時間ステップの最大回数に近づいたら
             if time_step < 195:
                 # 途中でコケたら、報酬－１
-                self.add_reword( torch.FloatTensor( [-1.0] ) )
+                self.add_reword( torch.FloatTensor( [-1.0] ), time_step )
                 #self._n_succeeded_episode = 0
             else:
                 # 立ったまま終了時は、報酬＋１
-                self.add_reword( torch.FloatTensor( [1.0] ) )
+                self.add_reword( torch.FloatTensor( [1.0] ), time_step )
                 #self._n_succeeded_episode += 1
         else:
             # 観測値をそのまま状態として採用する（状態の離散化を行わない）
@@ -155,8 +151,9 @@ class CartPoleAgent( Agent ):
             # shape = 4 → １*4 に reshape
             next_state = torch.unsqueeze( next_state, dim = 0 )
 
-            # 途中報酬は０
+            # 途中報酬
             self.set_reword( torch.FloatTensor( [0.0] ) )
+            #self.add_reword( torch.FloatTensor( [1.0] ), time_step )
 
         #print( "reward :", self._reword )
 
@@ -180,7 +177,19 @@ class CartPoleAgent( Agent ):
 
 
     def agent_on_done( self, episode, time_step ):
+        """
+        Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
+        ・Academy からコールされるコールバック関数
+
+        [Args]
+            episode : <int> 現在のエピソード数
+        """
         print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
+
+        # 利得の履歴に追加
+        self._reward_historys.append( self._reword )
+
+        # 損失関数の履歴に追加
         print( "loss = %0.6f" % self._brain.get_loss() )
         self._losses.append( self._brain.get_loss() )
 

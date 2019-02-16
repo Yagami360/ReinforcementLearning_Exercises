@@ -35,8 +35,8 @@ class CartPoleAcademy( Academy ):
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
-    def __init__( self, env, max_episode = 1, max_time_step = 100 ):
-        super().__init__( max_episode, max_time_step )
+    def __init__( self, env, max_episode = 1, max_time_step = 100, save_step = 100 ):
+        super().__init__( max_episode, max_time_step, save_step )
         self._env = env
         self._frames = []
         return
@@ -69,7 +69,11 @@ class CartPoleAcademy( Academy ):
             # 時間ステップを 1ステップづつ進める
             for time_step in range( 0 ,self._max_time_step ):
                 dones = []
-                if( episode % 10 == 0 ):
+
+                if( episode % self._save_step == 0 ):
+                    # 学習環境の動画のフレームを追加
+                    self.add_frame( episode, time_step )
+                if( episode == self._max_episode - 1 ):
                     # 学習環境の動画のフレームを追加
                     self.add_frame( episode, time_step )
 
@@ -87,8 +91,12 @@ class CartPoleAcademy( Academy ):
                 agent.agent_on_done( episode, time_step )
 
             # 動画を保存
-            if( episode % 10 == 0 ):
-                self.save_frames( "RL_ENV_{}_DQN2013_Episode{}.gif".format( self._env.spec.id, episode) )
+            if( episode % self._save_step == 0 ):
+                self.save_frames( "RL_ENV_{}_Episode{}.gif".format(self._env.spec.id, episode) )
+                self._frames = []
+
+            if( episode == self._max_episode - 1 ):
+                self.save_frames( "RL_ENV_{}_Episode{}.gif".format(self._env.spec.id, episode) )
                 self._frames = []
 
         return

@@ -34,9 +34,6 @@ class CartPoleAgent( Agent ):
         
         self._observations = self._env.reset()
         #self._n_succeeded_episode = 0
-
-        #self._q_function_historys = []
-        #self._v_function_historys = []
         return
 
     def print( self, str ):
@@ -51,8 +48,7 @@ class CartPoleAgent( Agent ):
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
         print( "_s_a_historys : \n", self._s_a_historys )
-        #print( "_q_function_historys : \n", self._q_function_historys )
-        #print( "_v_function_historys : \n", self._v_function_historys )
+        print( "_reward_historys : \n", self._reward_historys )
         print( "----------------------------------" )
         return
 
@@ -126,16 +122,19 @@ class CartPoleAgent( Agent ):
         if( env_done == True ):
             # 時間ステップの最大回数に近づいたら
             if time_step < 195:
-                # 途中でコケたら、報酬－１
-                self.add_reword( -1 )
+                # 途中でコケたら、負の報酬
+                #self.add_reword( -200, time_step )
+                self.add_reword( -1, time_step )
                 #self._n_succeeded_episode = 0
             else:
-                # 立ったまま終了時は、報酬＋１
-                self.add_reword( 1 )
+                # 立ったまま終了時は、正の報酬
+                self.add_reword( +1, time_step )
                 #self._n_succeeded_episode += 1
         else:
-            # 途中報酬は０
-            self.set_reword( 0 )
+            # 途中報酬
+            #self.add_reword( 0.01, time_step )
+            #self.set_reword(0)
+            pass
 
         #print( "reward :", self._reword )
 
@@ -157,3 +156,13 @@ class CartPoleAgent( Agent ):
             print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
         
         return self._done
+
+    def agent_on_done(self, episode):
+        """
+        Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
+        ・Academy からコールされるコールバック関数
+        """
+        # 利得の履歴に追加
+        self._reward_historys.append( self._reword )
+
+        return

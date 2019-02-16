@@ -2,11 +2,6 @@
 強化学習の学習環境用の単純な迷路探索問題。<br>
 方策オフ型TD制御アルゴリズムである Q学習によって、単純な迷路探索問題を解く。<br>
 
-<!--
-単純な迷路探索問題を、Unity ML-Agents のフレームワーク（`Academy`,`Brain`,`Agent`クラス など）を参考にして実装しています。<br>
-分かりやすいように `main.py` ファイル毎に１つの完結した実行コードにしています。<br>
--->
-
 ## ■ 項目 [Contents]
 1. [動作環境](#動作環境)
 1. [使用法](#使用法)
@@ -37,7 +32,7 @@ AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99         # 割引率
+BRAIN_GAMMDA = 0.9          # 割引率
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -51,23 +46,16 @@ BRAIN_GAMMDA = 0.99         # 割引率
 |エピソード試行回数：`NUM_EPISODE`|100|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
 |学習率：`learning_rate`|0.1|
-|利得の割引率：`BRAIN_GAMMDA`|0.99|
+|利得の割引率：`BRAIN_GAMMDA`|0.9|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
-|利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
-
-- 割引利得のエピソード毎の履歴<br>
-![mazasimple_q-learning_reward_episode100](https://user-images.githubusercontent.com/25688193/52895712-66a5aa80-3201-11e9-9a3d-ff7a559c3d2c.png)<br>
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
-![image](https://user-images.githubusercontent.com/25688193/52895841-555d9d80-3203-11e9-8d25-7954d3c8756f.png)<br>
-
+![image](https://user-images.githubusercontent.com/25688193/52710903-e2baab00-2fd3-11e9-82f6-3d00011914ec.png)<br>
 > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
 > ※ 尚、終端状態 S8 の状態価値関数は常に０の値となる。<br>
 
 - Q 学習 と Sarsa での比較<br>
-![mazasimple_q-learning_sarsa_reward_episode100](https://user-images.githubusercontent.com/25688193/52895875-b08f9000-3203-11e9-8be9-5891163db112.png)<br>
-
-![image](https://user-images.githubusercontent.com/25688193/52895899-f187a480-3203-11e9-9e76-4499a1d5d27d.png)<br>
+![image](https://user-images.githubusercontent.com/25688193/52710776-848dc800-2fd3-11e9-87ba-d30f3a96aeeb.png)<br>
 > 赤線が Q 学習での状態価値関数 V(s) の変化。青線が、Sarsa での状態価値関数 V(s) の変化。<br>
 > Q 学習のほうが、Sarsa に比べて、落ち込みが少なく、収束が早い傾向が見てとれる。
 
@@ -75,20 +63,25 @@ BRAIN_GAMMDA = 0.99         # 割引率
 
 以下のアニメーションは、Q学習による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
-- エピソード：1 回 / 迷路を解くのにかかったステップ数：47<br>
-![rl_env_simplemaze_qlearning_episode0](https://user-images.githubusercontent.com/25688193/52895737-ba17f880-3201-11e9-9fe6-bda72ccaec6f.gif)<br>
+- エピソード：1 回
 
-- エピソード：5 回 / 迷路を解くのにかかったステップ数：7<br>
-![rl_env_simplemaze_qlearning_episode5](https://user-images.githubusercontent.com/25688193/52895736-ba17f880-3201-11e9-8581-b6b75e2ac2ae.gif)<br>
+<br>
 
-- エピソード：10 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_qlearning_episode10](https://user-images.githubusercontent.com/25688193/52895735-ba17f880-3201-11e9-978e-8caa5d9bee26.gif)<br>
+- エピソード：5 回
 
-- エピソード：50 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_qlearning_episode50](https://user-images.githubusercontent.com/25688193/52895759-13802780-3202-11e9-932a-f3d82e27b9a0.gif)<br>
+<br>
 
-- エピソード：100 回経過 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_qlearning_episode95](https://user-images.githubusercontent.com/25688193/52895883-c43af680-3203-11e9-9592-66ca0d9b4de1.gif)<br>
+- エピソード：10 回
+
+<br>
+
+- エピソード：50 回
+
+<br>
+
+- エピソード：100 回経過
+
+<br>
 
 
 ### ◎ コードの説明

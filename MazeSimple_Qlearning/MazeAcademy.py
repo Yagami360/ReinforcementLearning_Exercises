@@ -61,12 +61,9 @@ class MazeAcademy( Academy ):
                 agent.agent_on_done( episode )
 
             # 動画を保存
-            if( episode % 5 == 0 ):
-                self.save_frames( "RL_ENV_SimpleMaze_Episode{}.gif".format(episode) )
+            #if( episode % 5 == 0 ):
+                #self.save_frames( "RL_ENV_SimpleMaze_Qlearning_Episode{}.gif".format(episode) )
                 #self._frames = []
-
-            if( episode == self._max_episode - 1 ):
-                self.save_frames( "RL_ENV_SimpleMaze_Episode{}.gif".format(episode) )
 
         return
 
@@ -146,7 +143,7 @@ class MazeAcademy( Academy ):
         else:
             anim.save( file_name )
 
-        plt.close()
+        
 
         return
 

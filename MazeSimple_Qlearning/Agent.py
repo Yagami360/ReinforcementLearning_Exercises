@@ -114,12 +114,14 @@ class Agent( object ):
         self._reword = reword
         return self._reword
 
-    def add_reword( self, reword, time_step ):
+    def add_reword( self, reword ):
         """
         報酬を加算する
         ・割引収益 Rt = Σ_t γ^t r_t+1 になるように報酬を加算する。
         """
-        self._reword += ( self._gamma **time_step ) * reword
+        #
+        self._reword += self._gamma * reword        # γ^t * r_t+1
+        #self._gamma = self._gamma * self._gamma     # γ^t
         return self._reword
 
     def agent_reset( self ):
