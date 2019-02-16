@@ -58,11 +58,14 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
 ![cartpole-v0_dqn2015_reward_episode500](https://user-images.githubusercontent.com/25688193/52898225-a8911980-321e-11e9-9604-fc8fab7fa5da.png)
-> DQN2013バージョンより、学習が安定していることがわかる。（ExperienceRelayの学習安定化効果？）
+> DQN2013バージョンより、学習が安定していることがわかる。（Target Q-Network 同期による学習安定化効果？）
 
 - 損失関数のグラフ（実行条件１）<br>
 ![cartpole-v0_dqn2015_episode500](https://user-images.githubusercontent.com/25688193/52898254-f9a10d80-321e-11e9-9a99-d637f0111f92.png)<br>
 
+- DQN2013年バージョンとDQN2015バージョンの比較（実行条件１）<br>
+![cartpole-v0_dqn2015-dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/52899315-ffe9b680-322b-11e9-9e68-60040d8ef52f.png)<br>
+![cartpole-v0_dqn2015-dqn2013_episode500](https://user-images.githubusercontent.com/25688193/52899317-02e4a700-322c-11e9-9ca0-0d20315c3224.png)<br>
 
 <br>
 
@@ -86,6 +89,7 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 - エピソード = 500 / 最終時間ステップ数 = 199<br>
 ![rl_env_cartpole-v0_episode499](https://user-images.githubusercontent.com/25688193/52898275-1ccbbd00-321f-11e9-861f-41cecee2f610.gif)<br>
+
 
 
 ### ◎ コードの説明

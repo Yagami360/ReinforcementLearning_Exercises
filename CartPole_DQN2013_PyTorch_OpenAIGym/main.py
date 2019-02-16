@@ -26,7 +26,7 @@ from matplotlib import animation
 from Academy import Academy
 from CartPoleAcademy import CartPoleAcademy
 from Brain import Brain
-from CartPoleDQNBrain import CartPoleDQNBrain
+from CartPoleDQN2013Brain import CartPoleDQN2013Brain
 from Agent import Agent
 from CartPoleAgent import CartPoleAgent
 from ExperienceReplay import ExperienceReplay
@@ -73,7 +73,7 @@ def main():
     #-----------------------------------
     # Brain の生成
     #-----------------------------------
-    brain = CartPoleDQNBrain(
+    brain = CartPoleDQN2013Brain(
         n_states = env.observation_space.shape[0],
         n_actions = env.action_space.n,
         epsilon = BRAIN_GREEDY_EPSILON,

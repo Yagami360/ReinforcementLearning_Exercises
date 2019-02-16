@@ -13,7 +13,6 @@ import random
 from Brain import Brain
 from Agent import Agent
 from ExperienceReplay import ExperienceReplay
-from QNetwork import QNetwork
 
 # PyTorch
 import torch
@@ -22,7 +21,7 @@ from torch import optim
 import torch.nn.functional as F
 
 
-class CartPoleDQNBrain( Brain ):
+class CartPoleDQN2013Brain( Brain ):
     """
     倒立振子課題（CartPole）の Brain。
     ・DQN によるアルゴリズム
@@ -38,9 +37,7 @@ class CartPoleDQNBrain( Brain ):
         _expected_q_function : <> 推定行動状態関数 Q(s,a,θ)
         _memory : <ExperienceRelay> ExperienceRelayに基づく学習用のデータセット
 
-        _main_network : <QNetwork> DQNのネットワーク
-        _target_network : <QNetwork> DQNのターゲットネットワーク
-
+        _model : <torch.nn.Sequential> モデルのオブジェクト
         _loss_fn : <torch.> モデルの損失関数
         _optimizer : <torch.optimizer> モデルの最適化アルゴリズム
 
@@ -61,10 +58,7 @@ class CartPoleDQNBrain( Brain ):
         self._learning_rate = learning_rate
         self._batch_size = batch_size
 
-        self._main_network = None
-        self._target_network = None
-        self.model()
-
+        self._model = None
         self._loss_fn = None
         self._optimizer = None
 
@@ -78,7 +72,7 @@ class CartPoleDQNBrain( Brain ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "CartPoleDQNBrain" )
+        print( "CartPoleDQN2013Brain" )
         print( self )
         print( str )
         print( "_n_states : \n", self._n_states )
@@ -92,8 +86,7 @@ class CartPoleDQNBrain( Brain ):
         print( "_expected_q_function : \n", self._expected_q_function )
         print( "_memory :", self._memory )
 
-        print( "_main_network :\n", self._main_network )
-        print( "target network :", self._target_network )
+        print( "_model :\n", self._model )
         print( "_loss_fn :\n", self._loss_fn )
         print( "_optimizer :\n", self._optimizer )
 
@@ -115,23 +108,17 @@ class CartPoleDQNBrain( Brain ):
         [Returns]
         """
         #------------------------------------------------
-        # ネットワーク構成
+        # Sequential モデルでネットワーク構成
         #------------------------------------------------
-        self._main_network = QNetwork(
-            n_inputs = self._n_states, 
-            n_hiddens = 32,
-            n_outputs = self._n_actions
-        )
+        self._model = nn.Sequential()
+        self._model.add_module( name = "fc1", module = nn.Linear( in_features = self._n_states, out_features = 32 ) )
+        self._model.add_module( "relu1", nn.ReLU() )
+        self._model.add_module( "fc2", nn.Linear( 32, 32 ) )
+        self._model.add_module( "relu2", nn.ReLU() )
+        self._model.add_module( "fc3", nn.Linear( 32, self._n_actions ) )
 
-        self._target_network = QNetwork(
-            n_inputs = self._n_states, 
-            n_hiddens = 32,
-            n_outputs = self._n_actions
-        )
+        print( "model :", self._model )
 
-        print( "main network :", self._main_network )
-        print( "target network :", self._target_network )
-        return
 
     def loss( self ):
         """
@@ -168,7 +155,7 @@ class CartPoleDQNBrain( Brain ):
         """
         # 最適化アルゴリズムとして、Adam を採用
         self._optimizer = optim.Adam( 
-            params = self._main_network.parameters(), 
+            params = self._model.parameters(), 
             lr = self._learning_rate 
         )
 
@@ -185,7 +172,7 @@ class CartPoleDQNBrain( Brain ):
         #--------------------------------------------------------------------
         # ネットワークを推論モードへ切り替え（PyTorch特有の処理）
         #--------------------------------------------------------------------
-        self._main_network.eval()
+        self._model.eval()
 
         #--------------------------------------------------------------------
         # 構築したDQNのネットワークが出力する Q(s,a) を求める。
@@ -193,7 +180,7 @@ class CartPoleDQNBrain( Brain ):
         # model(引数) で呼び出せるのは、__call__ をオーバライトしているため
         #--------------------------------------------------------------------
         # outputs / shape = batch_size * _n_actions
-        outputs = self._main_network( state_batch )
+        outputs = self._model( state_batch )
         #print( "outputs :", outputs )
 
         # outputs から実際にエージェントが選択した action を取り出す
@@ -215,8 +202,7 @@ class CartPoleDQNBrain( Brain ):
         )
         #print( "non_final_mask :", non_final_mask )
 
-        # Main Network ではなく Target Network からの出力
-        next_outputs = self._target_network( non_final_next_states )
+        next_outputs = self._model( non_final_next_states )
         #print( "next_outputs :", next_outputs )
 
         # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
@@ -238,7 +224,7 @@ class CartPoleDQNBrain( Brain ):
         [Returns]
         """
         # モデルを学習モードに切り替える。
-        self._main_network.train()
+        self._model.train()
 
         # 損失関数を計算する
         self.loss()
@@ -279,12 +265,12 @@ class CartPoleDQNBrain( Brain ):
             # Q の最大化する行動を選択
             #------------------------------
             # model を推論モードに切り替える（PyTorch特有の処理）
-            self._main_network.eval()
+            self._model.eval()
 
             # 微分を行わない処理の範囲を with 構文で囲む
             with torch.no_grad():
                 # テストデータをモデルに流し込み、モデルの出力を取得する
-                outputs = self._main_network( state )
+                outputs = self._model( state )
                 #print( "outputs :", outputs )
                 #print( "outputs.data :", outputs.data )
 
@@ -346,14 +332,11 @@ class CartPoleDQNBrain( Brain ):
 
         return self._q_function
 
-
     def update_target_q_function( self ):
         """
         Target Network を Main Network と同期する。
         """
-        # load_state_dict() : モデルを読み込み
-        self._target_network.load_state_dict(
-            state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
-        )
+        # DQN 2013 バージョンでは、Target network を組み込んでないので、処理を行わない
+        pass
 
-        return
+
