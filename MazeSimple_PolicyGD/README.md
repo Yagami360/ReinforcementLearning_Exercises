@@ -34,7 +34,7 @@ AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 �
 AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
-BRAIN_GAMMDA = 0.9          # 割引率
+BRAIN_GAMMDA = 0.99         # 割引率
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -49,83 +49,41 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |エピソード試行回数：`NUM_EPISODE`|5000|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
 |学習率：`learning_rate`|0.1|
-|利得の割引率：`BRAIN_GAMMDA`|0.9|
+|利得の割引率：`BRAIN_GAMMDA`|0.99|
+|利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
+
+- 割引利得のエピソード毎の履歴<br>
+![mazasimple_policygd_reward_episode5000](https://user-images.githubusercontent.com/25688193/52896351-0b2bea80-320a-11e9-93a7-0b26a56e6786.png)<br>
+
+<br>
 
 以下のアニメーションは、方策勾配法による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
-- エピソード：1 回
+- エピソード：1 回 / 迷路を解くのにかかったステップ数：87<br>
+![rl_env_simplemaze_episode0](https://user-images.githubusercontent.com/25688193/52896304-2ba77500-3209-11e9-8009-de7c877af66e.gif)<br>
 
-![mazesimple_policygd_episode1](https://user-images.githubusercontent.com/25688193/52711286-cd924c00-2fd4-11e9-894a-573c54c9c642.gif)<br>
+- エピソード：100 回 / 迷路を解くのにかかったステップ数：55<br>
+![rl_env_simplemaze_episode100](https://user-images.githubusercontent.com/25688193/52896299-2b0ede80-3209-11e9-9f39-acf274230651.gif)<br>
 
-- エピソード：100 回
+- エピソード：200 回 / 迷路を解くのにかかったステップ数：7<br>
+![rl_env_simplemaze_episode200](https://user-images.githubusercontent.com/25688193/52896300-2b0ede80-3209-11e9-9d56-4875e3af5dba.gif)<br>
 
-![mazesimple_policygd_episode100](https://user-images.githubusercontent.com/25688193/52711359-f7e40980-2fd4-11e9-88a8-6a7926cee28f.gif)<br>
+- エピソード：300 回 / 迷路を解くのにかかったステップ数：11<br>
+![rl_env_simplemaze_episode300](https://user-images.githubusercontent.com/25688193/52896301-2b0ede80-3209-11e9-9211-72f25357a185.gif)<br>
 
-- エピソード：500 回
+- エピソード：400 回 / 迷路を解くのにかかったステップ数：13<br>
+![rl_env_simplemaze_episode400](https://user-images.githubusercontent.com/25688193/52896302-2b0ede80-3209-11e9-8746-c4e8492123ff.gif)<br>
 
-![mazesimple_policygd_episode500](https://user-images.githubusercontent.com/25688193/52711654-b1db7580-2fd5-11e9-9368-3094d945131c.gif)<br>
+- エピソード：500 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_simplemaze_episode500](https://user-images.githubusercontent.com/25688193/52896303-2ba77500-3209-11e9-8472-38041ab0ca7f.gif)<br>
 
-- エピソード：1000 回
+- エピソード：1000 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_simplemaze_episode1000](https://user-images.githubusercontent.com/25688193/52896342-f3ecfd00-3209-11e9-9d55-a41363c6449b.gif)<br>
 
-![mazesimple_policygd_episode1000](https://user-images.githubusercontent.com/25688193/52711432-206c0380-2fd5-11e9-9f85-32d72ddf8603.gif)<br>
+- エピソード：500 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_simplemaze_episode4900](https://user-images.githubusercontent.com/25688193/52896365-3adaf280-320a-11e9-9281-70f014d66e69.gif)<br>
 
-- エピソード：5000 回経過
-
-![mazesimple_policygd_episode5000](https://user-images.githubusercontent.com/25688193/52711614-92444d00-2fd5-11e9-8260-d3f0be9a254a.gif)<br>
-
-
-- xxx
-```python
-現在のエピソード数： 0
-迷路を解くのにかかったステップ数：87
-前回の行動方針との差分： 0.00749363112701
-現在のエピソード数： 1
-迷路を解くのにかかったステップ数：7
-前回の行動方針との差分： 0.032466052517
-現在のエピソード数： 2
-迷路を解くのにかかったステップ数：17
-前回の行動方針との差分： 0.0304130227703
-現在のエピソード数： 3
-迷路を解くのにかかったステップ数：101
-前回の行動方針との差分： 0.00811249998137
-現在のエピソード数： 4
-迷路を解くのにかかったステップ数：37
-前回の行動方針との差分： 0.0185292727225
-現在のエピソード数： 5
-迷路を解くのにかかったステップ数：29
-前回の行動方針との差分： 0.0105092161438
-現在のエピソード数： 6
-迷路を解くのにかかったステップ数：27
-前回の行動方針との差分： 0.0153991487113
-現在のエピソード数： 7
-迷路を解くのにかかったステップ数：101
-前回の行動方針との差分： 0.00680583483672
-現在のエピソード数： 8
-迷路を解くのにかかったステップ数：29
-前回の行動方針との差分： 0.0121632186446
-現在のエピソード数： 9
-迷路を解くのにかかったステップ数：35
-前回の行動方針との差分： 0.0189626453555
-現在のエピソード数： 10
-迷路を解くのにかかったステップ数：81
-前回の行動方針との差分： 0.0113166240451
-...
-現在のエピソード数： 4995
-迷路を解くのにかかったステップ数：5
-前回の行動方針との差分： 6.08025288053e-05
-現在のエピソード数： 4996
-迷路を解くのにかかったステップ数：5
-前回の行動方針との差分： 6.07305220958e-05
-現在のエピソード数： 4997
-迷路を解くのにかかったステップ数：5
-前回の行動方針との差分： 6.06586436798e-05
-現在のエピソード数： 4998
-迷路を解くのにかかったステップ数：5
-前回の行動方針との差分： 6.05868932502e-05
-現在のエピソード数： 4999
-迷路を解くのにかかったステップ数：5
-前回の行動方針との差分： 6.05152705041e-05
-```
+<br>
 
 - 初回の行動方策 policy の値
 

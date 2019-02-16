@@ -20,12 +20,12 @@ from Brain import Brain
 from MazeRamdomBrain import MazeRamdomBrain
 
 # 設定可能な定数
-NUM_EPISODE = 1           # エピソード試行回数
+NUM_EPISODE = 100           # エピソード試行回数
 NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
 AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
 AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
-BRAIN_GAMMDA = 0.9          # 割引率
+BRAIN_GAMMDA = 0.99         # 割引率
 
 def main():
     """
@@ -99,71 +99,28 @@ def main():
     #===================================
     # 実行結果の描写処理
     #===================================
-    # 初期位置での迷路の様子
-
-    # 図を描く大きさと、図の変数名を宣言
-    fig = plt.figure(figsize=(5, 5))
-    ax = plt.gca()
-
-    # 赤い壁を描く
-    ax.plot([1, 1], [0, 1], color='red', linewidth=2)
-    ax.plot([1, 2], [2, 2], color='red', linewidth=2)
-    ax.plot([2, 2], [2, 1], color='red', linewidth=2)
-    ax.plot([2, 3], [1, 1], color='red', linewidth=2)
-
-    # 状態を示す文字S0～S8を描く
-    ax.text(0.5, 2.5, 'S0', size=14, ha='center')
-    ax.text(1.5, 2.5, 'S1', size=14, ha='center')
-    ax.text(2.5, 2.5, 'S2', size=14, ha='center')
-    ax.text(0.5, 1.5, 'S3', size=14, ha='center')
-    ax.text(1.5, 1.5, 'S4', size=14, ha='center')
-    ax.text(2.5, 1.5, 'S5', size=14, ha='center')
-    ax.text(0.5, 0.5, 'S6', size=14, ha='center')
-    ax.text(1.5, 0.5, 'S7', size=14, ha='center')
-    ax.text(2.5, 0.5, 'S8', size=14, ha='center')
-    ax.text(0.5, 2.3, 'START', ha='center')
-    ax.text(2.5, 0.3, 'GOAL', ha='center')
-
-    # 描画範囲の設定と目盛りを消す設定
-    ax.set_xlim(0, 3)
-    ax.set_ylim(0, 3)
-    ax.tick_params(axis='both', which='both', bottom='off', top='off',
-                    labelbottom='off', right='off', left='off', labelleft='off')
-        
-    # 現在地S0に緑丸を描画する
-    line, = ax.plot([0.5], [2.5], marker="o", color='g', markersize=60)
-
-    #
-    #plt.savefig( "MazeSimple_Random.png", dpi = 300, bbox_inches = "tight" )
-        
-    #----------------------------------------
-    # エージェントの移動の様子を可視化
-    #----------------------------------------
-    def init():
-        '''背景画像の初期化'''
-        line.set_data([], [])
-        return (line,)
-
-    def animate(i):
-        '''フレームごとの描画内容'''
-        s_a_historys = agent.get_s_a_historys()
-        state = s_a_historys[i][0]  # 現在の場所を描く
-        x = (state % 3) + 0.5  # 状態のx座標は、3で割った余り+0.5
-        y = 2.5 - int(state / 3)  # y座標は3で割った商を2.5から引く
-        line.set_data(x, y)
-        return (line,)
-
-    #　初期化関数とフレームごとの描画関数を用いて動画を作成する
-    s_a_historys = agent.get_s_a_historys()
-    anim = animation.FuncAnimation(
-        fig, animate, 
-        init_func = init, 
-        frames = len( s_a_historys ), 
-        interval = 200, repeat = False
+    #---------------------------------------------
+    # 利得の履歴の plot
+    #---------------------------------------------
+    reward_historys = agent.get_reward_historys()
+    plt.clf()
+    plt.plot(
+        range(0,NUM_EPISODE+1), reward_historys,
+        label = 'gamma = {}'.format(BRAIN_GAMMDA),
+        linestyle = '-',
+        #linewidth = 2,
+        color = 'black'
     )
+    plt.title( "Reward History" )
+    plt.xlim( 0, NUM_EPISODE+1 )
+    plt.ylim( [-0.1, 1.05] )
+    plt.xlabel( "Episode" )
+    plt.grid()
+    plt.legend( loc = "lower right" )
+    plt.tight_layout()
 
-    HTML( anim.to_jshtml() )
-    anim.save( "MazeSimple_Random_Episode{}.gif".format(NUM_EPISODE), writer = 'imagemagick' )
+    plt.savefig( "MazaSimple_Ramdom_Reward_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.show()
 
     print("Finish main()")
     return

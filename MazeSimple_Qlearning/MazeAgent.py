@@ -54,6 +54,7 @@ class MazeAgent( Agent ):
         print( "_state : \n", self._state )
         print( "_action : \n", self._action )
         print( "_s_a_historys : \n", self._s_a_historys )
+        print( "_reward_historys : \n", self._reward_historys )
         #print( "_q_function_historys : \n", self._q_function_historys )
         #print( "_v_function_historys : \n", self._v_function_historys )
         print( "----------------------------------" )
@@ -96,13 +97,6 @@ class MazeAgent( Agent ):
         self._action = next_action = self._brain.action( state = self._state )
         self._s_a_historys[-1][1] = self._action  # -1 で末端に追加
         
-        # r0 : 初期の行動に対しての報酬 r1 の設定
-        if( self._state == 8 ):
-            self.add_reword( 1.0 )  # ゴール地点なら、報酬１
-        else:
-            self.add_reword( 0.0 )  # ゴール地点でないなら、報酬なし
-
-
         return
 
 
@@ -153,9 +147,11 @@ class MazeAgent( Agent ):
 
         # a' → r'' : 次行動 a' に対する報酬 r'' の指定
         if( next_state == 8 ):
-            self.add_reword( 1.0 )  # ゴール地点なら、報酬１
+            # ゴール地点なら、報酬１
+            self.add_reword( 1.0, time_step )
         else:
-            self.add_reword( 0.0 )  # ゴール地点なら、報酬なし
+            # ゴール地点なら、小さな負の報酬
+            self.add_reword( -0.01, time_step )
 
 
         # s,a,s',r',a' → Q : Q 関数を更新
@@ -190,6 +186,9 @@ class MazeAgent( Agent ):
         # １エピソード完了後の処理
         #------------------------------------------------------------
         print( "迷路を解くのにかかったステップ数：" + str( len(self._s_a_historys) ) )
+
+        # 利得の履歴に追加
+        self._reward_historys.append( self._reword )
 
         # このメソッドが呼び出される度に、ε の値を徐々に小さくする。
         #self._brain.decay_learning_rate()

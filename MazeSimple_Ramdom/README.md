@@ -32,7 +32,7 @@ NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大�
 AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
 AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
-BRAIN_GAMMDA = 0.9          # 割引率
+BRAIN_GAMMDA = 0.99         # 割引率
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -41,18 +41,28 @@ BRAIN_GAMMDA = 0.9          # 割引率
 強化学習の学習環境用の迷路探索問題。<br>
 等確率で表現された４つの移動候補（上下左右）から１つの方向をランダムに選択し、これを繰り返すことで、最終的に目的地に到着させる。<br>
 
+|パラメータ名|値（実行条件１）|
+|---|---|
+|エピソード試行回数：`NUM_EPISODE`|100|
+|１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
+|利得の割引率：`BRAIN_GAMMDA`|0.99|
+|利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
+
+- 割引利得のエピソード毎の履歴<br>
+![mazasimple_ramdom_reward_episode100](https://user-images.githubusercontent.com/25688193/52896224-f2223a00-3207-11e9-943f-1392c8ad8d82.png)<br>
+
 以下のアニメーションは、このランダムな方策に基づく迷路探索問題の探索結果である。エピソードが経過しても、最短ルートでゴールまで到達できるようにはなっていないことが分かる。<br>
 
-- エピソード：1 回
+- エピソード：1 回 / 迷路を解くのにかかったステップ数：19<br>
+![rl_env_simplemaze_episode0](https://user-images.githubusercontent.com/25688193/52896188-863fd180-3207-11e9-826a-d7ec13d06ad1.gif)<br>
 
-![mazesimple_random_episode1](https://user-images.githubusercontent.com/25688193/52712039-c704d400-2fd6-11e9-92e2-e5c6fdaf8599.gif)<br>
+- エピソード：25 回 / 迷路を解くのにかかったステップ数：37<br>
+![rl_env_simplemaze_episode25](https://user-images.githubusercontent.com/25688193/52896190-8b048580-3207-11e9-8bf8-7a3c29728715.gif)<br>
 
-- エピソード：50 回
-
-![mazesimple_random_episode50](https://user-images.githubusercontent.com/25688193/52712041-c79d6a80-2fd6-11e9-85ac-7ff4fa809992.gif)<br>
+- エピソード：50 回 / 迷路を解くのにかかったステップ数：33<br>
+![rl_env_simplemaze_episode50](https://user-images.githubusercontent.com/25688193/52896221-e2a2f100-3207-11e9-8d9f-fb186c3ed3cd.gif)<br>
 
 <!--
-- エピソード：100 回
-
-![mazesimple_random_episode100](https://user-images.githubusercontent.com/25688193/52712065-de43c180-2fd6-11e9-8314-726205d96c44.gif)<br>
+- エピソード：75 回 / 迷路を解くのにかかったステップ数：71<br>
+![rl_env_simplemaze_episode75](https://user-images.githubusercontent.com/25688193/52896193-aa9bae00-3207-11e9-8837-3d7a190d9dec.gif)<br>
 -->

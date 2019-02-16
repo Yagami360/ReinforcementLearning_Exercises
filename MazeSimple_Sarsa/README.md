@@ -50,14 +50,17 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |エピソード試行回数：`NUM_EPISODE`|100|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
 |学習率：`learning_rate`|0.1|
-|利得の割引率：`BRAIN_GAMMDA`|0.9|
+|利得の割引率：`BRAIN_GAMMDA`|0.99|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
+|利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
 
 <br>
 
-- 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
+- 割引利得のエピソード毎の履歴<br>
+![mazasimple_sarsa_reward_episode100](https://user-images.githubusercontent.com/25688193/52896095-3dd3e400-3206-11e9-8fb9-94142881a007.png)<br>
 
-![image](https://user-images.githubusercontent.com/25688193/52710292-565bb880-2fd2-11e9-875d-69882840fd46.png)<br>
+- 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
+![image](https://user-images.githubusercontent.com/25688193/52896111-87bcca00-3206-11e9-863d-570943e4e288.png)<br>
 > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
 > ※ 尚、状態 S8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。<br>
 
@@ -65,25 +68,20 @@ BRAIN_GAMMDA = 0.9          # 割引率
 
 以下のアニメーションは、Sarsa による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
-- エピソード：1 回
+- エピソード：1 回 / 迷路を解くのにかかったステップ数：47<br>
+![rl_env_simplemaze_episode10](https://user-images.githubusercontent.com/25688193/52896098-4d532d00-3206-11e9-8437-529a9491f597.gif)<br>
 
-![mazesimple_sarsa_episode1](https://user-images.githubusercontent.com/25688193/52710524-df72ef80-2fd2-11e9-95a4-923b5c63a847.gif)<br>
+- エピソード：5 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_simplemaze_episode0](https://user-images.githubusercontent.com/25688193/52896099-4d532d00-3206-11e9-8b52-a87d17827d19.gif)<br>
 
-- エピソード：5 回
+- エピソード：10 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_simplemaze_episode5](https://user-images.githubusercontent.com/25688193/52896100-4debc380-3206-11e9-95c2-3b76a0309d74.gif)<br>
 
-![mazesimple_sarsa_episode5](https://user-images.githubusercontent.com/25688193/52710562-fa456400-2fd2-11e9-939b-42a0563fc9a3.gif)<br>
+- エピソード：50 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_simplemaze_episode50](https://user-images.githubusercontent.com/25688193/52896101-4fb58700-3206-11e9-9709-9c0c60ab32fc.gif)<br>
 
-- エピソード：10 回
-
-![mazesimple_sarsa_episode10](https://user-images.githubusercontent.com/25688193/52710615-1ba65000-2fd3-11e9-8b53-a3f55e3f632a.gif)<br>
-
-- エピソード：50 回
-
-![mazesimple_sarsa_episode50](https://user-images.githubusercontent.com/25688193/52710669-4395b380-2fd3-11e9-85df-4b9d414ac942.gif)<br>
-
-- エピソード：100 回経過
-
-![mazesimple_sarsa_episode100](https://user-images.githubusercontent.com/25688193/52710334-70959680-2fd2-11e9-92e6-d9d50984eb53.gif)<br>
+- エピソード：100 回経過 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_simplemaze_episode95](https://user-images.githubusercontent.com/25688193/52896102-52b07780-3206-11e9-9d59-c24d214daae8.gif)<br>
 
 
 ### ◎ コードの説明
