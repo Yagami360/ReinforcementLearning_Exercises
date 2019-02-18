@@ -35,7 +35,7 @@ from ExperienceReplay import ExperienceReplay
 # 設定可能な定数
 #--------------------------------
 RL_ENV = "CartPole-v0"          # 利用する強化学習環境の課題名
-NUM_EPISODE = 200               # エピソード試行回数
+NUM_EPISODE = 500               # エピソード試行回数
 NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
 BRAIN_LEARNING_RATE = 0.0001    # 学習率
 BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ

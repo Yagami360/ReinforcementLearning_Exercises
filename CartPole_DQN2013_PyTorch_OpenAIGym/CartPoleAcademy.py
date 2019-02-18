@@ -9,8 +9,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
-#from JSAnimation.IPython_display import display_animation
-#from IPython.display import display
 import os.path
 
 # 自作クラス
@@ -112,7 +110,7 @@ class CartPoleAcademy( Academy ):
         return
 
 
-    def save_frames( self, file_name = "RL_ENV_CartPole-v0.mp4" ):
+    def save_frames( self, file_name = "RL_ENV.mp4" ):
         """
         外部ファイルに動画を保存する。
         """

@@ -97,7 +97,7 @@ def main():
     )
 
     # モデルの構造を定義する。
-    #brain1.model()
+    brain1.model()
     brain2.model()
 
     # 損失関数を設定する。

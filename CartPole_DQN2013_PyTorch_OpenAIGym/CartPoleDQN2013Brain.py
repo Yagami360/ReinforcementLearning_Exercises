@@ -13,6 +13,8 @@ import random
 from Brain import Brain
 from Agent import Agent
 from ExperienceReplay import ExperienceReplay
+from QNetworkMLP3 import QNetworkMLP3
+from QNetworkMLP4 import QNetworkMLP4
 
 # PyTorch
 import torch
@@ -59,6 +61,7 @@ class CartPoleDQN2013Brain( Brain ):
         self._batch_size = batch_size
 
         self._model = None
+        self.model()
         self._loss_fn = None
         self._optimizer = None
 
@@ -110,14 +113,28 @@ class CartPoleDQN2013Brain( Brain ):
         #------------------------------------------------
         # Sequential モデルでネットワーク構成
         #------------------------------------------------
+        """
         self._model = nn.Sequential()
         self._model.add_module( name = "fc1", module = nn.Linear( in_features = self._n_states, out_features = 32 ) )
         self._model.add_module( "relu1", nn.ReLU() )
         self._model.add_module( "fc2", nn.Linear( 32, 32 ) )
         self._model.add_module( "relu2", nn.ReLU() )
         self._model.add_module( "fc3", nn.Linear( 32, self._n_actions ) )
+        """
+        """
+        self._model = QNetworkMLP3(
+            n_states = self._n_states, 
+            n_hiddens = 32,
+            n_actions = self._n_actions
+        )
+        """
+        self._model = QNetworkMLP4(
+            n_states = self._n_states, 
+            n_hiddens = 32,
+            n_actions = self._n_actions
+        )
 
-        print( "model :", self._model )
+        return
 
 
     def loss( self ):

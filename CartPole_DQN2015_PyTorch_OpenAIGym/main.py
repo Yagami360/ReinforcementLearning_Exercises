@@ -68,7 +68,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 100 )
+    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 50 )
 
     #-----------------------------------
     # Brain の生成

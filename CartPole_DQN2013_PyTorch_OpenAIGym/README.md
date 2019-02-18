@@ -2,7 +2,7 @@
 強化学習の学習環境用の倒立振子課題 CartPole。<br>
 ディープラーニングを用いた強化学習手法であるDQN [Deep Q-Network] （2013年バージョンのTarget Q-Network非使用）によって、単純な２次元の倒立振子課題を解く。<br>
 
-※ ここでのDQNのネットワーク構成は、CNNではなく多層パーセプトロン（MLP）で代用したもので実装している。
+※ ここでのDQNのネットワーク構成は、簡単のため、CNNではなく多層パーセプトロン（MLP）で代用したもので実装している。
 
 ## ■ 項目 [Contents]
 1. [動作環境](#動作環境)
@@ -54,7 +54,12 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
-|報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0に設定|←|転倒：-1<br>連続 `NUM_TIME_STEP`回成功：+`NUM_TIME_STEP=200`<br>それ以外：+1|
+|報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0に設定|←|
+|DQNのネットワーク構成|MLP<br>入力層：状態数<br>隠れ層：32ノード<br>出力層：行動数|←|MLP<br>入力層：状態数<br>隠れ層１：32ノード<br>隠れ層２：32ノード<br>出力層：行動数|
+
+<!--
+転倒：-1<br>連続 `NUM_TIME_STEP`回成功：+`NUM_TIME_STEP=200`<br>それ以外：+1|
+-->
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
 ![cartpole-v0_dqn2013_reward_episode200](https://user-images.githubusercontent.com/25688193/52898133-b1352000-321d-11e9-9ff2-5ba7b2752648.png)<br>
@@ -65,9 +70,19 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 - 割引利得のエピソード毎の履歴（実行条件２）<br>
 ![cartpole-v0_dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/52897889-20f5db80-321b-11e9-82c1-50d9796adb9e.png)<br>
+
 - 損失関数のグラフ（実行条件２）<br>
 ![cartpole-v0_dqn2013_1-1_episode500](https://user-images.githubusercontent.com/25688193/52897890-22bf9f00-321b-11e9-9eb2-d3071e61b570.png)
 > 収束していたloss値が突然発散して、その後収束しなくなっており、学習が安定していない。<br>
+
+- 割引利得のエピソード毎の履歴（実行条件３）<br>
+![cartpole-v0_dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/52930646-8917ff00-338c-11e9-8b3a-0991947aff80.png)<br>
+
+- 損失関数のグラフ（実行条件３）<br>
+![cartpole-v0_dqn2013_episode500](https://user-images.githubusercontent.com/25688193/52930652-8ddcb300-338c-11e9-9f45-ddfb600e48d9.png)<br>
+
+> 実行条件２より、学習が安定化していることがわかる。（実行条件１のMLPより、層数が多いため？）<br>
+
 
 <br>
 
