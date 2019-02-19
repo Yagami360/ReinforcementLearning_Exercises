@@ -21,7 +21,7 @@ AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.9          # 割引率
+BRAIN_GAMMDA = 0.99         # 割引率
 
 
 def main():
@@ -40,7 +40,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
+    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 5 )
 
     #-----------------------------------
     # Brain の生成
@@ -112,7 +112,7 @@ def main():
         #linewidth = 2,
         color = 'black'
     )
-    plt.title( "Reward HIstory" )
+    plt.title( "Reward History" )
     plt.xlim( 0, NUM_EPISODE+1 )
     plt.ylim( [0, 1.05] )
     plt.xlabel( "Episode" )
@@ -120,12 +120,11 @@ def main():
     plt.legend( loc = "lower right" )
     plt.tight_layout()
 
-    plt.savefig( "MazaSimple_Q-learning_Reward_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( "MazaSimple_Qlearning_Reward_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
     #---------------------------------------------
     # 状態 s0 ~ s7 での状態価値関数の値を plot
-    # ※ 状態 s8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。
     #---------------------------------------------
     # 各エピソードでの状態価値関数
     v_function_historys1 = agent1.get_v_function_historys()
@@ -152,9 +151,6 @@ def main():
         v_function_historys1_s6.append( v_function[6] )
         v_function_historys1_s7.append( v_function[7] )
         v_function_historys1_s8.append( 0 )
-
-    # Q 学習での状態価値関数
-    plt.clf()
 
     # S0
     plt.subplot( 3, 3, 1 )
@@ -300,15 +296,115 @@ def main():
     plt.grid()
     plt.tight_layout()
 
-    plt.savefig( "MazaSimple_Q-learning_Vfunction_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( "MazaSimple_Qlearning_Vfunction_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
+    #---------------------------------------------
+    # 行動価値関数を plot
+    #---------------------------------------------
+    Q_function_historys = agent1.get_q_function_historys()
+    Q_function = Q_function_historys[-1]
+
+    def draw_q_function( q_func ):
+        """
+        Q関数をグリッド上に分割したヒータマップで描写する。
+        |　|↑　|　|
+        |←|平均|→|
+        |　|↓|　|
+        """
+        import matplotlib.cm as cm  # color map
+
+        n_row = 3   # Maze の行数
+        n_col = 3   # Maze の列数
+        n_qrow = n_row * 3
+        n_qcol = n_col * 3
+        q_draw_map = np.zeros( shape = (n_qrow,n_qcol) )
+
+        for i in range( n_row ):
+            for j in range( n_col ):
+                k = i * n_row + j   # 状態の格子番号
+            
+                if( k == 8 ):
+                    break
+
+                _i = 1 + ( n_row - 1 - i ) * 3
+                _j = 1 + j * 3
+                q_draw_map[_i][_j-1] = q_func[k][3]     # Left
+                q_draw_map[_i-1][_j] = q_func[k][2]     # Down
+                q_draw_map[_i][_j+1] = q_func[k][1]     # Right
+                q_draw_map[_i+1][_j] = q_func[k][0]     # Up
+                q_draw_map[_i][_j] = np.mean( q_func[k] )
+
+        q_draw_map = np.nan_to_num(q_draw_map)
+        #print( "q_draw_map :", q_draw_map )
+
+        fig = plt.figure()
+        ax = fig.add_subplot( 1,1,1 )
+        plt.imshow(
+            q_draw_map,
+            cmap = cm.RdYlGn,
+            interpolation = "bilinear",
+            vmax = abs( q_draw_map ).max(),
+            vmin = -abs( q_draw_map ).max()
+        )
+
+        plt.colorbar()
+        ax.set_xlim( -0.5, n_qcol - 0.5 )
+        ax.set_ylim( -0.5, n_qrow - 0.5 )
+        ax.set_xticks( np.arange(-0.5, n_qcol, 3) )
+        ax.set_yticks( np.arange(-0.5, n_qrow, 3) )
+        #ax.set_xticklabels( range(n_col+1) )
+        #ax.set_yticklabels( range(n_row+1) )
+    
+        # 壁を描く
+        ax.plot([1*n_col-0.5, 1*n_row-0.5], [0*n_col-0.5, 1*n_row-0.5], color='black', linewidth=2)
+        ax.plot([1*n_col-0.5, 2*n_row-0.5], [2*n_col-0.5, 2*n_row-0.5], color='black', linewidth=2)
+        ax.plot([2*n_col-0.5, 2*n_row-0.5], [2*n_col-0.5, 1*n_row-0.5], color='black', linewidth=2)
+        ax.plot([2*n_col-0.5, 3*n_row-0.5], [1*n_col-0.5, 1*n_row-0.5], color='black', linewidth=2)
+
+        # 状態を示す文字S0～S8を描く
+        ax.text(0.5*n_col-0.5, 2.5*n_row-0.5, 'S0', size=14, ha='center')
+        ax.text(0.5*n_col-0.5, 2.3*n_row-0.5, 'START', ha='center')
+        ax.text(0.5*n_col-0.5, 2.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(1.5*n_col-0.5, 2.5*n_row-0.5, 'S1', size=14, ha='center')
+        ax.text(1.5*n_col-0.5, 2.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(2.5*n_col-0.5, 2.5*n_row-0.5, 'S2', size=14, ha='center')
+        ax.text(2.5*n_col-0.5, 2.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(0.5*n_col-0.5, 1.5*n_row-0.5, 'S3', size=14, ha='center')
+        ax.text(0.5*n_col-0.5, 1.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(1.5*n_col-0.5, 1.5*n_row-0.5, 'S4', size=14, ha='center')
+        ax.text(1.5*n_col-0.5, 1.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(2.5*n_col-0.5, 1.5*n_row-0.5, 'S5', size=14, ha='center')
+        ax.text(2.5*n_col-0.5, 1.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(0.5*n_col-0.5, 0.5*n_row-0.5, 'S6', size=14, ha='center')
+        ax.text(0.5*n_col-0.5, 0.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(1.5*n_col-0.5, 0.5*n_row-0.5, 'S7', size=14, ha='center')
+        ax.text(1.5*n_col-0.5, 0.1*n_row-0.5, 'reward : -0.05', ha='center')
+        ax.text(2.5*n_col-0.5, 0.5*n_row-0.5, 'S8', size=14, ha='center')
+        ax.text(2.5*n_col-0.5, 0.3*n_row-0.5, 'GOAL', ha='center')
+        ax.text(2.5*n_col-0.5, 0.1*n_row-0.5, 'reward : +1.0', ha='center')
+
+
+        # 軸を消す
+        plt.tick_params(
+            axis='both', which='both', bottom='off', top='off',
+            labelbottom='off', right='off', left='off', labelleft='off'
+        )
+
+        ax.grid( which = "both" )
+        plt.title( "Q function" )
+        plt.savefig( "MazaSimple_Qlearning_Qfunction_episode{}.png".format(NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+        plt.show()
+
+        return
+
+    draw_q_function( Q_function )
 
     print("Finish main()")
     return
 
-    
+
+
+
 if __name__ == '__main__':
      main()
-
-

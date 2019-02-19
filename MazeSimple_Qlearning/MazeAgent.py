@@ -117,9 +117,6 @@ class MazeAgent( Agent ):
         if( self._done == True):
             return self._done
 
-        #print( "現在のエピソード数：", episode )
-        #print( "現在の時間ステップ数：", time_step )
-
         #----------------------------------------------------------------------
         # １時間ステップでの迷宮探索
         # バックアップ線図 : s_t → a_t → r_(t+1) → s_(t+1) → a_(t+1) → r_(t+2) → Q → ...
@@ -146,12 +143,14 @@ class MazeAgent( Agent ):
         self._s_a_historys.append( [next_state, next_action] )
 
         # a' → r'' : 次行動 a' に対する報酬 r'' の指定
+        reward = 0.0
         if( next_state == 8 ):
-            self.add_reword( 1.0 )  # ゴール地点なら、報酬１
+            reward = 1.0
+            self.add_reword( reward )  # ゴール地点なら、報酬１
         else:
             # ゴール地点でないなら、負の報酬（）
-            self.add_reword( -0.01 )
-
+            reward = -0.01
+            self.add_reword( reward )
 
         # s,a,s',r',a' → Q : Q 関数を更新
         self._brain.update_q_function(
@@ -176,14 +175,15 @@ class MazeAgent( Agent ):
         return self._done
 
 
-    def agent_on_done( self, episode ):
+    def agent_on_done( self, episode, time_step ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
         """
         #------------------------------------------------------------
-        # １エピソード完了後の処理
+        # エピソード完了後の処理
         #------------------------------------------------------------
+        print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
         print( "迷路を解くのにかかったステップ数：" + str( len(self._s_a_historys) ) )
 
         # 利得の履歴に追加
