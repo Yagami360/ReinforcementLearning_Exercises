@@ -139,13 +139,13 @@ def main():
     plt.plot(
         range(0,NUM_EPISODE+1), reward_historys2,
         label = 'Sarsa / gamma = {}'.format(BRAIN_GAMMDA),
-        linestyle = '-',
+        linestyle = '--',
         #linewidth = 2,
         color = 'blue'
     )
     plt.title( "Reward History" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.05, 1.05] )
+    #plt.ylim( [-1.05, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.legend( loc = "lower right" )

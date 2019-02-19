@@ -50,30 +50,24 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
 
 - 割引利得のエピソード毎の履歴（実行条件１）
-![mazasimple_qlearning_reward_episode100](https://user-images.githubusercontent.com/25688193/53012236-c1e7cf00-3485-11e9-9813-71bf8bd5cc2d.png)<br>
+![mazasimple_qlearning_reward_episode100](https://user-images.githubusercontent.com/25688193/53015127-9e288700-348d-11e9-9abb-0adc663cb1d4.png)<br>
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化（実行条件１）<br>
-<!--
-![image](https://user-images.githubusercontent.com/25688193/52710903-e2baab00-2fd3-11e9-82f6-3d00011914ec.png)<br>
--->
-![image](https://user-images.githubusercontent.com/25688193/53012133-7e8d6080-3485-11e9-89d2-8147ccbe05ee.png)<br>
+![image](https://user-images.githubusercontent.com/25688193/53015105-8e10a780-348d-11e9-8a08-81be2b5a05f0.png)<br>
 > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
 > ※ 尚、終端状態 S8 の状態価値関数は常に０の値となる。<br>
 
 - 各状態 S0 ~ S8 での行動価値関数 Q(s) の学習完了後のヒートマップ図（実行条件１）<br>
-![mazasimple_qlearning_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53012335-07a49780-3486-11e9-8659-9ad6c338ed36.png)<br>
+![mazasimple_qlearning_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53015165-b26c8400-348d-11e9-844a-ff2a0fb3cf18.png)<br>
 
 > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する状態行動対の行動価値関数の値が、高い値となっており、うまく行動価値関数を学習出来ていることが分かる。<br>
 > ※ 尚、終端状態 S8 の行動価値関数は常に０の値となる。<br>
 
 - Q 学習 と Sarsa での比較<br>
-<!--
-![image](https://user-images.githubusercontent.com/25688193/52710776-848dc800-2fd3-11e9-87ba-d30f3a96aeeb.png)<br>
--->
-![mazasimple_qlearning-sarsa_reward_episode100](https://user-images.githubusercontent.com/25688193/53013172-6e2ab500-3488-11e9-9251-59ae659edcec.png)<br>
-![image](https://user-images.githubusercontent.com/25688193/53013122-4d625f80-3488-11e9-8c46-b9d7b39996a7.png)<br>
-![mazasimple_qlearnig_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53013276-b6e26e00-3488-11e9-9cd1-0d1af4e1a839.png)<br>
-![mazasimple_sarsa_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53013262-a7632500-3488-11e9-8e71-f9a86a50df32.png)<br>
+![mazasimple_qlearning-sarsa_reward_episode100](https://user-images.githubusercontent.com/25688193/53014847-fe6af900-348c-11e9-84cf-c46694d61daa.png)<br>
+![image](https://user-images.githubusercontent.com/25688193/53014893-278b8980-348d-11e9-9ec9-ae9cb994deee.png)<br>
+![mazasimple_qlearnig_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53014951-3c681d00-348d-11e9-8426-c0d6822bae5e.png)<br>
+![mazasimple_sarsa_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53014960-3ffba400-348d-11e9-9988-1f6cf955591a.png)<br>
 
 > 赤線が Q 学習での変化。青線が、Sarsa での変化。<br>
 > Q 学習のほうが、Sarsa に比べて、落ち込みが少なく、収束が早い傾向が見てとれる。<br>
