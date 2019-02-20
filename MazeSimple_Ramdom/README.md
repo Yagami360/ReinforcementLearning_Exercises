@@ -47,6 +47,7 @@ BRAIN_GAMMDA = 0.99         # 割引率
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|
 |利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
+|シード値|`np.random.seed(8)`<br>`random.seed(8)`|←|
 
 - 割引利得のエピソード毎の履歴<br>
 ![mazasimple_ramdom_reward_episode100](https://user-images.githubusercontent.com/25688193/53062593-a1ab2500-3504-11e9-98d3-8ea0e33b43a0.png)<br>

@@ -49,6 +49,7 @@ BRAIN_GAMMDA = 0.99         # 割引率
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|転倒：-1<br>連続 `NUM_TIME_STEP`回成功：+`NUM_TIME_STEP=200`<br>それ以外：+0.01|
+|シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`env.seed(8)`|←|
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
 ![cartpole-v0_qlearning_reward_episode500](https://user-images.githubusercontent.com/25688193/53066078-990d1b80-3511-11e9-974d-eb456fa16dfc.png)<br>

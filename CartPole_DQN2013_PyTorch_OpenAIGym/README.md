@@ -55,6 +55,7 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0に設定|←|
+|シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
 |DQNのネットワーク構成|MLP（３層）<br>入力層：状態数<br>隠れ層：32ノード<br>出力層：行動数|MLP（４層）<br>入力層：状態数<br>隠れ層１：32ノード<br>隠れ層２：32ノード<br>出力層：行動数|
 
 <!--
@@ -66,7 +67,7 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 - 損失関数のグラフ（実行条件１）<br>
 ![cartpole-v0_dqn2013_episode500](https://user-images.githubusercontent.com/25688193/53067890-8ac2fd80-3519-11e9-8117-925c7e4f9d92.png)<br>
-> エピソードが経過するにつれて、損失関数の値が０付近の値に向かって収束しており、うまく学習できていることがわかる。<br>
+> 途中で損失関数の値が発散しており、その後０付近の収束しておらず、うまく学習できていないことがわかる。<br>
 
 - 割引利得のエピソード毎の履歴（実行条件２）<br>
 ![cartpole-v0_dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/53067446-8eee1b80-3517-11e9-882a-5d32b68e3468.png)<br>

@@ -122,7 +122,6 @@ class CartPoleDQN2013Brain( Brain ):
             n_hiddens = 32,
             n_actions = self._n_actions
         )
-        
         return
 
 

@@ -51,6 +51,7 @@ BRAIN_GAMMDA = 0.99         # 割引率
 |学習率：`learning_rate`|0.1|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|
 |利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
+|シード値|`np.random.seed(1)`<br>`random.seed(1)`|←|
 
 - 割引利得のエピソード毎の履歴<br>
 ![mazasimple_policygd_reward_episode5000_](https://user-images.githubusercontent.com/25688193/53063294-f354af00-3506-11e9-9ce2-233a7f3d7c27.png)<br>

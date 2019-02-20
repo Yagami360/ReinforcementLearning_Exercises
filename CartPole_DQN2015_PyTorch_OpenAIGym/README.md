@@ -55,22 +55,26 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0に設定|←|
+|シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
 |DQNのネットワーク構成|MLP<br>入力層：状態数<br>隠れ層：32ノード<br>出力層：行動数|MLP<br>入力層：状態数<br>隠れ層１：32ノード<br>隠れ層２：32ノード<br>出力層：行動数|
+
 
 <!--
 転倒：-1<br>連続 `NUM_TIME_STEP`回成功：+`NUM_TIME_STEP=200`<br>それ以外：+1|
 -->
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
-![cartpole-v0_dqn2015_reward_episode500](https://user-images.githubusercontent.com/25688193/52898225-a8911980-321e-11e9-9604-fc8fab7fa5da.png)
+![cartpole-v0_dqn2015_reward_mlp3_episode500](https://user-images.githubusercontent.com/25688193/53070991-2c4f4c80-3524-11e9-9001-09727fbe7f00.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
-![cartpole-v0_dqn2015_episode500](https://user-images.githubusercontent.com/25688193/52898254-f9a10d80-321e-11e9-9a99-d637f0111f92.png)<br>
+![cartpole-v0_dqn2015_mlp3_episode500](https://user-images.githubusercontent.com/25688193/53070989-2a858900-3524-11e9-9ee3-10dbc962c259.png)<br>
 > DQN2013バージョンより、学習が安定していることがわかる。（Target Q-Network 同期による学習安定化効果？）
 
+<!--
 - DQN2013年バージョンとDQN2015バージョンの比較（実行条件１）<br>
-![cartpole-v0_dqn2015-dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/52899315-ffe9b680-322b-11e9-9e68-60040d8ef52f.png)<br>
-![cartpole-v0_dqn2015-dqn2013_episode500](https://user-images.githubusercontent.com/25688193/52899317-02e4a700-322c-11e9-9ca0-0d20315c3224.png)<br>
+![cartpole-v0_dqn2015-dqn2013_mlp3_reward_episode500](https://user-images.githubusercontent.com/25688193/53071607-0c208d00-3526-11e9-9fbf-a01e4deb7d0a.png)<br>
+![cartpole-v0_dqn2015-dqn2013_mlp3_episode500](https://user-images.githubusercontent.com/25688193/53071608-0cb92380-3526-11e9-875f-0d7065c57c35.png)<br>
+-->
 
 <br>
 
@@ -86,12 +90,11 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 -->
 ![cartpole-v0_dqn2015_mlp4_episode500](https://user-images.githubusercontent.com/25688193/53069072-0cb52580-351e-11e9-87c8-71dc2d3fd948.png)<br>
 
-
-> 実行条件１より、学習が安定化していることがわかる。（実行条件１のMLPより、層数が多いため？）<br>
-
+<!--
 - DQN2013年バージョンとDQN2015バージョンの比較（実行条件２）<br>
-![cartpole-v0_dqn2015-dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/52930168-bd8abb80-338a-11e9-9add-c8b27c101dee.png)<br>
-![cartpole-v0_dqn2015-dqn2013_episode500](https://user-images.githubusercontent.com/25688193/52930175-c54a6000-338a-11e9-98be-0a23635e9407.png)<br>
+![cartpole-v0_dqn2015-dqn2013_mlp4 reward_episode500](https://user-images.githubusercontent.com/25688193/53072115-8bfb2700-3527-11e9-91ee-f970cd331344.png)<br>
+![cartpole-v0_dqn2015-dqn2013_mlp4_episode500](https://user-images.githubusercontent.com/25688193/53072117-8c93bd80-3527-11e9-9237-2e27ff2a4e6f.png)<br>
+-->
 
 <br>
 

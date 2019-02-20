@@ -67,7 +67,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 50 )
+    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 500 )
 
     #-----------------------------------
     # Brain の生成
@@ -83,7 +83,7 @@ def main():
     )
     
     # モデルの構造を定義する。
-    #brain.model()
+    brain.model()
 
     # 損失関数を設定する。
     #brain.loss()
