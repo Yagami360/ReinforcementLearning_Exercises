@@ -61,8 +61,6 @@ class CartPoleAcademy( Academy ):
         """
         # エピソードを試行
         for episode in range( 0, self._max_episode ):
-            #print( "現在のエピソード数：", episode )
-
             # 学習環境を RESET
             self.academy_reset()
 
@@ -88,7 +86,7 @@ class CartPoleAcademy( Academy ):
             # Academy と全 Agents のエピソードを完了
             self._done = True
             for agent in self._agents:
-                agent.agent_on_done( episode )
+                agent.agent_on_done( episode, time_step )
 
             # 動画を保存
             if( episode % self._save_step == 0 ):

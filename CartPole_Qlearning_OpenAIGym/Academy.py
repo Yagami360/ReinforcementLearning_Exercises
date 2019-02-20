@@ -26,11 +26,8 @@ class Academy( object ):
         _max_episode : <int> エピソードの最大回数。最大回数数に到達すると、Academy と全 Agent のエピソードを完了する。
         _max_time_step : <int> 時間ステップの最大回数
         _save_step : <int> 保存間隔（エピソード数）
-
         _agents : list<AgentBase>
-
         _done : <bool> エピソードが完了したかのフラグ
-
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -77,10 +74,12 @@ class Academy( object ):
 
     def academy_run( self ):
         """
-        学習環境を実行する。
+        学習環境を実行する
         """
         # エピソードを試行
         for episode in range( 0, self._max_episode ):
+            print( "現在のエピソード数：", episode )
+
             # 学習環境を RESET
             self.academy_reset()
 
@@ -95,23 +94,27 @@ class Academy( object ):
                     self.add_frame( episode, time_step )
 
                 for agent in self._agents:
-                    agent.agent_step( episode, time_step )
+                    done = agent.agent_step( episode, time_step )
                     dones.append( done )
 
                 # 全エージェントが完了した場合
-                if( dones == True ):
+                if( all(dones) == True ):
                     break
 
             # Academy と全 Agents のエピソードを完了
             self._done = True
             for agent in self._agents:
-                agent.agent_on_done( episode )
+                agent.agent_on_done( episode, time_step )
 
             # 動画を保存
             if( episode % self._save_step == 0 ):
                 self.save_frames( "RL_ENV_Episode{}.gif".format(episode) )
                 self._frames = []
 
+            if( episode == self._max_episode - 1 ):
+                self.save_frames( "RL_ENV_Episode{}.gif".format(episode) )
+                self._frames = []
+        
         return
 
 
@@ -128,3 +131,4 @@ class Academy( object ):
         外部ファイルに動画を保存する。
         """
         return
+

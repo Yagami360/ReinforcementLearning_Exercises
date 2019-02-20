@@ -37,7 +37,8 @@ class CartPoleAgent( Agent ):
         self._env = env
         
         self._observations = self._env.reset()
-        self._losses = []
+        self._total_reward = torch.FloatTensor( [0.0] )
+        self._loss_historys = []
         #self._n_succeeded_episode = 0
         return
 
@@ -49,7 +50,7 @@ class CartPoleAgent( Agent ):
         print( "_env :", self._env )
         print( "_brain : \n", self._brain )
         print( "_observations : \n", self._observations )
-        print( "_reword : \n", self._reword )
+        print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
         print( "_s_a_historys : \n", self._s_a_historys )
@@ -71,12 +72,15 @@ class CartPoleAgent( Agent ):
         num_actions = self._env.action_space.n
         return num_actions
 
+    def get_loss_historys( self ):
+        return self._loss_historys
+
     def agent_reset( self ):
         """
         エージェントの再初期化処理
         """
         self._observations = self._env.reset()
-        self._reword = torch.FloatTensor( [0.0] )
+        self._total_reward = torch.FloatTensor( [0.0] )
         self._done = False
         return
 
@@ -120,13 +124,13 @@ class CartPoleAgent( Agent ):
         # 行動を実行する。
         #-------------------------------------------------------------------
         observations_next, _, env_done, _ = self._env.step( action.item() )
-
         #print( "env_done :", env_done )
         #print( "info :", info )
 
         #------------------------------------------------------------------
         # 行動の実行により、次の時間での状態 s_{t+1} 報酬 r_{t+1} を求める。
         #------------------------------------------------------------------
+        reward = torch.FloatTensor( [0.0] )
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
             # 次の状態は存在しない（＝終端状態）ので、None に設定する
@@ -135,11 +139,13 @@ class CartPoleAgent( Agent ):
             # 時間ステップの最大回数に近づいたら
             if time_step < 195:
                 # 途中でコケたら、報酬－１
-                self.add_reword( torch.FloatTensor( [-1.0] ), time_step )
+                reward = torch.FloatTensor( [-1.0] )
+                self.add_reward( reward, time_step )
                 #self._n_succeeded_episode = 0
             else:
                 # 立ったまま終了時は、報酬＋１
-                self.add_reword( torch.FloatTensor( [1.0] ), time_step )
+                reward = torch.FloatTensor( [1.0] )
+                self.add_reward( reward, time_step )
                 #self._n_succeeded_episode += 1
         else:
             # 観測値をそのまま状態として採用する（状態の離散化を行わない）
@@ -152,15 +158,14 @@ class CartPoleAgent( Agent ):
             next_state = torch.unsqueeze( next_state, dim = 0 )
 
             # 途中報酬
-            self.set_reword( torch.FloatTensor( [0.0] ) )
-            #self.add_reword( torch.FloatTensor( [1.0] ), time_step )
-
-        #print( "reward :", self._reword )
+            #self.set_reward( reward )
+            #reward = torch.FloatTensor( [1.0] )
+            #self.add_reward( reward, time_step )
 
         #----------------------------------------
         # 価値関数の更新
         #----------------------------------------
-        self._brain.update_q_function( state, action, next_state, self._reword )
+        self._brain.update_q_function( state, action, next_state, reward )
 
         #----------------------------------------
         # 状態の更新
@@ -187,11 +192,11 @@ class CartPoleAgent( Agent ):
         print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
 
         # 利得の履歴に追加
-        self._reward_historys.append( self._reword )
+        self._reward_historys.append( self._total_reward )
 
         # 損失関数の履歴に追加
         print( "loss = %0.6f" % self._brain.get_loss() )
-        self._losses.append( self._brain.get_loss() )
+        self._loss_historys.append( self._brain.get_loss() )
 
         # 一定間隔で、Target Network と Main Network を同期する
         if( (episode % 2) == 0 ):

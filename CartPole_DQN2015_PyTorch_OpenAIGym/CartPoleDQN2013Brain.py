@@ -110,17 +110,6 @@ class CartPoleDQN2013Brain( Brain ):
         [Args]
         [Returns]
         """
-        #------------------------------------------------
-        # Sequential モデルでネットワーク構成
-        #------------------------------------------------
-        """
-        self._model = nn.Sequential()
-        self._model.add_module( name = "fc1", module = nn.Linear( in_features = self._n_states, out_features = 32 ) )
-        self._model.add_module( "relu1", nn.ReLU() )
-        self._model.add_module( "fc2", nn.Linear( 32, 32 ) )
-        self._model.add_module( "relu2", nn.ReLU() )
-        self._model.add_module( "fc3", nn.Linear( 32, self._n_actions ) )
-        """
         """
         self._model = QNetworkMLP3(
             n_states = self._n_states, 
@@ -133,7 +122,7 @@ class CartPoleDQN2013Brain( Brain ):
             n_hiddens = 32,
             n_actions = self._n_actions
         )
-
+        
         return
 
 

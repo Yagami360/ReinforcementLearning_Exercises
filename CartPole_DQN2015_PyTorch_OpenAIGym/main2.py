@@ -4,9 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-
 from matplotlib import animation
-#from IPython.display import HTML
 
 # OpenAI Gym
 import gym
@@ -66,6 +64,8 @@ def main():
     # OpenAI-Gym の ENV を作成
     env1 = gym.make( RL_ENV )
     env2 = gym.make( RL_ENV )
+    env1.seed(8)
+    env2.seed(8)
 
     #-----------------------------------
     # Academy の生成
@@ -181,19 +181,19 @@ def main():
     #-----------------------------------
     # 損失関数の plot
     #-----------------------------------
-    losses1 = agent1._losses
-    losses2 = agent2._losses
+    loss_historys1 = agent1.get_loss_historys()
+    loss_historys2 = agent2.get_loss_historys()
 
     plt.clf()
     plt.plot(
-        range( 0, NUM_EPISODE ), losses1,
+        range( 0, NUM_EPISODE ), loss_historys1,
         label = 'with Target Network / mini_batch_size = %d, learning_rate = %0.4f' % ( BRAIN_BATCH_SIZE, BRAIN_LEARNING_RATE ),
         linestyle = '-',
         linewidth = 1,
         color = 'red'
     )
     plt.plot(
-        range( 0, NUM_EPISODE ), losses2,
+        range( 0, NUM_EPISODE ), loss_historys2,
         label = 'without Target Network / mini_batch_size = %d, learning_rate = %0.4f' % ( BRAIN_BATCH_SIZE, BRAIN_LEARNING_RATE ),
         linestyle = '--',
         linewidth = 1,

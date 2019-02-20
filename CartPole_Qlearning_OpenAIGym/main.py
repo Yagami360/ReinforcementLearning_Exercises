@@ -53,6 +53,7 @@ def main():
     #===================================
     # OpenAI-Gym の ENV を作成
     env = gym.make( RL_ENV )
+    env.seed(8)
 
     #-----------------------------------
     # Academy の生成

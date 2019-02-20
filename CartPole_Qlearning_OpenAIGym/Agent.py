@@ -19,7 +19,7 @@ class Agent( object ):
     [protected] 変数名の前にアンダースコア _ を付ける
         _brain : <Brain> エージェントの Brain への参照
         _observations : list<動的な型> エージェントが観測できる状態
-        _reword : <float> 収益
+        _total_reward : <float> 割引利得の総和
         _gamma : <float> 収益の割引率
         _done : <bool> エピソードの完了フラグ
         _state : <int> エージェントの現在の状態 s
@@ -38,13 +38,13 @@ class Agent( object ):
     ):
         self._brain = brain
         self._observations = []
-        self._reword = 0.0
+        self._total_reward = 0.0
         self._gamma = gamma
         self._done = False
         self._state = state0
         self._action = np.nan
         self._s_a_historys = [ [ self._state, self._action ] ]
-        self._reward_historys = [self._reword]
+        self._reward_historys = [self._total_reward]
         return
 
     def print( self, str ):
@@ -55,7 +55,7 @@ class Agent( object ):
 
         print( "_brain : \n", self._brain )
         print( "_observations : \n", self._observations )
-        print( "_reword : \n", self._reword )
+        print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
         print( "_state : \n", self._state )
@@ -70,6 +70,15 @@ class Agent( object ):
 
     def get_reward_historys( self ):
         return self._reward_historys
+
+    def collect_observations( self ):
+        """
+        Agent が観測している State を Brain に提供する。
+        ・Brain が、エージェントの状態を取得時にコールバックする。
+        """
+        self._observations = []
+        return self._observations
+
 
     def set_brain( self, brain ):
         """
@@ -98,26 +107,26 @@ class Agent( object ):
         """
         return self._done
 
-    def set_reword( self, reword ):
+    def set_total_reword( self, total_reward ):
         """
         報酬をセットする
         """
-        self._reword = reword
-        return self._reword
+        self._total_reward = total_reward
+        return self._total_reward
 
-    def add_reword( self, reword, time_step ):
+    def add_reward( self, reward, time_step ):
         """
         報酬を加算する
         ・割引収益 Rt = Σ_t γ^t r_t+1 になるように報酬を加算する。
         """
-        self._reword += ( self._gamma **time_step ) * reword
-        return self._reword
+        self._total_reward += (self._gamma**time_step) * reward
+        return self._total_reward
 
     def agent_reset( self ):
         """
         エージェントの再初期化処理
         """
-        self._reword = 0.0
+        self._total_reward = 0.0
         self._done = False
         self._state = self._s_a_historys[0][0]
         self._action = self._s_a_historys[0][1]
@@ -130,23 +139,24 @@ class Agent( object ):
         ・Academy から各時間ステップ度にコールされるコールバック関数
 
         [Args]
-            episode : 現在のエピソード数
-            time_step : 現在の時間ステップ
+            episode : <int> 現在のエピソード数
+            time_step : <int> 現在の時間ステップ
 
         [Returns]
-            done : bool
-                   エピソードの完了フラグ
+            done : <bool> エピソードの完了フラグ
         """
         self._done = False
         return self._done
     
-    def agent_on_done( self, episode ):
+
+    def agent_on_done( self, episode, time_step ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
 
         [Args]
             episode : <int> 現在のエピソード数
+            time_step : <int> エピソード完了時の時間ステップ数
         """
         return
 
