@@ -49,20 +49,25 @@ BRAIN_GAMMDA = 0.99         # 割引率
 |利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
 
 - 割引利得のエピソード毎の履歴<br>
-![mazasimple_ramdom_reward_episode100](https://user-images.githubusercontent.com/25688193/52896224-f2223a00-3207-11e9-943f-1392c8ad8d82.png)<br>
+![mazasimple_ramdom_reward_episode100](https://user-images.githubusercontent.com/25688193/53062593-a1ab2500-3504-11e9-98d3-8ea0e33b43a0.png)<br>
 
 以下のアニメーションは、このランダムな方策に基づく迷路探索問題の探索結果である。エピソードが経過しても、最短ルートでゴールまで到達できるようにはなっていないことが分かる。<br>
 
-- エピソード：1 回 / 迷路を解くのにかかったステップ数：19<br>
-![rl_env_simplemaze_episode0](https://user-images.githubusercontent.com/25688193/52896188-863fd180-3207-11e9-826a-d7ec13d06ad1.gif)<br>
+- エピソード：0 回目 / 迷路を解くのにかかったステップ数：19<br>
+![rl_env_episode0](https://user-images.githubusercontent.com/25688193/53062585-9ce67100-3504-11e9-9317-b1eb28bb7c9f.gif)<br>
 
-- エピソード：25 回 / 迷路を解くのにかかったステップ数：37<br>
-![rl_env_simplemaze_episode25](https://user-images.githubusercontent.com/25688193/52896190-8b048580-3207-11e9-8bf8-7a3c29728715.gif)<br>
+- エピソード：25 回目 / 迷路を解くのにかかったステップ数：37<br>
+![rl_env_episode25](https://user-images.githubusercontent.com/25688193/53062573-99eb8080-3504-11e9-8652-cf9751e24f94.gif)<br>
 
-- エピソード：50 回 / 迷路を解くのにかかったステップ数：33<br>
-![rl_env_simplemaze_episode50](https://user-images.githubusercontent.com/25688193/52896221-e2a2f100-3207-11e9-8d9f-fb186c3ed3cd.gif)<br>
+- エピソード：50 回目 / 迷路を解くのにかかったステップ数：39<br>
+![rl_env_episode50](https://user-images.githubusercontent.com/25688193/53062575-9a841700-3504-11e9-9e11-bdc1dfcfcd20.gif)<br>
 
 <!--
-- エピソード：75 回 / 迷路を解くのにかかったステップ数：71<br>
-![rl_env_simplemaze_episode75](https://user-images.githubusercontent.com/25688193/52896193-aa9bae00-3207-11e9-8837-3d7a190d9dec.gif)<br>
+- エピソード：75 回 / 迷路を解くのにかかったステップ数：155<br>
+![rl_env_episode75](https://user-images.githubusercontent.com/25688193/53062576-9a841700-3504-11e9-87ea-a5bbc8d2d878.gif)<br>
+-->
+
+<!--
+- エピソード：100 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_episode99](https://user-images.githubusercontent.com/25688193/53062578-9b1cad80-3504-11e9-988c-b779a2ddb2c1.gif)<br>
 -->

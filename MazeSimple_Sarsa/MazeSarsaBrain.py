@@ -150,7 +150,7 @@ class MazeSarsaBrain( Brain ):
         return q_function
 
 
-    def update_q_function( self, state, action, next_state, next_action, reword ):
+    def update_q_function( self, state, action, next_state, next_action, reward ):
         """
         Q 関数の値を更新する。
 
@@ -159,7 +159,7 @@ class MazeSarsaBrain( Brain ):
             action : <int> 現在の行動 a
             next_state : <int> 次の状態 s'
             next_action : <int> 次の行動 a'
-            reword : <float> 報酬
+            reward : <float> 報酬
         [Returns]
 
         """
@@ -170,8 +170,8 @@ class MazeSarsaBrain( Brain ):
 
         # ゴールした場合
         if( next_state == 8 ):
-            self._q_function[ state, action ] += self._learning_rate * ( reword - self._q_function[ state, action ] )
+            self._q_function[ state, action ] += self._learning_rate * ( reward - self._q_function[ state, action ] )
         else:
-            self._q_function[ state, action ] += self._learning_rate * ( reword + self._gamma * self._q_function[ next_state, next_action ] - self._q_function[ state, action ] )
+            self._q_function[ state, action ] += self._learning_rate * ( reward + self._gamma * self._q_function[ next_state, next_action ] - self._q_function[ state, action ] )
 
         return self._q_function

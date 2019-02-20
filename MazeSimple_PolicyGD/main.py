@@ -3,10 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
 from matplotlib import animation
-from IPython.display import HTML
-
 import random
 
 # 自作モジュール
@@ -46,7 +43,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
+    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 100 )
 
     #-----------------------------------
     # Brain の生成

@@ -37,7 +37,7 @@ AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.9          # 割引率
+BRAIN_GAMMDA = 0.99          # 割引率
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -52,36 +52,53 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |学習率：`learning_rate`|0.1|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
-|利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
+|利得の設定|ゴール地点：利得+1.0、それ以外：利得-0.01|
 
 <br>
 
 - 割引利得のエピソード毎の履歴<br>
-![mazasimple_sarsa_reward_episode100](https://user-images.githubusercontent.com/25688193/52896095-3dd3e400-3206-11e9-8fb9-94142881a007.png)<br>
+![mazasimple_sarsa_reward_episode100](https://user-images.githubusercontent.com/25688193/53059008-b1bd0780-34f8-11e9-926f-3be7a6262b8e.png)<br>
 
 - 各状態 S0 ~ S8 での状態価値関数 V(s) のエピソード経過による変化<br>
-![image](https://user-images.githubusercontent.com/25688193/52896111-87bcca00-3206-11e9-863d-570943e4e288.png)<br>
+![image](https://user-images.githubusercontent.com/25688193/53060285-445fa580-34fd-11e9-86d2-6c63e544ffea.png)<br>
+
 > ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する各状態の状態価値関数の値が、エピソードの経過とともに高い値となっており、うまく価値関数を学習出来ていることが分かる。<br>
 > ※ 尚、状態 S8 は、ゴール状態で行動方策がないため、これに対応する状態価値関数も定義されない。<br>
+
+- 各状態 {S0 ~ S8}、各行動 {↑、→、↓、←} での行動価値関数 Q(s) の学習完了後のヒートマップ図（実行条件１）<br>
+![mazasimple_sarsa_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53061348-d0bf9780-3500-11e9-9f40-26e75a6ace15.png)<br>
+> 上図は、下表のように、各状態のセルを９つのグリッドに分割し、それぞれ↑→↓←での状態行動対に対する行動価値関数をヒートマップで表示した図である。
+
+|S0|↑||S1|↑||S2|↑||
+|---|---|---|---|---|---|---|---|---|
+|←|平均値|→|←|平均値|→|←|平均値|→|
+||↓|||↓|||↓||
+|S3|↑||S4|↑||S5|↑||
+|←|平均値|→|←|平均値|→|←|平均値|→|
+||↓|||↓|||↓||
+|S6|↑||S7|↑||S8|↑||
+|←|平均値|→|←|平均値|→|←|平均値|→|
+||↓|||↓|||↓||
+
+> ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7 → S8）に対応する状態行動対の行動価値関数の値が、高い値となっており、うまく行動価値関数を学習出来ていることが分かる。<br>
+> ※ 尚、終端状態 S8 の行動価値関数は常に０の値となる。<br>
+
 
 <br>
 
 以下のアニメーションは、Sarsa による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
 - エピソード：1 回 / 迷路を解くのにかかったステップ数：47<br>
-![rl_env_simplemaze_episode10](https://user-images.githubusercontent.com/25688193/52896098-4d532d00-3206-11e9-8437-529a9491f597.gif)<br>
+![rl_env_episode0](https://user-images.githubusercontent.com/25688193/53061281-aa016100-3500-11e9-85ed-9226028d930b.gif)<br>
 
 - エピソード：5 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_episode0](https://user-images.githubusercontent.com/25688193/52896099-4d532d00-3206-11e9-8b52-a87d17827d19.gif)<br>
+![rl_env_episode5](https://user-images.githubusercontent.com/25688193/53061279-a8d03400-3500-11e9-8cbd-31b8ad88cc9e.gif)<br>
 
 - エピソード：10 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_episode5](https://user-images.githubusercontent.com/25688193/52896100-4debc380-3206-11e9-95c2-3b76a0309d74.gif)<br>
-
-- エピソード：50 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_episode50](https://user-images.githubusercontent.com/25688193/52896101-4fb58700-3206-11e9-9709-9c0c60ab32fc.gif)<br>
+![rl_env_episode10](https://user-images.githubusercontent.com/25688193/53061280-a968ca80-3500-11e9-82bd-157997224fef.gif)<br>
 
 - エピソード：100 回経過 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_episode95](https://user-images.githubusercontent.com/25688193/52896102-52b07780-3206-11e9-9d59-c24d214daae8.gif)<br>
+![rl_env_episode99](https://user-images.githubusercontent.com/25688193/53061293-ac63bb00-3500-11e9-8994-104274e6cf0c.gif)<br>
 
 
 ### ◎ コードの説明

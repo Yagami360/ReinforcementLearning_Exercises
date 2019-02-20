@@ -32,7 +32,7 @@ AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
 BRAIN_LEARNING_RATE = 0.1   # 学習率
 BRAIN_GREEDY_EPSILON = 0.5  # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.9          # 割引率
+BRAIN_GAMMDA = 0.99          # 割引率
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -48,6 +48,7 @@ BRAIN_GAMMDA = 0.9          # 割引率
 |学習率：`learning_rate`|0.1|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
+|利得の設定|ゴール地点：利得+1.0、それ以外：利得-0.01|
 
 - 割引利得のエピソード毎の履歴（実行条件１）
 ![mazasimple_qlearning_reward_episode100](https://user-images.githubusercontent.com/25688193/53015127-9e288700-348d-11e9-9abb-0adc663cb1d4.png)<br>
@@ -58,16 +59,28 @@ BRAIN_GAMMDA = 0.9          # 割引率
 > ※ 尚、終端状態 S8 の状態価値関数は常に０の値となる。<br>
 
 - 各状態 S0 ~ S8 での行動価値関数 Q(s) の学習完了後のヒートマップ図（実行条件１）<br>
-![mazasimple_qlearning_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53015165-b26c8400-348d-11e9-844a-ff2a0fb3cf18.png)<br>
+![mazasimple_qlearning_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53062093-02d1f900-3503-11e9-989f-875de6ad1fbb.png)<br>
+> 上図は、下表のように、各状態のセルを９つのグリッドに分割し、それぞれ↑→↓←での状態行動対に対する行動価値関数をヒートマップで表示した図である。
 
-> ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7）に対応する状態行動対の行動価値関数の値が、高い値となっており、うまく行動価値関数を学習出来ていることが分かる。<br>
+|S0|↑||S1|↑||S2|↑||
+|---|---|---|---|---|---|---|---|---|
+|←|平均値|→|←|平均値|→|←|平均値|→|
+||↓|||↓|||↓||
+|S3|↑||S4|↑||S5|↑||
+|←|平均値|→|←|平均値|→|←|平均値|→|
+||↓|||↓|||↓||
+|S6|↑||S7|↑||S8|↑||
+|←|平均値|→|←|平均値|→|←|平均値|→|
+||↓|||↓|||↓||
+
+> ゴールへたどり着くための正解ルート（S0 → S3 → S4 → S7 → S8）に対応する状態行動対の行動価値関数の値が、高い値となっており、うまく行動価値関数を学習出来ていることが分かる。<br>
 > ※ 尚、終端状態 S8 の行動価値関数は常に０の値となる。<br>
 
 - Q 学習 と Sarsa での比較<br>
 ![mazasimple_qlearning-sarsa_reward_episode100](https://user-images.githubusercontent.com/25688193/53014847-fe6af900-348c-11e9-84cf-c46694d61daa.png)<br>
 ![image](https://user-images.githubusercontent.com/25688193/53014893-278b8980-348d-11e9-9ec9-ae9cb994deee.png)<br>
-![mazasimple_qlearnig_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53014951-3c681d00-348d-11e9-8426-c0d6822bae5e.png)<br>
-![mazasimple_sarsa_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53014960-3ffba400-348d-11e9-9988-1f6cf955591a.png)<br>
+![mazasimple_qlearning_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53062204-59d7ce00-3503-11e9-9f98-6169336b9552.png)<br>
+![mazasimple_sarsa_qfunction_episode100](https://user-images.githubusercontent.com/25688193/53062205-5b08fb00-3503-11e9-91fc-06906c57e5aa.png)<br>
 
 > 赤線が Q 学習での変化。青線が、Sarsa での変化。<br>
 > Q 学習のほうが、Sarsa に比べて、落ち込みが少なく、収束が早い傾向が見てとれる。<br>
@@ -76,18 +89,17 @@ BRAIN_GAMMDA = 0.9          # 割引率
 
 以下のアニメーションは、Q学習による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
-- エピソード：0 回目 / 迷路を解くのにかかったステップ数：47<br>
-![rl_env_episode0](https://user-images.githubusercontent.com/25688193/53012366-21de7580-3486-11e9-9d57-9a64de9611e1.gif)<br>
+- エピソード：0 回目 / 迷路を解くのにかかったステップ数：45<br>
+![rl_env_episode0](https://user-images.githubusercontent.com/25688193/53061973-98b95400-3502-11e9-9ae2-9c005ed9bf88.gif)<br>
 
-- エピソード：5 回目 / 迷路を解くのにかかったステップ数：21<br>
-![rl_env_episode5](https://user-images.githubusercontent.com/25688193/53012367-21de7580-3486-11e9-84db-3508510d5527.gif)<br>
+- エピソード：5 回目 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_episode5](https://user-images.githubusercontent.com/25688193/53061974-98b95400-3502-11e9-8f21-ed80532218c0.gif)<br>
 
 - エピソード：10 回目 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_episode10](https://user-images.githubusercontent.com/25688193/53012364-2145df00-3486-11e9-93a7-7b2aba5c1ce4.gif)
-<br>
+![rl_env_episode10](https://user-images.githubusercontent.com/25688193/53061972-9820bd80-3502-11e9-8822-d62570e7d9a6.gif)<br>
 
 - エピソード：100 回目経過 / 迷路を解くのにかかったステップ数：5
-![rl_env_episode99](https://user-images.githubusercontent.com/25688193/53012529-8bf71a80-3486-11e9-9671-3eb905317687.gif)<br>
+![rl_env_episode100](https://user-images.githubusercontent.com/25688193/53062044-d6b67800-3502-11e9-9c57-5e98214069a5.gif)<br>
 
 
 ### ◎ コードの説明

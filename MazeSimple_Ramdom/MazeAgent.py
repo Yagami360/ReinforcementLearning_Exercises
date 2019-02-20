@@ -40,7 +40,7 @@ class MazeAgent( Agent ):
         print( str )
         print( "_brain : \n", self._brain )
         print( "_observations : \n", self._observations )
-        print( "_reword : \n", self._reword )
+        print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
         print( "_state : \n", self._state )
@@ -66,7 +66,7 @@ class MazeAgent( Agent ):
         エージェントの再初期化処理
         """
         self._done = False
-        self._reword = 0.0
+        self._total_reward = 0.0
         
         # s0 : エージェントの状態を再初期化 s0 して、開始位置に設定する。
         # a0 はまだ分からないので、np.nan
@@ -96,9 +96,6 @@ class MazeAgent( Agent ):
         # 既にエピソードが完了状態なら、そのまま return して、全エージェントの完了を待つ
         if( self._done == True):
             return self._done
-
-        #print( "現在のエピソード数：", episode )
-        #print( "現在の時間ステップ数：", time_step )
 
         #----------------------------------------------------------------------
         # １時間ステップでの迷宮探索
@@ -130,12 +127,14 @@ class MazeAgent( Agent ):
         policy = self._brain.get_policy()
 
         # a' → r'' : 次行動 a' に対する報酬 r'' の指定
+        reward = 0.0
         if( next_state == 8 ):
-            # ゴール地点なら、報酬１
-            self.add_reword( 1.0, time_step )
+            reward = 1.0
+            self.add_reward( reward, time_step )  # ゴール地点なら、報酬１
         else:
-            # ゴール地点なら、小さな負の報酬
-            self.add_reword( -0.01, time_step )
+            # ゴール地点でないなら、負の報酬（）
+            reward = -0.01
+            self.add_reward( reward, time_step )
         
         # ゴールの指定
         if( next_state == 8 ):
@@ -152,18 +151,19 @@ class MazeAgent( Agent ):
         return self._done
 
 
-    def agent_on_done( self, episode ):
+    def agent_on_done( self, episode, time_step ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
         """
         #------------------------------------------------------------
-        # １エピソード完了後の処理
+        # エピソード完了後の処理
         #------------------------------------------------------------
+        print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
         print( "迷路を解くのにかかったステップ数：" + str( len(self._s_a_historys) ) )
 
         # 利得の履歴に追加
-        self._reward_historys.append( self._reword )
+        self._reward_historys.append( self._total_reward )
 
         return
 

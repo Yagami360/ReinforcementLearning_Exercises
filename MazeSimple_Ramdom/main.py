@@ -3,10 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-
 from matplotlib import animation
-from IPython.display import HTML
-
 import random
 
 # 自作モジュール
@@ -43,7 +40,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP )
+    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 25 )
 
     #-----------------------------------
     # Brain の生成
@@ -113,7 +110,7 @@ def main():
     )
     plt.title( "Reward History" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.legend( loc = "lower right" )

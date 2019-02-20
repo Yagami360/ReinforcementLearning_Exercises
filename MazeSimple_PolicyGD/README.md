@@ -53,35 +53,35 @@ BRAIN_GAMMDA = 0.99         # 割引率
 |利得の設定|ゴール地点：利得＋１、それ以外：利得-0.01|
 
 - 割引利得のエピソード毎の履歴<br>
-![mazasimple_policygd_reward_episode5000](https://user-images.githubusercontent.com/25688193/52896351-0b2bea80-320a-11e9-93a7-0b26a56e6786.png)<br>
+![mazasimple_policygd_reward_episode5000_](https://user-images.githubusercontent.com/25688193/53063294-f354af00-3506-11e9-9ce2-233a7f3d7c27.png)<br>
 
 <br>
 
 以下のアニメーションは、方策勾配法による迷路探索問題の探索結果である。エピソードが経過するにつれて、うまく最短ルートで、ゴールまで到達できるようになっていることが分かる。<br>
 
 - エピソード：1 回 / 迷路を解くのにかかったステップ数：87<br>
-![rl_env_simplemaze_episode0](https://user-images.githubusercontent.com/25688193/52896304-2ba77500-3209-11e9-8009-de7c877af66e.gif)<br>
+![rl_env_episode0](https://user-images.githubusercontent.com/25688193/53062983-f00cf380-3505-11e9-9352-6592f4ca39ec.gif)<br>
 
-- エピソード：100 回 / 迷路を解くのにかかったステップ数：55<br>
-![rl_env_simplemaze_episode100](https://user-images.githubusercontent.com/25688193/52896299-2b0ede80-3209-11e9-9f39-acf274230651.gif)<br>
+- エピソード：100 回 / 迷路を解くのにかかったステップ数：7<br>
+![rl_env_episode100](https://user-images.githubusercontent.com/25688193/53063084-4712c880-3506-11e9-98e6-35e106b2c1c8.gif)<br>
 
-- エピソード：200 回 / 迷路を解くのにかかったステップ数：7<br>
-![rl_env_simplemaze_episode200](https://user-images.githubusercontent.com/25688193/52896300-2b0ede80-3209-11e9-9d56-4875e3af5dba.gif)<br>
+- エピソード：200 回 / 迷路を解くのにかかったステップ数：23<br>
+![rl_env_episode200](https://user-images.githubusercontent.com/25688193/53063085-47ab5f00-3506-11e9-8bd4-505738df0478.gif)<br>
 
 - エピソード：300 回 / 迷路を解くのにかかったステップ数：11<br>
-![rl_env_simplemaze_episode300](https://user-images.githubusercontent.com/25688193/52896301-2b0ede80-3209-11e9-9211-72f25357a185.gif)<br>
+![rl_env_episode300](https://user-images.githubusercontent.com/25688193/53063090-4bd77c80-3506-11e9-9db5-4c2f04ab5cbc.gif)<br>
 
-- エピソード：400 回 / 迷路を解くのにかかったステップ数：13<br>
-![rl_env_simplemaze_episode400](https://user-images.githubusercontent.com/25688193/52896302-2b0ede80-3209-11e9-8746-c4e8492123ff.gif)<br>
+- エピソード：400 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_episode400](https://user-images.githubusercontent.com/25688193/53063096-50039a00-3506-11e9-9b09-c2c1b5b6c348.gif)<br>
 
-- エピソード：500 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_episode500](https://user-images.githubusercontent.com/25688193/52896303-2ba77500-3209-11e9-8472-38041ab0ca7f.gif)<br>
+- エピソード：500 回 / 迷路を解くのにかかったステップ数：7<br>
+![rl_env_episode500](https://user-images.githubusercontent.com/25688193/53063098-5134c700-3506-11e9-8088-a1893645c709.gif)<br>
 
 - エピソード：1000 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_episode1000](https://user-images.githubusercontent.com/25688193/52896342-f3ecfd00-3209-11e9-9d55-a41363c6449b.gif)<br>
+![rl_env_episode1000](https://user-images.githubusercontent.com/25688193/53063145-7c1f1b00-3506-11e9-8edb-fd6fe654ac12.gif)<br>
 
-- エピソード：500 回 / 迷路を解くのにかかったステップ数：5<br>
-![rl_env_simplemaze_episode4900](https://user-images.githubusercontent.com/25688193/52896365-3adaf280-320a-11e9-9281-70f014d66e69.gif)<br>
+- エピソード：5000 回 / 迷路を解くのにかかったステップ数：5<br>
+![rl_env_episode4999](https://user-images.githubusercontent.com/25688193/53063317-05cee880-3507-11e9-931e-8d4ced302785.gif)<br>
 
 <br>
 
