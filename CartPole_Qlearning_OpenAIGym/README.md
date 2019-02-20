@@ -47,7 +47,7 @@ BRAIN_GAMMDA = 0.99         # 割引率
 |各状態の離散値への分割数：`NUM_DIZITIZED`|6|←|
 |学習率：`learning_rate`|0.5|←|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
-|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|←|
+|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5（減衰）|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|転倒：-1<br>連続 `NUM_TIME_STEP`回成功：+`NUM_TIME_STEP=200`<br>それ以外：+0.01|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`env.seed(8)`|←|
 

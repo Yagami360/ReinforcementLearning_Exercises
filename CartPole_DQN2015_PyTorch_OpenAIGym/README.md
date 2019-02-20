@@ -52,11 +52,11 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 |ミニバッチサイズ：`BRAIN_LEARNING_RATE`|32|←|
 |最適化アルゴリズム|Adam|←|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
-|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|←|
+|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5（減衰）|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
-|報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0に設定|←|
+|報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
-|DQNのネットワーク構成|MLP<br>入力層：状態数<br>隠れ層：32ノード<br>出力層：行動数|MLP<br>入力層：状態数<br>隠れ層１：32ノード<br>隠れ層２：32ノード<br>出力層：行動数|
+|DQNのネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>出力層：行動数（2）|MLP（4層）<br>入力層：状態数（4）<br>隠れ層１：32ノード<br>隠れ層２：32ノード<br>出力層：行動数（2）|
 
 
 <!--

@@ -51,7 +51,7 @@ BRAIN_GAMMDA = 0.99          # 割引率
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|500|
 |学習率：`learning_rate`|0.1|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|
-|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5|
+|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5（減衰）|
 |利得の設定|ゴール地点：利得+1.0、それ以外：利得-0.01|
 |シード値|`np.random.seed(1)`<br>`random.seed(1)`|←|
 
