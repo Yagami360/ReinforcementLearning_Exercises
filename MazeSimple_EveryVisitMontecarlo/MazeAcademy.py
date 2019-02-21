@@ -66,12 +66,12 @@ class MazeAcademy( Academy ):
 
             # 動画を保存
             if( episode % self._save_step == 0 ):
-                #self.save_frames( "RL_ENV_Episode{}.gif".format(episode) )
+                self.save_frames( "RL_ENV_Episode{}.gif".format(episode) )
                 #self._frames = []
                 pass
 
             if( episode == self._max_episode - 1 ):
-                #self.save_frames( "RL_ENV_Episode{}.gif".format(episode) )
+                self.save_frames( "RL_ENV_Episode{}.gif".format(episode) )
                 #self._frames = []
                 pass
 

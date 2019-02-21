@@ -17,8 +17,8 @@ from Brain import Brain
 from MazeEveryVisitMCBrain import MazeEveryVisitMCBrain
 
 # 設定可能な定数
-NUM_EPISODE = 200           # エピソード試行回数
-NUM_TIME_STEP = 200         # １エピソードの時間ステップの最大数
+NUM_EPISODE = 100           # エピソード試行回数
+NUM_TIME_STEP = 500         # １エピソードの時間ステップの最大数
 AGANT_NUM_STATES = 8        # 状態の要素数（s0~s7）※ 終端状態 s8 は除いた数
 AGANT_NUM_ACTIONS = 4       # 行動の要素数（↑↓→←）
 AGENT_INIT_STATE = 0        # 初期状態の位置 0 ~ 8
@@ -32,8 +32,8 @@ def main():
     """
     print("Start main()")
 
-    random.seed(8)
-    np.random.seed(8)
+    random.seed(1)
+    np.random.seed(1)
 
     #===================================
     # 学習環境、エージェント生成フェイズ
@@ -41,7 +41,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 1000 )
+    academy = MazeAcademy( max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 25 )
 
     #-----------------------------------
     # Brain の生成
@@ -165,7 +165,7 @@ def main():
     )
     plt.title( "V functions / S0" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -181,7 +181,7 @@ def main():
     )
     plt.title( "V functions / S1" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -198,7 +198,7 @@ def main():
 
     plt.title( "V functions / S2" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -215,7 +215,7 @@ def main():
 
     plt.title( "V functions / S3" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -232,7 +232,7 @@ def main():
 
     plt.title( "V functions / S4" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -248,7 +248,7 @@ def main():
     )
     plt.title( "V functions / S5" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -265,7 +265,7 @@ def main():
 
     plt.title( "V functions / S6" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -282,7 +282,7 @@ def main():
 
     plt.title( "V functions / S7" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
@@ -299,7 +299,7 @@ def main():
 
     plt.title( "V functions / S8" )
     plt.xlim( 0, NUM_EPISODE+1 )
-    plt.ylim( [-0.1, 1.05] )
+    #plt.ylim( [-0.1, 1.05] )
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()

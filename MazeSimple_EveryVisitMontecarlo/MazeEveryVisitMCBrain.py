@@ -73,7 +73,7 @@ class MazeEveryVisitMCBrain( Brain ):
         """
         ε-greedy 法の ε 値を減衰させる。
         """
-        self._epsilon = self._epsilon / 2.0
+        self._epsilon = self._epsilon / 1.10
         return
 
 
@@ -101,7 +101,8 @@ class MazeEveryVisitMCBrain( Brain ):
             state : <int> 現在の状態
         """
         # ε-グリーディー法に従った行動選択
-        if( self._epsilon <= np.random.rand() ):
+        rand = np.random.rand()
+        if( self._epsilon >= rand ):
             # ε の確率でランダムな行動を選択
             action = np.random.choice( self._n_actions, p = self._policy[ state, : ] )
 
@@ -126,7 +127,7 @@ class MazeEveryVisitMCBrain( Brain ):
         return q_function
 
 
-    def update_q_function( self, s_a_r_historys, total_reward ):
+    def update_q_function( self, s_a_r_historys ):
         """
         Brain を更新する。
         [Args]
@@ -136,14 +137,29 @@ class MazeEveryVisitMCBrain( Brain ):
         from collections import defaultdict
         N = defaultdict( lambda: [0] * self._n_actions )
 
+        total_reward = 0.0  # 状態行動対 (s,a) からみた将来の報酬和
+
         # 逐次訪問MC法による方策評価
+        # t = 0 ~ T
         for (t, s_a_r) in enumerate(s_a_r_historys):
             state = s_a_r[0]
             action = s_a_r[1]
             reward = s_a_r[2]
 
-            N[state][action] += 1  # count of s, a pair
+            # i = t ~ T / 0 ~ T, 1 ~ T, 2 ~ T,...
+            k = 0
+            for i in range( t, len(s_a_r_historys) ):
+                # reward_toal = Σ_k=0^T gamma^k * r_{t+k+1}
+                total_reward += ( self._gamma ** k ) * s_a_r_historys[i][2]
+                k += 1
+
+            # 状態行動対 (s,a) に遷移した回数
+            N[state][action] += 1
+
+            # 学習率（平均化のため逆数）
             alpha = 1 / N[state][action]
+
+            # ゴール状態での行動価値関数は定義していないため、除外
             if( state != 8 ):
                 self._q_function[state][action] += alpha * ( total_reward - self._q_function[state][action] )
 

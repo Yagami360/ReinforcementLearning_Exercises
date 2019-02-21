@@ -71,7 +71,7 @@ class MazeAgent( Agent ):
         # _s_a_historys = [s0, np.nan]
         self._state = self._s_a_r_historys[0][0]
         self._action = self._s_a_r_historys[0][1]
-        self._s_a_r_historys = [ [ self._state, self._action ] ]
+        self._s_a_historys = [ [ self._state, self._action ] ]
         self._s_a_r_historys = [ [ self._state, self._action, self._total_reward ] ]
 
         # a0 : 初期行動a0 を設定する。（Brain のロジックに従ったエージェント次の行動）
@@ -127,11 +127,12 @@ class MazeAgent( Agent ):
         reward = 0.0
         if( next_state == 8 ):
             reward = 1.0
-            #self.add_reward( reward, time_step )  # ゴール地点なら、報酬１
+            self.add_reward( reward, time_step )  # ゴール地点なら、報酬１
         else:
-            # ゴール地点でないなら、負の報酬（）
+            # ゴール地点でないなら、負の報酬
             reward = -0.01
-            #self.add_reward( reward, time_step )
+            #reward = 0.0
+            self.add_reward( reward, time_step )
         
         # (s,a,r) の履歴を追加
         self._s_a_historys.append( [next_state, next_action] )
@@ -163,10 +164,6 @@ class MazeAgent( Agent ):
         print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
         print( "迷路を解くのにかかったステップ数：" + str( len(self._s_a_r_historys) ) )
 
-        for (t,s_a_r) in enumerate( self._s_a_r_historys ):
-            reward = s_a_r[2]
-            self.add_reward( reward, time_step = t )
-
         # このメソッドが呼び出される度に、ε の値を徐々に小さくする。
         self._brain.decay_epsilon()
 
@@ -174,7 +171,7 @@ class MazeAgent( Agent ):
         self._reward_historys.append( self._total_reward )
 
         # 逐次訪問MC法による方策評価
-        self._brain.update_q_function( self._s_a_r_historys, self._total_reward )
+        self._brain.update_q_function( self._s_a_r_historys )
 
         #---------------------------------------------
         # Q関数とV関数

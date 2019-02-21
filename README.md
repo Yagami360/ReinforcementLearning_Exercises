@@ -4,7 +4,7 @@
 
 強化学習の背景理論は、以下のサイトに記載してあります。<br>
 
-- [強化学習](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md)
+- [GitHub/Yagami360/My_NoteBook/情報工学/情報工学_機械学習_強化学習.md](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md)
 
 
 ## ■ 動作環境
@@ -21,8 +21,8 @@
     1. [./MazeSimple_Sarsa](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Sarsa)
     1. [./MazeSimple_Qlearning](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Qlearning)
     1. [./MazeSimple_PolicyGD](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_PolicyGD)
-    1. [./MazeSimple_EveryVisitMontecarlo（実装中）](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_EveryVisitMontecarlo)
-    1. ./MazeGame_Unity_ML-Agents
+    1. [./MazeSimple_EveryVisitMontecarlo](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_EveryVisitMontecarlo)
+    1. ./MazeSimple_FirstVisitMontecarlo
 1. CartPole
     1. ./CartPole_Sarsa_OpenAIGym
     1. [./CartPole_Qleaning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_Qlearning_OpenAIGym)
@@ -30,12 +30,13 @@
     1. [./CartPole_DQN2015_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DQN2015_PyTorch_OpenAIGym)
 1. FrozenLake
     1. [./FrozenLake_Ramdom_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/FrozenLake_Ramdom_OpenAIGym)
-    1. ./FrozenLake_MonteCarlo_OpenAIGym
     1. ./FrozenLake_Sarsa_OpenAIGym
     1. [./FrozenLake_Qlearning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/FrozenLake_Qlearning_OpenAIGym)
-1. その他
+    1. ./FrozenLake_MonteCarlo_OpenAIGym
+1. OpenAI Gym
     1. [./Processing_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/Processing_OpenAIGym)
-
+1. Unity ML-Agents
+    1. ./MazeGame_Unity_ML-Agents
 
 ## ■ 参考文献＆サイト
 
