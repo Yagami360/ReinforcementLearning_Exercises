@@ -7,7 +7,7 @@ Q学習 によって、スリップなしのFrozenLakeを解く。<br>
 1. [使用法](#使用法)
 1. [コード説明＆実行結果](#コード説明＆実行結果)
 1. 背景理論
-    1. [【外部リンク】強化学習 / Q学習](https://github.com/Yagami360/My_NoteBook/blob/master/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6/%E6%83%85%E5%A0%B1%E5%B7%A5%E5%AD%A6_%E6%A9%9F%E6%A2%B0%E5%AD%A6%E7%BF%92_%E5%BC%B7%E5%8C%96%E5%AD%A6%E7%BF%92.md#Q%E5%AD%A6%E7%BF%92)
+    1. [【外部リンク】強化学習 / Q学習](http://yagami12.hatenablog.com/entry/2019/02/22/210608#Q%E5%AD%A6%E7%BF%92)
 
 ## ■ 動作環境
 
