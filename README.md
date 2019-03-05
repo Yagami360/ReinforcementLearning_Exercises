@@ -29,6 +29,7 @@
     1. [./CartPole_Qleaning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_Qlearning_OpenAIGym)
     1. [./CartPole_DQN2013_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DQN2013_PyTorch_OpenAIGym)
     1. [./CartPole_DQN2015_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DQN2015_PyTorch_OpenAIGym)
+    1. [./CartPole_DDQN_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DDQN_PyTorch_OpenAIGym)
 1. FrozenLake
     1. [./FrozenLake_Ramdom_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/FrozenLake_Ramdom_OpenAIGym)
     1. ./FrozenLake_Sarsa_OpenAIGym
