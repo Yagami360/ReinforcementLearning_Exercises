@@ -19,7 +19,7 @@ import torchvision      # 画像処理関連
 from Academy import Academy
 from CartPoleAcademy import CartPoleAcademy
 from Brain import Brain
-from CartPoleDQN2015Brain import CartPoleDQN2015Brain
+from CartPoleDDQNBrain import CartPoleDDQNBrain
 from Agent import Agent
 from CartPoleAgent import CartPoleAgent
 from ExperienceReplay import ExperienceReplay
@@ -40,7 +40,7 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 def main():
     """
 	強化学習の学習環境用の倒立振子課題 CartPole
-    ・エージェントの行動方策の学習ロジックは、DQN (2015年Natureバージョン)
+    ・エージェントの行動方策の学習ロジックは、Double-DQN
     """
     print("Start main()")
     
@@ -62,12 +62,12 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 25 )
+    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 50 )
 
     #-----------------------------------
     # Brain の生成
     #-----------------------------------
-    brain = CartPoleDQN2015Brain(
+    brain = CartPoleDDQNBrain(
         n_states = env.observation_space.shape[0],
         n_actions = env.action_space.n,
         epsilon = BRAIN_GREEDY_EPSILON,
@@ -137,7 +137,7 @@ def main():
     plt.legend( loc = "lower right" )
     plt.tight_layout()
 
-    plt.savefig( "{}_DQN2015_Reward_episode{}.png".format( RL_ENV, NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( "{}_Reward_episode{}.png".format( RL_ENV, NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
     #-----------------------------------
@@ -160,7 +160,7 @@ def main():
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
-    plt.savefig( "{}_DQN2015_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( "{}_Loss_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
     plt.show()
 
     print("Finish main()")

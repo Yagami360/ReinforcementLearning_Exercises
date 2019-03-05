@@ -23,10 +23,10 @@ from torch import optim
 import torch.nn.functional as F
 
 
-class CartPoleDQN2015Brain( Brain ):
+class CartPoleDDQNBrain( Brain ):
     """
     倒立振子課題（CartPole）の Brain。
-    ・DQN によるアルゴリズム
+    ・DDQN によるアルゴリズム
     
     [public]
 
@@ -39,8 +39,8 @@ class CartPoleDQN2015Brain( Brain ):
         _expected_q_function : <> 推定行動状態関数 Q(s,a,θ)
         _memory : <ExperienceRelay> ExperienceRelayに基づく学習用のデータセット
 
-        _main_network : <QNetwork> DQNのネットワーク
-        _target_network : <QNetwork> DQNのターゲットネットワーク
+        _main_network : <QNetwork> DDQNのメインネットワーク
+        _target_network : <QNetwork> DDQNのターゲットネットワーク
 
         _loss_fn : <torch.> モデルの損失関数
         _optimizer : <torch.optimizer> モデルの最適化アルゴリズム
@@ -79,7 +79,7 @@ class CartPoleDQN2015Brain( Brain ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "CartPoleDQN2015Brain" )
+        print( "CartPoleDDQNBrain" )
         print( self )
         print( str )
         print( "_n_states : \n", self._n_states )
@@ -118,7 +118,6 @@ class CartPoleDQN2015Brain( Brain ):
         #------------------------------------------------
         # ネットワーク構成
         #------------------------------------------------
-        """
         self._main_network = QNetworkMLP3(
             n_states = self._n_states, 
             n_hiddens = 32,
@@ -142,7 +141,7 @@ class CartPoleDQN2015Brain( Brain ):
             n_hiddens = 32,
             n_actions = self._n_actions
         )
-        
+        """
         print( "main network :", self._main_network )
         print( "target network :", self._target_network )
         return
@@ -219,24 +218,46 @@ class CartPoleDQN2015Brain( Brain ):
         #print( "_q_function :", self._q_function )
 
         #--------------------------------------------------------------------
-        # 次の状態を求める
-        #--------------------------------------------------------------------
-        # 全部 0 で初期化
-        next_state_values = torch.zeros( self._batch_size )
-
         # CartPole が done ではなく、next_state が存在するインデックス用のマスク
+        #--------------------------------------------------------------------
         non_final_mask = torch.ByteTensor(
             tuple( map(lambda s: s is not None,batch.next_state) )
         )
         #print( "non_final_mask :", non_final_mask )
 
+        #--------------------------------------------------------------------
+        # 次の状態 s_{t+1} でQ値を最大化する行動 a_m を求める
+        # a_m = arg max_{a∈A} Q_main(s_{t+1},a)
+        #--------------------------------------------------------------------
+        a_m = torch.zeros( self._batch_size ).type(torch.LongTensor)
+        #print( "a_m :", a_m )   # tensor([0, 0, 0,...,0) / shape = [batch_size]
+
+        # a_m は、メインネットワークから求める
+        # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
+        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
+        # 最後の[1]で行動に対応したindexが返る
+        a_m[non_final_mask] = self._main_network( non_final_next_states ).detach().max(1)[1]
+        #print( "a_m :", a_m )   # shape = [batch_size]
+
+        # 次の状態があるものだけにフィルターし、batch_size → batch_size * 1 へ reshape
+        a_m_non_final_next_states = a_m[non_final_mask].view(-1, 1)
+        #print( "a_m_non_final_next_states :", a_m_non_final_next_states )   # shape = [batch_size*1]
+
+        #--------------------------------------------------------------------
+        # 次の状態を求める
+        #--------------------------------------------------------------------
+        # 全部 0 で初期化
+        next_state_values = torch.zeros( self._batch_size )
+
         # Main Network ではなく Target Network からの出力
         next_outputs = self._target_network( non_final_next_states )
         #print( "next_outputs :", next_outputs )
 
-        # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
+        # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
+        # squeeze() で [batch_size]→[batch_size*1] に reshape
+        #next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
+        next_state_values[non_final_mask] = next_outputs.gather(1, a_m_non_final_next_states).detach().squeeze()
         #print( "next_state_values :", next_state_values )
 
         #--------------------------------------------------------------------

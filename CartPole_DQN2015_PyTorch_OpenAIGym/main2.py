@@ -15,11 +15,6 @@ from torch.utils.data import TensorDataset, DataLoader
 from torch  import nn   # ネットワークの構成関連
 import torchvision      # 画像処理関連
 
-
-# 動画の描写関数用
-from JSAnimation.IPython_display import display_animation
-from matplotlib import animation
-
 # 自作モジュール
 from Academy import Academy
 from CartPoleAcademy import CartPoleAcademy

@@ -64,10 +64,10 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 -->
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
-![cartpole-v0_dqn2015_reward_mlp3_episode500](https://user-images.githubusercontent.com/25688193/53070991-2c4f4c80-3524-11e9-9001-09727fbe7f00.png)<br>
+![cartpole-v0_dqn2015_reward_mlp3_episode500](https://user-images.githubusercontent.com/25688193/53780206-a5986780-3f46-11e9-8f1b-1e3f597f77b5.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
-![cartpole-v0_dqn2015_mlp3_episode500](https://user-images.githubusercontent.com/25688193/53070989-2a858900-3524-11e9-9ee3-10dbc962c259.png)<br>
+![cartpole-v0_dqn2015_mlp3_episode500](https://user-images.githubusercontent.com/25688193/53780207-a5986780-3f46-11e9-8d3d-47254bf568c6.png)<br>
 > DQN2013バージョンより、学習が安定していることがわかる。（Target Q-Network 同期による学習安定化効果？）
 
 <!--
@@ -82,13 +82,19 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 <!--
 ![cartpole-v0_dqn2015_reward_episode500](https://user-images.githubusercontent.com/25688193/52928835-15bebf00-3385-11e9-8acb-665b6f81b3b4.png)<br>
 -->
+<!--
 ![cartpole-v0_dqn2015_reward_mlp4_episode500](https://user-images.githubusercontent.com/25688193/53069071-0cb52580-351e-11e9-9b99-602261330fce.png)<br>
+-->
+![cartpole-v0_dqn2015_reward_mlp4_episode500](https://user-images.githubusercontent.com/25688193/53780902-cc0bd200-3f49-11e9-8235-f9168242d9cb.png)<br>
 
 - 損失関数のグラフ（実行条件２）<br>
 <!--
 ![cartpole-v0_dqn2015_episode500](https://user-images.githubusercontent.com/25688193/52928868-3555e780-3385-11e9-8042-ad94bee9a3eb.png)<br>
 -->
+<!--
 ![cartpole-v0_dqn2015_mlp4_episode500](https://user-images.githubusercontent.com/25688193/53069072-0cb52580-351e-11e9-87c8-71dc2d3fd948.png)<br>
+-->
+![cartpole-v0_dqn2015_mlp4_episode500](https://user-images.githubusercontent.com/25688193/53780901-c9a97800-3f49-11e9-8587-f2eae79bd4a6.png)<br>
 
 <!--
 - DQN2013年バージョンとDQN2015バージョンの比較（実行条件２）<br>
@@ -103,37 +109,28 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 
 - エピソード = 0 / 最終時間ステップ数 = 10（実行条件２）<br>
-![rl_env_cartpole-v0_episode0](https://user-images.githubusercontent.com/25688193/53068057-513ec200-351a-11e9-9293-a8fdef6a115b.gif)<br>
+![rl_env_cartpole-v0_episode0](https://user-images.githubusercontent.com/25688193/53780992-391f6780-3f4a-11e9-8a8c-f15c0bce8b4b.gif)<br>
 
-- エピソード = 50 / 最終時間ステップ数 = 28<br>
-![rl_env_cartpole-v0_episode50](https://user-images.githubusercontent.com/25688193/53068056-513ec200-351a-11e9-8b35-b7d89a958197.gif)<br>
+- エピソード = 50 / 最終時間ステップ数 = 14<br>
+![rl_env_cartpole-v0_episode50](https://user-images.githubusercontent.com/25688193/53780995-3de41b80-3f4a-11e9-8a9c-17a748f8cdd2.gif)<br>
 
-- エピソード = 100 / 最終時間ステップ数 = 195<br>
-![rl_env_cartpole-v0_episode100](https://user-images.githubusercontent.com/25688193/53068150-bb576700-351a-11e9-859f-bb66bdd2af37.gif)<br>
+- エピソード = 100 / 最終時間ステップ数 = 63<br>
+![rl_env_cartpole-v0_episode100](https://user-images.githubusercontent.com/25688193/53780997-40df0c00-3f4a-11e9-9dfa-9e961126f4c6.gif)<br>
 
-- エピソード = 150 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode150](https://user-images.githubusercontent.com/25688193/53068168-cdd1a080-351a-11e9-8ab9-fb33050a557a.gif)<br>
+- エピソード = 150 / 最終時間ステップ数 = 198<br>
+![rl_env_cartpole-v0_episode150](https://user-images.githubusercontent.com/25688193/53781002-450b2980-3f4a-11e9-9177-18131ee7740f.gif)<br>
 
 - エピソード = 200 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode200](https://user-images.githubusercontent.com/25688193/53068380-9dd6cd00-351b-11e9-994a-40b49bab168e.gif)<br>
-
-- エピソード = 250 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode250](https://user-images.githubusercontent.com/25688193/53068407-b21aca00-351b-11e9-89d8-4e27c668ac91.gif)<br>
+![rl_env_cartpole-v0_episode200](https://user-images.githubusercontent.com/25688193/53781058-84397a80-3f4a-11e9-9806-2548b9b807b8.gif)<br>
 
 - エピソード = 300 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode300](https://user-images.githubusercontent.com/25688193/53068496-1047ad00-351c-11e9-8128-5818084dd4a2.gif)<br>
-
-- エピソード = 350 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode350](https://user-images.githubusercontent.com/25688193/53068632-7c2a1580-351c-11e9-81a0-9aad4c46a680.gif)<br>
+![rl_env_cartpole-v0_episode300](https://user-images.githubusercontent.com/25688193/53781061-869bd480-3f4a-11e9-8864-9b213b7fedfb.gif)<br>
 
 - エピソード = 400 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode400](https://user-images.githubusercontent.com/25688193/53068846-420d4380-351d-11e9-9c66-099986e5e5fb.gif)<br>
-
-- エピソード = 450 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode450](https://user-images.githubusercontent.com/25688193/53068902-6ec15b00-351d-11e9-8a5d-a7f609ca7ba2.gif)<br>
+![rl_env_cartpole-v0_episode400](https://user-images.githubusercontent.com/25688193/53781066-8a2f5b80-3f4a-11e9-9d36-0cb1e1fafacf.gif)<br>
 
 - エピソード = 499 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode499](https://user-images.githubusercontent.com/25688193/53069030-e2fbfe80-351d-11e9-80dc-7c91f069e9ab.gif)<br>
+![rl_env_cartpole-v0_episode499](https://user-images.githubusercontent.com/25688193/53781068-8bf91f00-3f4a-11e9-9551-9dad68adc5dc.gif)<br>
 
 
 ### ◎ コードの説明
