@@ -56,7 +56,7 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|
-|DQNのネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>出力層：行動数（2）|
+|DQNのネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>出力層（状態価値関数）：1ノード<br>出力層（アドバンテージ関数）：行動数（2）|
 
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
