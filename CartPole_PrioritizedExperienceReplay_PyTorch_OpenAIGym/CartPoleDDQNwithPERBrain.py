@@ -395,5 +395,83 @@ class CartPoleDDQNwithPERBrain( Brain ):
 
     def update_td_error_memory( self ):
         """
+        TD誤差メモリに格納されているTD誤差を更新する
         """
+        #--------------------------------------------------------------------
+        # ネットワークを推論モードへ切り替え（PyTorch特有の処理）
+        #--------------------------------------------------------------------
+        self._main_network.eval()
+        self._target_network.eval()
+
+        #-----------------------------------------        
+        # ミニバッチデータを取得する
+        #-----------------------------------------
+        batch, state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_td_error_mini_batch()
+
+        #--------------------------------------------------------------------
+        # 構築したDQNのネットワークが出力する Q(s,a) を求める。
+        # 学習用データをモデルに流し込む
+        # model(引数) で呼び出せるのは、__call__ をオーバライトしているため
+        #--------------------------------------------------------------------
+        # outputs / shape = batch_size * _n_actions
+        outputs = self._main_network( state_batch )
+
+        # outputs から実際にエージェントが選択した action を取り出す
+        # gather(...) : 
+        # dim = 1 : 列方向
+        # index = action_batch : エージェントが実際に選択した行動は action_batch 
+        self._q_function = outputs.gather( 1, action_batch )
+
+        #--------------------------------------------------------------------
+        # CartPole が done ではなく、next_state が存在するインデックス用のマスク
+        #--------------------------------------------------------------------
+        non_final_mask = torch.ByteTensor(
+            tuple( map(lambda s: s is not None,batch.next_state) )
+        )
+
+        #--------------------------------------------------------------------
+        # 次の状態 s_{t+1} でQ値を最大化する行動 a_m を求める
+        # a_m = arg max_{a∈A} Q_main(s_{t+1},a)
+        #--------------------------------------------------------------------
+        a_m = torch.zeros( len( self._memory ) ).type(torch.LongTensor)
+        #print( "a_m :", a_m )   # tensor([0, 0, 0,...,0) / shape = [batch_size]
+
+        # a_m は、メインネットワークから求める
+        # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
+        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
+        # 最後の[1]で行動に対応したindexが返る
+        a_m[non_final_mask] = self._main_network( non_final_next_states ).detach().max(1)[1]
+        #print( "a_m :", a_m )   # shape = [batch_size]
+
+        # 次の状態があるものだけにフィルターし、batch_size → batch_size * 1 へ reshape
+        a_m_non_final_next_states = a_m[non_final_mask].view(-1, 1)
+        #print( "a_m_non_final_next_states :", a_m_non_final_next_states )   # shape = [batch_size*1]
+
+        #--------------------------------------------------------------------
+        # 次の状態を求める
+        #--------------------------------------------------------------------
+        # 全部 0 で初期化
+        next_state_values = torch.zeros( len( self._memory ) )
+
+        # Main Network ではなく Target Network からの出力
+        next_outputs = self._target_network( non_final_next_states )
+        #print( "next_outputs :", next_outputs )
+
+        # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
+        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
+        # squeeze() で [batch_size]→[batch_size*1] に reshape
+        #next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
+        next_state_values[non_final_mask] = next_outputs.gather(1, a_m_non_final_next_states).detach().squeeze()
+        #print( "next_state_values :", next_state_values )
+
+        #--------------------------------------------------------------------
+        # TD誤差を求める
+        #--------------------------------------------------------------------
+        # state_action_valuesはsize[minibatch×1]なので、squeezeしてsize[minibatch]へ
+        td_errors = (reward_batch + self._gamma * next_state_values) - self._q_function.squeeze()
+        
+        # TD誤差メモリを更新、Tensorをdetach()で取り出し、NumPyにしてから、Pythonのリストまで変換
+        td_errors_list = td_errors.detach().numpy().tolist()
+        self._memory.set_td_error_memory( td_errors_list )
+
         return

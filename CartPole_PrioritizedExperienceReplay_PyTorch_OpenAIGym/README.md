@@ -1,4 +1,4 @@
-# DDQN & Prioritized Experience Replay による倒立振子課題（CartPole）【実装中...】
+# DDQN & Prioritized Experience Replay による倒立振子課題（CartPole）
 強化学習の学習環境用の倒立振子課題 CartPole。<br>
 ディープラーニングを用いた強化学習手法であるDDQN [Double-DQN] をベースに、Prioritized Experience Replay による Relpay Memory によって、単純な２次元の倒立振子課題を解く。<br>
 
@@ -67,10 +67,10 @@ MEMORY_CHANGE_EPISODE = 30          # Experience Replay → PrioritizedExperienc
 |Experience Replay → PrioritizedExperienceReplay に切り替えるエピソード数：`MEMORY_CHANGE_EPISODE`|30|
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
-<br>
+![cartpole-v0_reward_episode500](https://user-images.githubusercontent.com/25688193/53941394-4e87c380-40fb-11e9-8a8a-75bd4250a7c1.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
-<br>
+![cartpole-v0_loss_episode500](https://user-images.githubusercontent.com/25688193/53941392-4e87c380-40fb-11e9-8f96-9c24dd5b1870.png)<br>
 
 
 <br>

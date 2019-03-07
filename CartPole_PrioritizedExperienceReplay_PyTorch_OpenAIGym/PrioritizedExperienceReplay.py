@@ -75,6 +75,12 @@ class PrioritizedExperienceReplay( object ):
         print( "_change_episode : ", self._change_episode )
         return
 
+    def get_memory( self ):
+        return self._memory
+
+    def set_td_error_memory( self, td_errors ):
+        self._memory_td_error = td_errors
+
     def push( self, state, action, next_state, reward ):
         """
         学習用のデータのメモリに、データを push する
@@ -143,7 +149,7 @@ class PrioritizedExperienceReplay( object ):
         # batch_size分の 0 ~ sum_abs_td_error の値の範囲での乱数を生成して、昇順に並べる
         rand_list = np.random.uniform( 0, sum_abs_td_error, batch_size )
         rand_list = np.sort( rand_list )
-        print( "rand_list : ", rand_list )
+        #print( "rand_list : ", rand_list )
 
         # 作成した乱数で、TD誤差の絶対値を串刺しにして、サンプリング対象のインデックスを求める
         indexes = []
@@ -161,11 +167,6 @@ class PrioritizedExperienceReplay( object ):
             indexes.append(idx)
 
         return indexes
-
-
-    def update_td_error( self, updated_td_errors ):
-        '''TD誤差の更新'''
-        self._memory_td_error = updated_td_errors
 
 
     def get_mini_batch( self, batch_size, episode ):
@@ -209,4 +210,31 @@ class PrioritizedExperienceReplay( object ):
         return batch, state_batch, action_batch, reward_batch, non_final_next_states
 
 
+    def get_td_error_mini_batch( self ):
+        """
+        """
+        #--------------------------------------------------------------------
+        # 全メモリでミニバッチを作成
+        #--------------------------------------------------------------------
+        transitions = self._memory
+        batch = Transition( *zip(*transitions) )
 
+        # 取り出したデータをミニバッチ学習用に reshape
+        # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size / shape = 32 * 4
+        # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
+        batch = Transition( *zip(*transitions) )
+
+        #
+        state_batch = torch.cat( batch.state )
+        action_batch = torch.cat( batch.action )
+        reward_batch = torch.cat( batch.reward )
+        non_final_next_states = torch.cat(
+            [s for s in batch.next_state if s is not None]
+        )
+
+        return batch, state_batch, action_batch, reward_batch, non_final_next_states
+
+
+    def update_td_error( self, updated_td_errors ):
+        '''TD誤差の更新'''
+        self._memory_td_error = updated_td_errors
