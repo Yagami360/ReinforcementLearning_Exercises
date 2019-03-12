@@ -32,10 +32,8 @@ class CartPoleA2CBrain( Brain ):
     [protected] 変数名の前にアンダースコア _ を付ける
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
-        _batch_size : <int> ミニバッチサイズ
 
         _network : <A2CNetwork> A2C のネットワーク
-
         _loss_fn : <torch.> モデルの損失関数
         _optimizer : <torch.optimizer> モデルの最適化アルゴリズム
 
@@ -52,7 +50,6 @@ class CartPoleA2CBrain( Brain ):
         super().__init__( n_states, n_actions )
         self._gamma = gamma
         self._learning_rate = learning_rate
-        self._batch_size = batch_size
 
         self._network = None
         self.model()
@@ -72,7 +69,6 @@ class CartPoleA2CBrain( Brain ):
         print( "_n_actions : \n", self._n_actions )
         print( "_gamma : \n", self._gamma )
         print( "_learning_rate : \n", self._learning_rate )
-        print( "_batch_size : \n", self._batch_size )
 
         print( "_network :\n", self._network )
         print( "_loss_fn :\n", self._loss_fn )
@@ -105,11 +101,11 @@ class CartPoleA2CBrain( Brain ):
             #print( "actor_output :\n", actor_output )
             #print( "critic_output :\n", critic_output )
 
-            # dim=1で行動の種類方向にsoftmaxを計算
-            action_probs = F.softmax( actor_output, dim = 0 )
+            # softmax で確率を計算 / A(s,a) → π(s,a)
+            policy = F.softmax( actor_output, dim = 0 )
 
-            # 確率分布のうち、最も確率が高い値のインデックスを取得
-            action = action_probs.multinomial( num_samples = 1 )
+            # 確率分布で表現された行動方策のうち、最も確率が高い値のインデックスを取得
+            action = policy.multinomial( num_samples = 1 )
             #print( "action :", action )
 
         return action
@@ -131,46 +127,57 @@ class CartPoleA2CBrain( Brain ):
         print( "_network :", self._network )
         return
 
-    def loss( self, state, action ):
+    def loss( self ):
         """
         モデルの損失関数を設定する。
         [Args]
         [Returns]
             self._loss_fn : <> モデルの損失関数
         """
+        #self._memory.print()
+
         #-------------------------------------------------------
         # loss 値を計算するために必要な各種値を計算
+        # k ステップ間のデータで計算
         #-------------------------------------------------------
-        actor_output, critic_output = self._network( state )
+        # [0:-1] で最後の行を除外し、[n_kstep+1, 4] → [n_kstep, 4] に reshape したものを渡す
+        actor_output, critic_output = self._network( self._memory.observations[0:-1] )
+        #print( "self._memory.observations[0:-1] :", self._memory.observations[0:-1] )
+        #print( "actor_output :", actor_output )
+        #print( "critic_output :", critic_output )
 
         # π = softmax(A)
-        probs = F.softmax( actor_output, dim = 0 )
-        #print( "probs :", probs )
+        policy = F.softmax( actor_output, dim = 1 )
+        #print( "policy :", policy )
 
         # π = softmax( A(s,a) )
         # log(π)
-        log_probs = F.log_softmax( actor_output, dim = 0 )  
-        #print( "log_probs :", log_probs )
+        log_policy = F.log_softmax( actor_output, dim = 1 )  
+        #print( "log_policy :", log_policy )
 
         # 
-        action_log_probs = log_probs.gather( 0, action )
-        #print( "action_log_probs :", action_log_probs )
+        action_log_policy = log_policy.gather( 1, self._memory.actions )
+        #print( "action_log_policy :", action_log_policy )
 
-        # L_entropy = π*log(π)
-        loss_entropy = -( log_probs * probs ).sum(-1).mean()
+        # L_entropy = Σ_a π*log(π)
+        loss_entropy = -( policy * log_policy ).sum(-1).mean()
         #print( "loss_entropy :", loss_entropy )
 
         # アドバンテージ関数を、割引利得＋割引状態価値関数で近似する。
-        advantage = self._memory.get_total_reward() - critic_output
+        advantage = self._memory.total_rewards[0:-1] - critic_output
+        #print( "memory / total_reward[0:-1]", self._memory.total_rewards[0:-1] )
+        #print( "advantage :", advantage )
 
         #-------------------------------------------------------
         # 損失関数の計算
         #-------------------------------------------------------
         # アクター側の損失関数 : Loss_actor = E[log(π)*A] - Loss_entorpy
-        loss_actor = - ( action_log_probs * advantage.detach() ).mean() - 0.01 * loss_entropy
+        loss_actor = - ( action_log_policy * advantage.detach() ).mean() - 0.01 * loss_entropy
+        #print( "loss_actor :", loss_actor )
 
         # クリティック側の損失関数 : Loss_critic = {Q(s,a)-V(s)}^2
         loss_critic = advantage.pow(2).mean()
+        #print( "loss_critic :", loss_critic )
 
         # 全損失関数
         self._loss_fn = loss_actor + 0.5 * loss_critic
@@ -198,24 +205,14 @@ class CartPoleA2CBrain( Brain ):
         return self._optimizer
 
 
-    def predict( self ):
-        """
-        教師信号となる行動価値関数を求める
-
-        [Args]
-        [Returns]
-        """
-        return
-
-
-    def fit( self, state, action ):
+    def fit( self ):
         """
         モデルを学習し、
         [Args]
         [Returns]
         """
         # 損失関数を計算する
-        self.loss( state, action )
+        self.loss()
 
         # モデルを学習モードに切り替える。
         self._network.train()
@@ -244,7 +241,7 @@ class CartPoleA2CBrain( Brain ):
         self._memory.insert( state, action, reward, done_mask )
         
         #
-        self.fit( state, action )
+        self.fit()
 
         #------------------------------------------------------
         # Meory の k-step 間での割引利得＋状態価値関数を再計算

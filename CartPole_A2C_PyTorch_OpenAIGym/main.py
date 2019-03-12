@@ -28,10 +28,9 @@ from CartPoleAgent import CartPoleAgent
 # 設定可能な定数
 #--------------------------------
 RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
-NUM_EPISODE = 500                   # エピソード試行回数
+NUM_EPISODE = 200                   # エピソード試行回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
 BRAIN_LEARNING_RATE = 0.0001        # 学習率
-BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
 BRAIN_KSTEP = 5                     # 先読みステップ数 k
 
@@ -71,7 +70,6 @@ def main():
         n_actions = env.action_space.n,
         gamma = BRAIN_GAMMDA,
         learning_rate = BRAIN_LEARNING_RATE,
-        batch_size = BRAIN_BATCH_SIZE,
         n_ksteps = BRAIN_KSTEP
     )
     
