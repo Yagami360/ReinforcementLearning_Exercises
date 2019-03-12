@@ -138,33 +138,46 @@ class CartPoleA2CBrain( Brain ):
         [Returns]
             self._loss_fn : <> モデルの損失関数
         """
-        # ネットワークを推論モードへ切り替え
-        self._network.eval()
-        
-        with torch.no_grad():
-            actor_output, critic_output = self._network( state )
+        #-------------------------------------------------------
+        # loss 値を計算するために必要な各種値を計算
+        #-------------------------------------------------------
+        actor_output, critic_output = self._network( state )
 
         # π = softmax(A)
         probs = F.softmax( actor_output, dim = 0 )
-        print( "probs :", probs )
+        #print( "probs :", probs )
 
         # π = softmax( A(s,a) )
         # log(π)
         log_probs = F.log_softmax( actor_output, dim = 0 )  
-        print( "log_probs :", log_probs )
+        #print( "log_probs :", log_probs )
 
         # 
         action_log_probs = log_probs.gather( 0, action )
-        print( "action_log_probs :", action_log_probs )
+        #print( "action_log_probs :", action_log_probs )
 
         # L_entropy = π*log(π)
-        entropy = -( log_probs * probs ).sum(-1).mean()
-        print( "entropy :", entropy )
+        loss_entropy = -( log_probs * probs ).sum(-1).mean()
+        #print( "loss_entropy :", loss_entropy )
 
+        # アドバンテージ関数を、割引利得＋割引状態価値関数で近似する。
+        advantage = self._memory.get_total_reward() - critic_output
+
+        #-------------------------------------------------------
+        # 損失関数の計算
+        #-------------------------------------------------------
+        # アクター側の損失関数 : Loss_actor = E[log(π)*A] - Loss_entorpy
+        loss_actor = - ( action_log_probs * advantage.detach() ).mean() - 0.01 * loss_entropy
+
+        # クリティック側の損失関数 : Loss_critic = {Q(s,a)-V(s)}^2
+        loss_critic = advantage.pow(2).mean()
+
+        # 全損失関数
+        self._loss_fn = loss_actor + 0.5 * loss_critic
         #print( "loss_fn :", self._loss_fn )
         
-        # loss 値の初回計算フラグ
-        #self._b_loss_init = True
+        # loss 値の初回計算済フラグ
+        self._b_loss_init = True
 
         return self._loss_fn
 
@@ -201,17 +214,17 @@ class CartPoleA2CBrain( Brain ):
         [Args]
         [Returns]
         """
-        # モデルを学習モードに切り替える。
-        self._network.train()
-
         # 損失関数を計算する
         self.loss( state, action )
+
+        # モデルを学習モードに切り替える。
+        self._network.train()
 
         # 勾配を 0 に初期化（この初期化処理が必要なのは、勾配がイテレーション毎に加算される仕様のため）
         self._optimizer.zero_grad()
 
         # 誤差逆伝搬
-        #self._loss_fn.backward()
+        self._loss_fn.backward()
 
         # 一気に重みパラメータ θ が更新されないように、勾配は最大 0.5 までにする。
         nn.utils.clip_grad_norm_( self._network.parameters(), 0.5 )
@@ -242,10 +255,11 @@ class CartPoleA2CBrain( Brain ):
         with torch.no_grad():
             actor_output, critic_output = self._network( state )
 
+        # detach() で deep copy したものを、メモリに保管
         v_function = critic_output.detach()
         self._memory.update( v_function )
 
-        self._memory.print("")
+        #self._memory.print("")
 
         return
 

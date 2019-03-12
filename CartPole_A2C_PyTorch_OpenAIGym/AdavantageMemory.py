@@ -43,7 +43,7 @@ class AdavantageMemory( object ):
         self._rewards = torch.zeros( n_ksteps, 1 )
         self._actions = torch.zeros( n_ksteps, 1 ).long()
         self._done_masks = torch.ones( n_ksteps + 1, 1 )
-        self._total_rewards = torch.zeros( n_ksteps, 1 )
+        self._total_rewards = torch.zeros( n_ksteps + 1, 1 )
         self._index = 0
 
         self._gamma = gamma
@@ -63,6 +63,9 @@ class AdavantageMemory( object ):
         print( "_total_rewards :\n", self._total_rewards )
         print( "----------------------------------" )
         return
+
+    def get_total_reward( self ):
+        return self._total_rewards[-1]
 
     def insert( self, observations, action, reward, done_mask ):
         """
@@ -86,17 +89,20 @@ class AdavantageMemory( object ):
 
     def update( self, v_function ):
         """
-        割引報酬和を再計算する。
+        割引報酬和＋割引状態価値関数を再計算する。
         """
         self._total_rewards[-1] = v_function
         
-        self.print()
+        #self.print()
         # 逆順ループ： n_kstep - 1 → ... → 2 → 1 → 0
         for step in reversed( range(self._n_ksteps) ):
             #print( "step :", step )
-            #self._total_rewards[step] = \
-            #    self._total_rewards[step + 1] * self._gamma * self._done_masks[step + 1] + self._rewards[step]
-            pass
+            self._total_rewards[step] = \
+                self._total_rewards[step + 1] * self._gamma * self._done_masks[step + 1] + self._rewards[step]
+            
+        # 割引報酬和を更新後は、0 番目の要素にコピー
+        self._observations[0].copy_( self._observations[-1] )
+        self._done_masks[0].copy_( self._done_masks[-1] )
 
         return
 

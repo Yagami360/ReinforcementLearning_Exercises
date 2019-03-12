@@ -34,6 +34,7 @@ NUM_TIME_STEP = 200             # １エピソードの時間ステップの最�
 BRAIN_LEARNING_RATE = 0.0001    # 学習率
 BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
 BRAIN_GAMMDA = 0.99             # 利得の割引率
+BRAIN_KSTEP = 5                     # 先読みステップ数 k
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -46,13 +47,14 @@ BRAIN_GAMMDA = 0.99             # 利得の割引率
 |---|---|---|
 |エピソード試行回数：`NUM_EPISODE`|500|500|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|200|←|
-|学習率：`learning_rate`|0.0001|←|
 |ミニバッチサイズ：`BRAIN_LEARNING_RATE`|32|←|
 |最適化アルゴリズム|Adam|←|
+|学習率：`learning_rate`|0.0001|←|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
+|先読みステップ数 k `BRAIN_KSTEP`|5|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
-|A2C のネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>アクター側の出力層：行動数（2）<br>クリティック側の出力層：1|
+|A2C のネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>アクター側の出力層：行動数（2）<br>クリティック側の出力層：1|←|
 
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
