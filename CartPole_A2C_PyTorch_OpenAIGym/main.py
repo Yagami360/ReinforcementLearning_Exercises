@@ -18,8 +18,11 @@ import torchvision      # 画像処理関連
 # 自作モジュール
 from Academy import Academy
 from CartPoleAcademy import CartPoleAcademy
+from CartPoleA2CAcademy import CartPoleA2CAcademy
+
 from Brain import Brain
 from CartPoleA2CBrain import CartPoleA2CBrain
+
 from Agent import Agent
 from CartPoleAgent import CartPoleAgent
 
@@ -28,11 +31,15 @@ from CartPoleAgent import CartPoleAgent
 # 設定可能な定数
 #--------------------------------
 RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
-NUM_EPISODE = 200                   # エピソード試行回数
+NUM_EPISODE = 500                   # エピソード試行回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
+NUM_KSTEP = 5                       # 先読みステップ数 k
 BRAIN_LEARNING_RATE = 0.0001        # 学習率
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
-BRAIN_KSTEP = 5                     # 先読みステップ数 k
+BRAIN_LOSS_CRITIC_COEF = 0.5        # クリティック側の損失関数の重み係数
+BRAIN_LOSS_ENTROPY_COEF = 0.1       # クリティック側の損失関数の重み係数
+BRAIN_ADVANTAGE_SOFTPLUS = False    # アドバンテージ関数の softplus 化の有無
+BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 
 
 def main():
@@ -60,7 +67,13 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = NUM_EPISODE )
+    academy = CartPoleA2CAcademy( 
+        env = env, 
+        max_episode = NUM_EPISODE, 
+        max_time_step = NUM_TIME_STEP,
+        k_step = NUM_KSTEP,
+        save_step = NUM_EPISODE
+    )
 
     #-----------------------------------
     # Brain の生成
@@ -70,7 +83,10 @@ def main():
         n_actions = env.action_space.n,
         gamma = BRAIN_GAMMDA,
         learning_rate = BRAIN_LEARNING_RATE,
-        n_ksteps = BRAIN_KSTEP
+        n_kstep = NUM_KSTEP,
+        loss_critic_coef = BRAIN_LOSS_CRITIC_COEF,
+        loss_entropy_coef = BRAIN_LOSS_ENTROPY_COEF,
+        clipping_max_grad = BRAIN_CLIPPING_MAX_GRAD
     )
     
     # モデルの構造を定義する。
@@ -117,7 +133,7 @@ def main():
 
     plt.clf()
     plt.plot(
-        range(0,NUM_EPISODE+1), reward_historys,
+        range( len(reward_historys) ), reward_historys,
         label = 'gamma = {}'.format(BRAIN_GAMMDA),
         linestyle = '-',
         linewidth = 0.5,
@@ -141,13 +157,13 @@ def main():
 
     plt.clf()
     plt.plot(
-        range( 0, NUM_EPISODE ), loss_historys,
-        label = 'mini_batch_size = %d, learning_rate = %0.4f' % ( BRAIN_BATCH_SIZE, BRAIN_LEARNING_RATE ),
+        range( len(loss_historys) ), loss_historys,
+        label = 'loss_total',
         linestyle = '-',
         #linewidth = 2,
         color = 'black'
     )
-    plt.title( "loss / Smooth L1" )
+    plt.title( "loss" )
     plt.legend( loc = 'best' )
     plt.xlim( 0, NUM_EPISODE+1 )
     #plt.ylim( [0, 1.05] )

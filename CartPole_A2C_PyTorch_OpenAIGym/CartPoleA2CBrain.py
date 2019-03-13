@@ -28,16 +28,18 @@ class CartPoleA2CBrain( Brain ):
     ・A2C [Advantage Actor Critic] によるアルゴリズム
     
     [public]
+        memory : <AdavantageMemory> メモリ
 
     [protected] 変数名の前にアンダースコア _ を付ける
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
+        _loss_critic_coef : <float> クリティック側の損失関数の重み係数
+        _loss_entropy_coef : <float> アクター側の損失関数のエントロピー後の重み係数
+        _clipping_max_grad : <float> クリッピングする最大勾配量
 
         _network : <A2CNetwork> A2C のネットワーク
         _loss_fn : <torch.> モデルの損失関数
         _optimizer : <torch.optimizer> モデルの最適化アルゴリズム
-
-        _memory : <AdavantageMemory> メモリ
     """
     def __init__(
         self,
@@ -45,18 +47,24 @@ class CartPoleA2CBrain( Brain ):
         n_actions,
         gamma = 0.9, learning_rate = 0.0001,
         batch_size = 32,
-        n_ksteps = 5
+        n_kstep = 5,
+        loss_critic_coef = 0.5,
+        loss_entropy_coef = 0.1,
+        clipping_max_grad = 0.5
     ):
         super().__init__( n_states, n_actions )
         self._gamma = gamma
         self._learning_rate = learning_rate
+        self._loss_critic_coef = loss_critic_coef
+        self._loss_entropy_coef = loss_entropy_coef
+        self._clipping_max_grad = clipping_max_grad
 
         self._network = None
         self.model()
 
         self._loss_fn = None
         self._optimizer = None
-        self._memory = AdavantageMemory( n_ksteps, n_states, gamma )
+        self.memory = AdavantageMemory( n_kstep, n_states, gamma )
         self._b_loss_init = False
         return
 
@@ -69,12 +77,14 @@ class CartPoleA2CBrain( Brain ):
         print( "_n_actions : \n", self._n_actions )
         print( "_gamma : \n", self._gamma )
         print( "_learning_rate : \n", self._learning_rate )
+        print( "_loss_critic_coef : \n", self._loss_critic_coef )
+        print( "_loss_entropy_coef : \n", self._loss_entropy_coef )
+        print( "_clipping_max_grad : \n", self._clipping_max_grad )
 
         print( "_network :\n", self._network )
         print( "_loss_fn :\n", self._loss_fn )
         print( "_optimizer :\n", self._optimizer )
-        print( "_memory :\n", self._memory )
-
+        print( "memory :\n", self.memory )
         print( "----------------------------------" )
         return
 
@@ -141,8 +151,8 @@ class CartPoleA2CBrain( Brain ):
         # k ステップ間のデータで計算
         #-------------------------------------------------------
         # [0:-1] で最後の行を除外し、[n_kstep+1, 4] → [n_kstep, 4] に reshape したものを渡す
-        actor_output, critic_output = self._network( self._memory.observations[0:-1] )
-        #print( "self._memory.observations[0:-1] :", self._memory.observations[0:-1] )
+        actor_output, critic_output = self._network( self.memory.observations[0:-1] )
+        #print( "self.memory.observations[0:-1] :", self.memory.observations[0:-1] )
         #print( "actor_output :", actor_output )
         #print( "critic_output :", critic_output )
 
@@ -156,7 +166,7 @@ class CartPoleA2CBrain( Brain ):
         #print( "log_policy :", log_policy )
 
         # 
-        action_log_policy = log_policy.gather( 1, self._memory.actions )
+        action_log_policy = log_policy.gather( 1, self.memory.actions )
         #print( "action_log_policy :", action_log_policy )
 
         # L_entropy = Σ_a π*log(π)
@@ -164,15 +174,18 @@ class CartPoleA2CBrain( Brain ):
         #print( "loss_entropy :", loss_entropy )
 
         # アドバンテージ関数を、割引利得＋割引状態価値関数で近似する。
-        advantage = self._memory.total_rewards[0:-1] - critic_output
-        #print( "memory / total_reward[0:-1]", self._memory.total_rewards[0:-1] )
+        advantage = self.memory.total_rewards[0:-1] - critic_output
+        #print( "memory / total_reward[0:-1]", self.memory.total_rewards[0:-1] )
         #print( "advantage :", advantage )
 
+        # アドバンテージ関数を softplus 化して、常に正の値にする
+        pass
+        
         #-------------------------------------------------------
         # 損失関数の計算
         #-------------------------------------------------------
         # アクター側の損失関数 : Loss_actor = E[log(π)*A] - Loss_entorpy
-        loss_actor = - ( action_log_policy * advantage.detach() ).mean() - 0.01 * loss_entropy
+        loss_actor = - ( action_log_policy * advantage.detach() ).mean() - self._loss_entropy_coef * loss_entropy
         #print( "loss_actor :", loss_actor )
 
         # クリティック側の損失関数 : Loss_critic = {Q(s,a)-V(s)}^2
@@ -180,7 +193,7 @@ class CartPoleA2CBrain( Brain ):
         #print( "loss_critic :", loss_critic )
 
         # 全損失関数
-        self._loss_fn = loss_actor + 0.5 * loss_critic
+        self._loss_fn = loss_actor + self._loss_critic_coef * loss_critic
         #print( "loss_fn :", self._loss_fn )
         
         # loss 値の初回計算済フラグ
@@ -224,7 +237,7 @@ class CartPoleA2CBrain( Brain ):
         self._loss_fn.backward()
 
         # 一気に重みパラメータ θ が更新されないように、勾配は最大 0.5 までにする。
-        nn.utils.clip_grad_norm_( self._network.parameters(), 0.5 )
+        nn.utils.clip_grad_norm_( self._network.parameters(), self._clipping_max_grad )
 
         # backward() で計算した勾配を元に、設定した optimizer に従って、重みを更新
         self._optimizer.step()
@@ -234,14 +247,11 @@ class CartPoleA2CBrain( Brain ):
         return
 
 
-    def update( self, state, action, reward, done_mask ):
+    def update( self ):
         """
         """
-        #
-        self._memory.insert( state, action, reward, done_mask )
-        
-        #
-        self.fit()
+        #self.memory.print()
+        #print( "self.memory.observations[-1] :", self.memory.observations[-1] )
 
         #------------------------------------------------------
         # Meory の k-step 間での割引利得＋状態価値関数を再計算
@@ -250,13 +260,22 @@ class CartPoleA2CBrain( Brain ):
         self._network.eval()
 
         with torch.no_grad():
-            actor_output, critic_output = self._network( state )
+            actor_output, critic_output = self._network( self.memory.observations[-1] )
 
         # detach() で deep copy したものを、メモリに保管
         v_function = critic_output.detach()
-        self._memory.update( v_function )
+        self.memory.update( v_function )
 
-        #self._memory.print("")
+        #------------------------------------------------------
+        # 重みパラメータ θ の更新
+        #------------------------------------------------------
+        #self.memory.print()
+        self.fit()
+
+        #------------------------------------------------------
+        # 
+        #------------------------------------------------------
+        self.memory.after_update()
 
         return
 

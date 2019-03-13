@@ -85,7 +85,7 @@ class CartPoleAgent( Agent ):
         self._done = False
         return
 
-    def agent_step( self, episode, time_step ):
+    def agent_step( self, episode, time_step, k_step ):
         """
         エージェント [Agent] の次の状態を決定する。
         ・Academy から各時間ステップ度にコールされるコールバック関数
@@ -99,7 +99,7 @@ class CartPoleAgent( Agent ):
                    エピソードの完了フラグ
         """
         # 既にエピソードが完了状態なら、そのまま return して、全エージェントの完了を待つ
-        if( self._done == True):
+        if( self._done == True ):
             return self._done
 
         #-------------------------------------------------------------------
@@ -111,7 +111,8 @@ class CartPoleAgent( Agent ):
         # 離散化した現在の状態 s_t を元に、行動 a_t を求める
         #-------------------------------------------------------------------
         #print( "state", state )
-        action = self._brain.action( state )
+        action = self._brain.action( self._brain.memory.observations[k_step] )
+        #action = self._brain.action( state )
         
         #-------------------------------------------------------------------
         # 行動を実行する。
@@ -157,12 +158,12 @@ class CartPoleAgent( Agent ):
             done_mask =  torch.FloatTensor( [1.0] )
 
         # 完了時は observation を 0 にする
-        #self._observations *= done_mask
+        observations_next *= done_mask
 
-        #----------------------------------------
-        # Brain の更新
-        #----------------------------------------
-        self._brain.update( self._observations, action, reward, done_mask )
+        #---------------------------------------------
+        # メモリに値を挿入
+        #---------------------------------------------
+        self._brain.memory.insert( observations_next, action, reward, done_mask )
 
         #----------------------------------------
         # 状態の更新
@@ -176,6 +177,17 @@ class CartPoleAgent( Agent ):
             self.done()
 
         return self._done
+
+
+    def agent_on_kstep_done( self, episode, time_step ):
+        """
+        """
+        #----------------------------------------
+        # Brain の更新
+        #----------------------------------------
+        self._brain.update()
+
+        return
 
 
     def agent_on_done( self, episode, time_step ):

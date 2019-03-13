@@ -29,11 +29,15 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
-NUM_EPISODE = 500               # エピソード試行回数
-NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
-BRAIN_LEARNING_RATE = 0.0001    # 学習率
-BRAIN_GAMMDA = 0.99             # 利得の割引率
-BRAIN_KSTEP = 5                 # 先読みステップ数 k
+NUM_EPISODE = 500                   # エピソード試行回数
+NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
+BRAIN_LEARNING_RATE = 0.0001        # 学習率
+BRAIN_GAMMDA = 0.99                 # 利得の割引率
+BRAIN_KSTEP = 5                     # 先読みステップ数 k
+BRAIN_LOSS_CRITIC_COEF = 0.5        # クリティック側の損失関数の重み係数
+BRAIN_LOSS_ENTROPY_COEF = 0.1       # クリティック側の損失関数の重み係数
+BRAIN_ADVANTAGE_SOFTPLUS = False    # アドバンテージ関数の softplus 化の有無
+BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -50,6 +54,10 @@ BRAIN_KSTEP = 5                 # 先読みステップ数 k
 |学習率：`learning_rate`|0.0001|←|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |先読みステップ数 k `BRAIN_KSTEP`|5|←|
+|クリティック側の損失関数の重み係数：`BRAIN_LOSS_CRITIC_COEF`|0.5|←|
+|エントロピーの損失関数の重み係数：`BRAIN_LOSS_ENTROPY_COEF`|0.1|←|
+|アドバンテージ関数の softplus 化の有無：`BRAIN_ADVANTAGE_SOFTPLUS`|`False`|`True`|
+|クリッピングする最大勾配値：`BRAIN_CLIPPING_MAX_GRAD`|0.5|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
 |A2C のネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>アクター側の出力層：行動数（2）<br>クリティック側の出力層：1|←|
@@ -67,17 +75,17 @@ BRAIN_KSTEP = 5                 # 先読みステップ数 k
 
 ```python
 CartPoleA2CBrain
-<AdavantageMemory.AdavantageMemory object at 0x00000193B885B908>
+<AdavantageMemory.AdavantageMemory object at 0x0000023CD35537B8>
 
 _index :
- 1
+ 0
 observations :
  tensor([[ 0.0000,  0.0000,  0.0000,  0.0000],
-        [ 0.0384, -0.0423,  0.0327,  0.0217],
-        [ 0.0000,  0.0000,  0.0000,  0.0000],
-        [ 0.0000,  0.0000,  0.0000,  0.0000],
-        [ 0.0000,  0.0000,  0.0000,  0.0000],
-        [ 0.0000,  0.0000,  0.0000,  0.0000]])
+        [ 0.0406,  0.1459, -0.0147, -0.2718],
+        [ 0.0436, -0.0490, -0.0201,  0.0162],
+        [ 0.0426, -0.2439, -0.0198,  0.3024],
+        [ 0.0377, -0.4387, -0.0138,  0.5888],
+        [ 0.0289, -0.2434, -0.0020,  0.2918]])
 rewards :
  tensor([[0.],
         [0.],
@@ -89,7 +97,7 @@ actions :
         [0],
         [0],
         [0],
-        [0]])
+        [1]])
 done_masks :
  tensor([[1.],
         [1.],
@@ -105,50 +113,8 @@ total_rewards :
         [0.],
         [0.]])
 ----------------------------------
-self._memory.observations[0:-1] : tensor([[ 0.0000,  0.0000,  0.0000,  0.0000],
-        [ 0.0384, -0.0423,  0.0327,  0.0217],
-        [ 0.0000,  0.0000,  0.0000,  0.0000],
-        [ 0.0000,  0.0000,  0.0000,  0.0000],
-        [ 0.0000,  0.0000,  0.0000,  0.0000]])
-actor_output : tensor([[-0.0918, -0.1602],
-        [-0.0959, -0.1605],
-        [-0.0918, -0.1602],
-        [-0.0918, -0.1602],
-        [-0.0918, -0.1602]], grad_fn=<AddmmBackward>)
-critic_output : tensor([[-0.0945],
-        [-0.0931],
-        [-0.0945],
-        [-0.0945],
-        [-0.0945]], grad_fn=<AddmmBackward>)
-policy : tensor([[0.5171, 0.4829],
-        [0.5162, 0.4838],
-        [0.5171, 0.4829],
-        [0.5171, 0.4829],
-        [0.5171, 0.4829]], grad_fn=<SoftmaxBackward>)
-log_policy : tensor([[-0.6595, -0.7279],
-        [-0.6614, -0.7260],
-        [-0.6595, -0.7279],
-        [-0.6595, -0.7279],
-        [-0.6595, -0.7279]], grad_fn=<LogSoftmaxBackward>)
-action_log_policy : tensor([[-0.7279],
-        [-0.6614],
-        [-0.6595],
-        [-0.6595],
-        [-0.6595]], grad_fn=<GatherBackward>)
-loss_entropy : tensor(0.6926, grad_fn=<NegBackward>)
-memory / total_reward[0:-1] tensor([[0.],
-        [0.],
-        [0.],
-        [0.],
-        [0.]])
-advantage : tensor([[0.0945],
-        [0.0931],
-        [0.0945],
-        [0.0945],
-        [0.0945]], grad_fn=<SubBackward0>)
-loss_actor : tensor(0.0565, grad_fn=<SubBackward0>)
-loss_critic : tensor(0.0089, grad_fn=<MeanBackward1>)
-loss_fn : tensor(0.0610, grad_fn=<AddBackward0>)
+self.memory.observations[-1] : tensor([ 0.0289, -0.2434, -0.0020,  0.2918])
+
 ```
 
 ```python
@@ -277,5 +243,42 @@ advantage : tensor([[[-0.0458]],
 loss_actor_gain : tensor(0.0160, grad_fn=<MeanBackward1>)
 loss_critic : tensor(0.0007, grad_fn=<MeanBackward1>)
 loss_total : tensor(-0.0226, grad_fn=<SubBackward0>)
+
+```
+
+```python
+masks : tensor([[1.]])
+reward : tensor([[0.]])
+episode_rewards : tensor([[0.]])
+final_rewards : tensor([[0.]])
+```
+
+```python
+index : 0
+observations :
+ tensor([[[ 0.0256, -0.0061,  0.0388,  0.0301]],
+
+        [[ 0.0255, -0.2017,  0.0394,  0.3348]],
+
+        [[ 0.0214, -0.3974,  0.0461,  0.6396]],
+
+        [[ 0.0135, -0.5931,  0.0589,  0.9464]],
+
+        [[ 0.0016, -0.3988,  0.0778,  0.6728]],
+
+        [[-0.0063, -0.5949,  0.0912,  0.9889]]])
+
+------------------------------------
+rollouts.observations[:-1].view(-1, 4) : 
+tensor([[ 0.0256, -0.0061,  0.0388,  0.0301],
+        [ 0.0255, -0.2017,  0.0394,  0.3348],
+        [ 0.0214, -0.3974,  0.0461,  0.6396],
+        [ 0.0135, -0.5931,  0.0589,  0.9464],
+        [ 0.0016, -0.3988,  0.0778,  0.6728]])
+rollouts.actions.view(-1, 1) : tensor([[0],
+        [0],
+        [0],
+        [1],
+        [0]])
 
 ```

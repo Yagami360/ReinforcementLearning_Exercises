@@ -17,29 +17,30 @@ class AdavantageMemory( object ):
     """
     Advantage 学習用のメモリ
     ・kステップ数でのメモリ領域を循環参照することで、kステップ先読みでの学習に対応
+    ・ロールアウト（スワップアウト）のメモリ構造
 
     [public]
         _observations : <Tensor> shape = n_states
         _reward : <Tensor>
 
     [protected] 変数名の前にアンダースコア _ を付ける        
-        _n_ksteps : [int] 先読みするステップ数 k
+        _n_kstep : [int] 先読みするステップ数 k
         _index : <int> 現在のメモリ先のインデックス
         _gamma : <float> 割引利得の γ 値
     """
     def __init__( 
         self, 
-        n_ksteps, n_states,
+        n_kstep, n_states,
         gamma = 0.0001
     ):
         #self._n_processes = n_processes
-        self._n_ksteps = n_ksteps
+        self._n_kstep = n_kstep
 
-        self.observations = torch.zeros( n_ksteps + 1, n_states )
-        self.rewards = torch.zeros( n_ksteps, 1 )
-        self.actions = torch.zeros( n_ksteps, 1 ).long()
-        self.done_masks = torch.ones( n_ksteps + 1, 1 )
-        self.total_rewards = torch.zeros( n_ksteps + 1, 1 )
+        self.observations = torch.zeros( n_kstep + 1, n_states )
+        self.rewards = torch.zeros( n_kstep, 1 )
+        self.actions = torch.zeros( n_kstep, 1 ).long()
+        self.done_masks = torch.ones( n_kstep + 1, 1 )
+        self.total_rewards = torch.zeros( n_kstep + 1, 1 )
         self._index = 0
 
         self._gamma = gamma
@@ -76,7 +77,7 @@ class AdavantageMemory( object ):
         self.done_masks[self._index + 1].copy_( done_mask )
 
         # index = 0 → 1 → ... → _n_ksteps → 0 → 1,...
-        self._index = ( self._index + 1 ) % self._n_ksteps
+        self._index = ( self._index + 1 ) % self._n_kstep
         return
 
 
@@ -88,15 +89,20 @@ class AdavantageMemory( object ):
         
         #self.print()
         # 逆順ループ： n_kstep - 1 → ... → 2 → 1 → 0
-        for step in reversed( range(self._n_ksteps) ):
+        for step in reversed( range(self._n_kstep) ):
             #print( "step :", step )
             self.total_rewards[step] = \
                 self.total_rewards[step + 1] * self._gamma * self.done_masks[step + 1] + self.rewards[step]
             
+        return
+
+
+    def after_update( self ):
         # 割引報酬和を更新後は、0 番目の要素にコピー
         self.observations[0].copy_( self.observations[-1] )
         self.done_masks[0].copy_( self.done_masks[-1] )
 
         return
+
 
     
