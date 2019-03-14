@@ -44,7 +44,8 @@ class A2CNetwork( nn.Module ):
         """
         h1 = F.relu( self.fc1(x) )
         h2 = F.relu( self.fc2(h1) )
-        
+
+        critic_output = self.critic( h2 )        
         actor_output = self.actor( h2 )
-        critic_output = self.critic( h2 )
+
         return actor_output, critic_output

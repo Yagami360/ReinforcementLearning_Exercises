@@ -83,9 +83,14 @@ class CartPoleAgent( Agent ):
         self._observations = torch.from_numpy( self._observations ).float()
         self._total_reward = torch.FloatTensor( [0.0] )
         self._done = False
+
+        self._brain.memory.observations[0].copy_( self._observations )
+
+        #print( "self._observations :", self._observations )
+
         return
 
-    def agent_step( self, episode, time_step, k_step ):
+    def agent_step( self, episode, time_step ):
         """
         エージェント [Agent] の次の状態を決定する。
         ・Academy から各時間ステップ度にコールされるコールバック関数
@@ -103,21 +108,15 @@ class CartPoleAgent( Agent ):
             return self._done
 
         #-------------------------------------------------------------------
-        # 現在の状態 s_t を求める
-        #-------------------------------------------------------------------
-        state = self._observations
-
-        #-------------------------------------------------------------------
         # 離散化した現在の状態 s_t を元に、行動 a_t を求める
         #-------------------------------------------------------------------
-        #print( "state", state )
-        action = self._brain.action( self._brain.memory.observations[k_step] )
-        #action = self._brain.action( state )
+        action = self._brain.action( self._observations )
+        #print( "self._observations :", self._observations )
+        #print( "action.item() :", action.item() )
         
         #-------------------------------------------------------------------
-        # 行動を実行する。
+        # 行動を実行し、次の状態を得る。
         #-------------------------------------------------------------------
-        #observations_next, _, env_done, _ = self._env.step( action.item() )
         observations_next, _, env_done, _ = self._env.step( action.item() )
 
         # numpy →  Tensor に変換
@@ -126,7 +125,7 @@ class CartPoleAgent( Agent ):
         #print( "info :", info )
 
         #------------------------------------------------------------------
-        # 行動の実行により、次の時間での状態 s_{t+1} 報酬 r_{t+1} を求める。
+        # 行動の実行により、次の時間での報酬 r_{t+1} を求める。
         #------------------------------------------------------------------
         reward = torch.FloatTensor( [0.0] )
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
@@ -159,11 +158,13 @@ class CartPoleAgent( Agent ):
 
         # 完了時は observation を 0 にする
         observations_next *= done_mask
+        #print( "observations_next :", observations_next )
 
         #---------------------------------------------
         # メモリに値を挿入
         #---------------------------------------------
         self._brain.memory.insert( observations_next, action, reward, done_mask )
+        #self._brain.memory.print()
 
         #----------------------------------------
         # 状態の更新

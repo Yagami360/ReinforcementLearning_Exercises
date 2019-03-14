@@ -65,6 +65,7 @@ class CartPoleA2CBrain( Brain ):
         self._loss_fn = None
         self._optimizer = None
         self.memory = AdavantageMemory( n_kstep, n_states, gamma )
+
         self._b_loss_init = False
         return
 
@@ -113,6 +114,7 @@ class CartPoleA2CBrain( Brain ):
 
             # softmax で確率を計算 / A(s,a) → π(s,a)
             policy = F.softmax( actor_output, dim = 0 )
+            #policy = F.softmax( actor_output, dim = 1 )
 
             # 確率分布で表現された行動方策のうち、最も確率が高い値のインデックスを取得
             action = policy.multinomial( num_samples = 1 )
@@ -144,7 +146,7 @@ class CartPoleA2CBrain( Brain ):
         [Returns]
             self._loss_fn : <> モデルの損失関数
         """
-        #self._memory.print()
+        #self.memory.print()
 
         #-------------------------------------------------------
         # loss 値を計算するために必要な各種値を計算
@@ -265,6 +267,7 @@ class CartPoleA2CBrain( Brain ):
         # detach() で deep copy したものを、メモリに保管
         v_function = critic_output.detach()
         self.memory.update( v_function )
+        #print( "v_function :", v_function )
 
         #------------------------------------------------------
         # 重みパラメータ θ の更新

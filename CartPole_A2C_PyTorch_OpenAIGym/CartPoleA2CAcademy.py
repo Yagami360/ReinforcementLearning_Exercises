@@ -65,35 +65,39 @@ class CartPoleA2CAcademy( CartPoleAcademy ):
         self.academy_reset()
 
         time_step = 0
-        # エピソードを試行
-        for episode in range( 0, self._max_episode ):
-            # 学習環境を RESET
-            #self.academy_reset()
+        episode = 0
 
+        # エピソードを試行
+        for epoch in range( 0, self._max_episode ):
             # k step
             for kstep in range( self._k_step ):
                 dones = []
 
                 for agent in self._agents:
-                    done = agent.agent_step( episode, time_step, kstep )
+                    done = agent.agent_step( episode, time_step )
                     dones.append( done )
 
                 # 全エージェントが完了した場合
                 if( all(dones) == True ):
+                    # Academy と全 Agents のエピソードを完了
+                    for agent in self._agents:
+                        agent.agent_on_done( episode, time_step )
+
                     time_step = 0
+                    episode += 1
                     break
+
                 else:
                     time_step += 1
-                    pass
 
             # k_step 完了後の処理
             for agent in self._agents:
                 agent.agent_on_kstep_done( episode, time_step )
 
-            # Academy と全 Agents のエピソードを完了
-            self._done = True
-            for agent in self._agents:
-                agent.agent_on_done( episode, time_step )
+            # 学習環境を RESET
+            if ( all(dones) == True ):
+                self._done = True
+                self.academy_reset()
 
         return
 

@@ -31,10 +31,10 @@ from CartPoleAgent import CartPoleAgent
 # 設定可能な定数
 #--------------------------------
 RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
-NUM_EPISODE = 500                   # エピソード試行回数
+NUM_EPISODE = 1000                   # エピソード試行回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
 NUM_KSTEP = 5                       # 先読みステップ数 k
-BRAIN_LEARNING_RATE = 0.0001        # 学習率
+BRAIN_LEARNING_RATE = 0.01        # 学習率
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
 BRAIN_LOSS_CRITIC_COEF = 0.5        # クリティック側の損失関数の重み係数
 BRAIN_LOSS_ENTROPY_COEF = 0.1       # クリティック側の損失関数の重み係数
@@ -140,9 +140,9 @@ def main():
         color = 'black'
     )
     plt.title( "Reward History" )
-    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.xlim( 0, NUM_EPISODE+1 )
     #plt.ylim( [-0.1, 1.05] )
-    plt.xlabel( "Episode" )
+    plt.xlabel( "epoches" )
     plt.grid()
     plt.legend( loc = "lower right" )
     plt.tight_layout()
@@ -165,9 +165,9 @@ def main():
     )
     plt.title( "loss" )
     plt.legend( loc = 'best' )
-    plt.xlim( 0, NUM_EPISODE+1 )
+    #plt.xlim( 0, NUM_EPISODE+1 )
     #plt.ylim( [0, 1.05] )
-    plt.xlabel( "Episode" )
+    plt.xlabel( "epoches" )
     plt.grid()
     plt.tight_layout()
     plt.savefig( "{}_Loss_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )

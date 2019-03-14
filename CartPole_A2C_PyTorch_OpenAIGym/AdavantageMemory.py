@@ -90,7 +90,6 @@ class AdavantageMemory( object ):
         #self.print()
         # 逆順ループ： n_kstep - 1 → ... → 2 → 1 → 0
         for step in reversed( range(self._n_kstep) ):
-            #print( "step :", step )
             self.total_rewards[step] = \
                 self.total_rewards[step + 1] * self._gamma * self.done_masks[step + 1] + self.rewards[step]
             
