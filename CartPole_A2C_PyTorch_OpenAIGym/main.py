@@ -31,10 +31,10 @@ from CartPoleAgent import CartPoleAgent
 # 設定可能な定数
 #--------------------------------
 RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
-NUM_EPOCHS = 2000                   # 繰り返し回数
+NUM_EPOCHS = 50000                   # 繰り返し回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
 NUM_KSTEP = 5                       # 先読みステップ数 k
-BRAIN_LEARNING_RATE = 0.01          # 学習率
+BRAIN_LEARNING_RATE = 0.0001          # 学習率
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
 BRAIN_LOSS_CRITIC_COEF = 0.5        # クリティック側の損失関数の重み係数
 BRAIN_LOSS_ENTROPY_COEF = 0.01      # クリティック側の損失関数の重み係数
@@ -71,7 +71,7 @@ def main():
         env = env, 
         max_epoches = NUM_EPOCHS, 
         k_step = NUM_KSTEP,
-        save_step = NUM_EPOCHS
+        save_step = ( ( NUM_EPOCHS - 1 ) / NUM_KSTEP )
     )
 
     #-----------------------------------
@@ -136,7 +136,7 @@ def main():
         range( len(reward_historys) ), reward_historys,
         label = 'gamma = {} / lr={}'.format(BRAIN_GAMMDA, BRAIN_LEARNING_RATE),
         linestyle = '-',
-        linewidth = 0.5,
+        linewidth = 0.1,
         color = 'black'
     )
     plt.title( "Reward History" )
@@ -148,7 +148,7 @@ def main():
     plt.tight_layout()
 
     plt.savefig( 
-        "{}_Reward_epoch{}_lr{}.png".format( RL_ENV, NUM_EPOCHS, BRAIN_LEARNING_RATE ), 
+        "{}_Reward_epoch{}_lr{}_maxgrad{}.png".format( RL_ENV, NUM_EPOCHS, BRAIN_LEARNING_RATE, BRAIN_CLIPPING_MAX_GRAD ), 
         dpi = 300, bbox_inches = "tight" 
     )
     plt.show()
@@ -163,7 +163,7 @@ def main():
         range( len(loss_historys) ), loss_historys,
         label = 'loss_total / lr ={}'.format(BRAIN_LEARNING_RATE),
         linestyle = '-',
-        #linewidth = 2,
+        linewidth = 0.1,
         color = 'black'
     )
     plt.title( "loss" )
@@ -174,7 +174,7 @@ def main():
     plt.grid()
     plt.tight_layout()
     plt.savefig( 
-        "{}_Loss_epoch{}_lr{}.png".format( academy._env.spec.id, NUM_EPOCHS, BRAIN_LEARNING_RATE ), 
+        "{}_Loss_epoch{}_lr{}_maxgrad{}.png".format( academy._env.spec.id, NUM_EPOCHS, BRAIN_LEARNING_RATE, BRAIN_CLIPPING_MAX_GRAD ), 
         dpi = 300, bbox_inches = "tight" 
     )
     plt.show()
