@@ -31,15 +31,20 @@ class CartPoleAgent( Agent ):
         self,
         env,
         brain = None, 
-        gamma = 0.9
+        gamma = 0.9,
+        max_time_step = 200,
+        n_kstep = 5
     ):
         super().__init__( brain, gamma, 0 )
         self._env = env
         
-        self._observations = self._env.reset()
+        self._observations = []
         self._total_reward = torch.FloatTensor( [0.0] )
         self._loss_historys = []
         #self._n_succeeded_episode = 0
+
+        self._max_time_step = max_time_step
+        self._n_kstep = n_kstep
         return
 
     def print( self, str ):
@@ -83,11 +88,7 @@ class CartPoleAgent( Agent ):
         self._observations = torch.from_numpy( self._observations ).float()
         self._total_reward = torch.FloatTensor( [0.0] )
         self._done = False
-
         self._brain.memory.observations[0].copy_( self._observations )
-
-        #print( "self._observations :", self._observations )
-
         return
 
     def agent_step( self, episode, time_step ):
@@ -131,7 +132,7 @@ class CartPoleAgent( Agent ):
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
             # 時間ステップの最大回数に近づいたら
-            if time_step < 195:
+            if time_step < self._max_time_step - self._n_kstep:
                 # 途中でコケたら、報酬－１
                 reward = torch.FloatTensor( [-1.0] )
                 self.add_reward( reward, time_step )

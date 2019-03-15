@@ -31,8 +31,8 @@ class A2CNetwork( nn.Module ):
             n_actions : 状態数 |A| / 出力ノード数に対応する。
         """
         super( A2CNetwork, self ).__init__()
-        self.fc1 = nn.Linear( in_features = n_states, out_features = n_hiddens )
-        self.fc2 = nn.Linear( in_features = n_hiddens, out_features = n_hiddens )
+        self.fc1 = nn.Linear( n_states, n_hiddens )
+        self.fc2 = nn.Linear( n_hiddens, n_hiddens )
         self.actor = nn.Linear( n_hiddens, n_actions )
         self.critic = nn.Linear( n_hiddens, 1 )
         return

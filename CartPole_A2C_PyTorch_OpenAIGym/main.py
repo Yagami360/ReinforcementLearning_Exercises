@@ -31,13 +31,13 @@ from CartPoleAgent import CartPoleAgent
 # 設定可能な定数
 #--------------------------------
 RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
-NUM_EPISODE = 1000                   # エピソード試行回数
+NUM_EPOCHS = 2000                   # 繰り返し回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
 NUM_KSTEP = 5                       # 先読みステップ数 k
-BRAIN_LEARNING_RATE = 0.01        # 学習率
+BRAIN_LEARNING_RATE = 0.01          # 学習率
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
 BRAIN_LOSS_CRITIC_COEF = 0.5        # クリティック側の損失関数の重み係数
-BRAIN_LOSS_ENTROPY_COEF = 0.1       # クリティック側の損失関数の重み係数
+BRAIN_LOSS_ENTROPY_COEF = 0.01      # クリティック側の損失関数の重み係数
 BRAIN_ADVANTAGE_SOFTPLUS = False    # アドバンテージ関数の softplus 化の有無
 BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 
@@ -69,10 +69,9 @@ def main():
     #-----------------------------------
     academy = CartPoleA2CAcademy( 
         env = env, 
-        max_episode = NUM_EPISODE, 
-        max_time_step = NUM_TIME_STEP,
+        max_epoches = NUM_EPOCHS, 
         k_step = NUM_KSTEP,
-        save_step = NUM_EPISODE
+        save_step = NUM_EPOCHS
     )
 
     #-----------------------------------
@@ -90,7 +89,7 @@ def main():
     )
     
     # モデルの構造を定義する。
-    brain.model()
+    #brain.model()
 
     # 損失関数を設定する。
     #brain.loss()
@@ -104,7 +103,8 @@ def main():
     agent = CartPoleAgent(
         env = env,
         brain = brain,
-        gamma = BRAIN_GAMMDA
+        gamma = BRAIN_GAMMDA,
+        max_time_step = NUM_TIME_STEP, n_kstep = NUM_KSTEP
     )
 
     # Agent の Brain を設定
@@ -134,7 +134,7 @@ def main():
     plt.clf()
     plt.plot(
         range( len(reward_historys) ), reward_historys,
-        label = 'gamma = {}'.format(BRAIN_GAMMDA),
+        label = 'gamma = {} / lr={}'.format(BRAIN_GAMMDA, BRAIN_LEARNING_RATE),
         linestyle = '-',
         linewidth = 0.5,
         color = 'black'
@@ -142,12 +142,15 @@ def main():
     plt.title( "Reward History" )
     #plt.xlim( 0, NUM_EPISODE+1 )
     #plt.ylim( [-0.1, 1.05] )
-    plt.xlabel( "epoches" )
+    plt.xlabel( "Episode" )
     plt.grid()
     plt.legend( loc = "lower right" )
     plt.tight_layout()
 
-    plt.savefig( "{}_Reward_episode{}.png".format( RL_ENV, NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( 
+        "{}_Reward_epoch{}_lr{}.png".format( RL_ENV, NUM_EPOCHS, BRAIN_LEARNING_RATE ), 
+        dpi = 300, bbox_inches = "tight" 
+    )
     plt.show()
 
     #-----------------------------------
@@ -158,7 +161,7 @@ def main():
     plt.clf()
     plt.plot(
         range( len(loss_historys) ), loss_historys,
-        label = 'loss_total',
+        label = 'loss_total / lr ={}'.format(BRAIN_LEARNING_RATE),
         linestyle = '-',
         #linewidth = 2,
         color = 'black'
@@ -167,10 +170,13 @@ def main():
     plt.legend( loc = 'best' )
     #plt.xlim( 0, NUM_EPISODE+1 )
     #plt.ylim( [0, 1.05] )
-    plt.xlabel( "epoches" )
+    plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
-    plt.savefig( "{}_Loss_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( 
+        "{}_Loss_epoch{}_lr{}.png".format( academy._env.spec.id, NUM_EPOCHS, BRAIN_LEARNING_RATE ), 
+        dpi = 300, bbox_inches = "tight" 
+    )
     plt.show()
 
     print("Finish main()")

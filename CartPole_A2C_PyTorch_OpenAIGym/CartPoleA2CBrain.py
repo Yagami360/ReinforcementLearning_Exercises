@@ -105,20 +105,19 @@ class CartPoleA2CBrain( Brain ):
                 現在の状態
         """
         # ネットワークを推論モードへ切り替え
-        self._network.eval()
-
+        #self._network.eval()
         with torch.no_grad():
             actor_output, critic_output = self._network( state )
             #print( "actor_output :\n", actor_output )
             #print( "critic_output :\n", critic_output )
 
-            # softmax で確率を計算 / A(s,a) → π(s,a)
-            policy = F.softmax( actor_output, dim = 0 )
-            #policy = F.softmax( actor_output, dim = 1 )
+        # softmax で確率を計算 / A(s,a) → π(s,a)
+        policy = F.softmax( actor_output, dim = 0 )
+        #print( "policy :", policy )
 
-            # 確率分布で表現された行動方策のうち、最も確率が高い値のインデックスを取得
-            action = policy.multinomial( num_samples = 1 )
-            #print( "action :", action )
+        # 確率分布で表現された行動方策のうち、最も確率が高い値のインデックスを取得
+        action = policy.multinomial( num_samples = 1 )
+        #print( "action :", action )
 
         return action
 
@@ -181,13 +180,15 @@ class CartPoleA2CBrain( Brain ):
         #print( "advantage :", advantage )
 
         # アドバンテージ関数を softplus 化して、常に正の値にする
-        pass
-        
+        #advantage = F.softplus( advantage )
+        #print( "advantage :", advantage )
+
         #-------------------------------------------------------
         # 損失関数の計算
         #-------------------------------------------------------
         # アクター側の損失関数 : Loss_actor = E[log(π)*A] - Loss_entorpy
         loss_actor = - ( action_log_policy * advantage.detach() ).mean() - self._loss_entropy_coef * loss_entropy
+        #print( "loss_actor_gain :", ( action_log_policy * advantage.detach() ).mean() )
         #print( "loss_actor :", loss_actor )
 
         # クリティック側の損失関数 : Loss_critic = {Q(s,a)-V(s)}^2

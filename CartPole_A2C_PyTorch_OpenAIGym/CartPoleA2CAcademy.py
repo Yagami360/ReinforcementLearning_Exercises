@@ -37,10 +37,11 @@ class CartPoleA2CAcademy( CartPoleAcademy ):
     def __init__( 
         self, 
         env, 
-        max_episode = 1, max_time_step = 100, k_step = 5,
+        max_epoches = 1, k_step = 5,
         save_step = 100
     ):
-        super().__init__( env, max_episode, max_time_step, save_step )
+        super().__init__( env, -1, -1, save_step )
+        self._max_epoches = max_epoches
         self._k_step = k_step
         return
 
@@ -55,7 +56,7 @@ class CartPoleA2CAcademy( CartPoleAcademy ):
                 agent.agent_reset()        
 
         self._done = False
-        self._env.reset()
+        #self._env.reset()
         return
 
     def academy_run( self ):
@@ -64,39 +65,47 @@ class CartPoleA2CAcademy( CartPoleAcademy ):
         """
         self.academy_reset()
 
-        time_step = 0
-        episode = 0
+        episode = 0     # 現在のエピソード数
+        time_step = 0   # 現在の時間ステップ t
 
-        # エピソードを試行
-        for epoch in range( 0, self._max_episode ):
+        # 繰り返し試行
+        for epoch in range( 0, self._max_epoches ):
             # k step
             for kstep in range( self._k_step ):
                 dones = []
-
                 for agent in self._agents:
                     done = agent.agent_step( episode, time_step )
                     dones.append( done )
 
+                time_step += 1
+
+                # 学習環境の動画のフレームを追加
+                if( episode % self._save_step == 0 ):
+                    self.add_frame( episode, time_step )
+
                 # 全エージェントが完了した場合
                 if( all(dones) == True ):
-                    # Academy と全 Agents のエピソードを完了
-                    for agent in self._agents:
-                        agent.agent_on_done( episode, time_step )
-
-                    time_step = 0
-                    episode += 1
-                    break
-
-                else:
-                    time_step += 1
+                    self._done = True
+                    #break
 
             # k_step 完了後の処理
             for agent in self._agents:
                 agent.agent_on_kstep_done( episode, time_step )
 
             # 学習環境を RESET
-            if ( all(dones) == True ):
-                self._done = True
+            if ( self._done == True ):
+                print( "epoch :", epoch )
+                # Academy と全 Agents のエピソードを完了
+                for agent in self._agents:
+                    agent.agent_on_done( episode, time_step )
+                
+                # 動画を保存
+                if( episode % self._save_step == 0 ):
+                    self.save_frames( "RL_ENV_{}_Episode{}.gif".format(self._env.spec.id, episode) )
+                    self._frames = []
+
+                time_step = 0
+                episode += 1
                 self.academy_reset()
 
         return
