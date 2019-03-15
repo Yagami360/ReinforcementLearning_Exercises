@@ -38,7 +38,7 @@ BRAIN_LEARNING_RATE = 0.01          # 学習率
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
 BRAIN_LOSS_CRITIC_COEF = 0.5        # クリティック側の損失関数の重み係数
 BRAIN_LOSS_ENTROPY_COEF = 0.01      # クリティック側の損失関数の重み係数
-BRAIN_ADVANTAGE_SOFTPLUS = False    # アドバンテージ関数の softplus 化の有無
+#BRAIN_ADVANTAGE_SOFTPLUS = False    # アドバンテージ関数の softplus 化の有無
 BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 
 

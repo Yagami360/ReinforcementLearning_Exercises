@@ -38,7 +38,6 @@ BRAIN_GAMMDA = 0.99                 # 利得の割引率
 BRAIN_KSTEP = 5                     # 先読みステップ数 k
 BRAIN_LOSS_CRITIC_COEF = 0.5        # クリティック側の損失関数の重み係数
 BRAIN_LOSS_ENTROPY_COEF = 0.01      # クリティック側の損失関数の重み係数
-BRAIN_ADVANTAGE_SOFTPLUS = False    # アドバンテージ関数の softplus 化の有無
 BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 ```
 
@@ -53,11 +52,10 @@ BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|200|←|
 |先読みステップ数 k `BRAIN_KSTEP`|5|←|
 |最適化アルゴリズム|Adam（減衰率：beta1=0.9 beta2=0.999）|←|
-|学習率：`learning_rate`|0.01|←|
+|学習率：`learning_rate`|0.01|0.0001|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |クリティック側の損失関数の重み係数：`BRAIN_LOSS_CRITIC_COEF`|0.5|←|
 |エントロピーの損失関数の重み係数：`BRAIN_LOSS_ENTROPY_COEF`|0.01|←|
-|アドバンテージ関数の softplus 化の有無：`BRAIN_ADVANTAGE_SOFTPLUS`|`False`|`True`|
 |クリッピングする最大勾配値：`BRAIN_CLIPPING_MAX_GRAD`|0.5|←|
 |A2C のネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>アクター側の出力層：行動数（2）<br>クリティック側の出力層：1|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
