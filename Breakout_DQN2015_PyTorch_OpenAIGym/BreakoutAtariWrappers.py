@@ -219,31 +219,6 @@ class WarpFrame(gym.ObservationWrapper):
                            interpolation=cv2.INTER_AREA)
         return frame[:, :, None]
 
-"""
-class Wrap4Frame(gym.ObservationWrapper):
-    """
-    強化学習環境の画像の４フレーム分を、入力画像とする。
-    """
-    def __init__(self, env=None):
-        super(Wrap4Frame, self).__init__(env)
-        obs_shape = self.observation_space.shape
-        self.width = 84
-        self.height = 84
-        self.observation_space = spaces.Box(
-            low=0, high=255,
-            shape=(self.height, self.width, 4), dtype=np.uint8
-        )
-        return
-
-
-    def observation(self, observation):
-        """
-        observation の Getter をオーバーライド
-        """
-        #observation = ( observation[0] * 4, 
-        return observation
-"""
-
 
 class WrapMiniBatch(gym.ObservationWrapper):
     """

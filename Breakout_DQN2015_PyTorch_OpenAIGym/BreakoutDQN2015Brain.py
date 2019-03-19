@@ -13,8 +13,6 @@ import random
 from Brain import Brain
 from Agent import Agent
 from ExperienceReplay import ExperienceReplay
-from QNetworkMLP3 import QNetworkMLP3
-from QNetworkMLP4 import QNetworkMLP4
 from QNetworkCNN import QNetworkCNN
 
 # PyTorch
@@ -118,48 +116,16 @@ class BreakoutDQN2015Brain( Brain ):
         """
         #------------------------------------------------
         # ネットワーク構成
-        #------------------------------------------------
-        """
-        self._main_network = QNetworkMLP3(
-            n_states = self._n_states, 
-            n_hiddens = 32,
-            n_actions = self._n_actions
-        )
-
-        self._target_network = QNetworkMLP3(
-            n_states = self._n_states, 
-            n_hiddens = 32,
-            n_actions = self._n_actions
-        )
-        """
-
-        """
-        self._main_network = QNetworkMLP4(
-            n_states = self._n_states, 
-            n_hiddens = 32,
-            n_actions = self._n_actions
-        )
-
-        self._target_network = QNetworkMLP4(
-            n_states = self._n_states, 
-            n_hiddens = 32,
-            n_actions = self._n_actions
-        )
-        """
-        
+        #------------------------------------------------        
         self._main_network = QNetworkCNN(
-            n_states = self._n_states, 
-            n_hiddens = 32,
+            in_channles = 4,
             n_actions = self._n_actions
         )
 
         self._target_network = QNetworkCNN(
-            n_states = self._n_states, 
-            n_hiddens = 32,
+            in_channles = 4,
             n_actions = self._n_actions
         )
-
-
         
         print( "main network :", self._main_network )
         print( "target network :", self._target_network )
