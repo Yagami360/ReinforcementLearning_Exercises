@@ -13,9 +13,7 @@ from matplotlib import animation
 
 
 # 設定可能な定数
-RL_ENV = "CartPole-v0"     # 利用する強化学習環境の課題名
-#RL_ENV = "MountainCar-v0"     # 利用する強化学習環境の課題名
-
+RL_ENV = "Breakout-v0"
 NUM_EPISODE = 5          # エピソード試行回数
 NUM_TIME_STEP = 100        # １エピソードの時間ステップの最大数
 
@@ -24,6 +22,7 @@ def save_frames( frames, file_name ):
     """
     Displays a list of frames as a gif, with controls
     """
+    print( "Start saving frames ..." )
     plt.figure(
         figsize=(frames[0].shape[1]/72.0, frames[0].shape[0]/72.0),
         dpi=72
@@ -49,6 +48,7 @@ def save_frames( frames, file_name ):
         anim.save( file_name )
 
     plt.close()
+    print( "Finish saving frames" )
     return
 
 
@@ -68,17 +68,14 @@ def main():
     print( "env :", env )
     print( "env.observation_space :", env.observation_space )
     print( "env.action_space :", env.action_space )
+    print( "env.unwrapped.get_action_meanings() :", env.unwrapped.get_action_meanings() )     # 行動の値の意味
 
     # 学習環境の RESET
     # 学習環境を実行する際には、一番最初に RESET して、環境を初期化する必要がある
     # observations : エージェントの状態
-    #   CartPole では、カートの棒の状態を表す４つの変数
-    #   observation[0] : カートの位置 / -2.4 ~ 2.4
-    #   observation[1] : カートの速度 / -inf ~ inf
-    #   observation[2] : 棒の速度 / -41.8° ~ 41.8°
-    #   observation[3] : 棒の角速度 / -inf ~ inf
+    #   Breakout では、画像イメージ 210*160 pixel の RGB 情報（合計：210*160*3=100800個の状態）
     observations = env.reset()
-    print( "observations :", observations )
+    #print( "observations :", observations )
 
     #===================================
     # エピソードの実行
@@ -104,15 +101,12 @@ def main():
             print( "action :", action )
             
             # reword : 即時報酬
-            #          CartPole では、action 実行後に、
-            #          1 : -カートの位置 = ±2.4以内 && 棒の角度 = 20.9°以内
-            #          0 : その他 
             # done : 終了フラグ / 
             # info : デバッグ情報
             observations, reword, done, info = env.step(action)
-            print( "observations :", observations )
-            print( "reword :", reword )
-            print( "info :", info )
+            #print( "observations :", observations )
+            #print( "reword :", reword )
+            #print( "info :", info )
 
             # 描写
             image = env.render( mode = "rgb_array" )

@@ -16,7 +16,7 @@
 
 ## ■ 項目（フォルダ別）
 
-1. 迷宮探索問題
+1. 迷路探索問題
     1. [./MazeSimple_Ramdom](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Ramdom)
     1. [./MazeSimple_Sarsa](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Sarsa)
     1. [./MazeSimple_Qlearning](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_Qlearning)
@@ -24,7 +24,7 @@
     1. [./MazeSimple_EveryVisitMontecarlo](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/MazeSimple_EveryVisitMontecarlo)
     1. ./MazeSimple_FirstVisitMontecarlo
     1. ./MazeSimple_ActorCritic
-1. CartPole
+1. CartPole（倒立振子課題）
     1. ./CartPole_Sarsa_OpenAIGym
     1. [./CartPole_Qleaning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_Qlearning_OpenAIGym)
     1. [./CartPole_DQN2013_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/CartPole_DQN2013_PyTorch_OpenAIGym)
@@ -38,6 +38,8 @@
     1. ./FrozenLake_Sarsa_OpenAIGym
     1. [./FrozenLake_Qlearning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/FrozenLake_Qlearning_OpenAIGym)
     1. ./FrozenLake_EveryVisitMonteCarlo_OpenAIGym
+1. Breakout（ブロック崩しゲーム）
+    1. ./Breakout_DQN2015_PyTorch_OpenAIGym（実装中...）
 1. OpenAI Gym
     1. [./Processing_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/Processing_OpenAIGym)
 1. Unity ML-Agents
