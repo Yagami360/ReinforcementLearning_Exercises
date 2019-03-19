@@ -50,7 +50,7 @@ class BreakoutAcademy( Academy ):
                 agent.agent_reset()        
 
         self._done = False
-        self._env.reset()
+        #self._env.reset()
         return
 
     def academy_run( self ):

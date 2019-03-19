@@ -57,7 +57,7 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
-|DQNのネットワーク構成|CNN<br>・|
+|DQNのネットワーク構成|CNN<br>(0): Conv2d(4, 32, kernel_size=(8, 8), stride=(4, 4))<br>(1): ReLU(inplace)<br>(2): Conv2d(32, 64, kernel_size=(4, 4), stride=(2, 2))<br>(3): ReLU(inplace)<br>(4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1))<br>(5): ReLU(inplace)<br>(6): Flatten()<br>(7): Linear(in_features=3136, out_features=512, bias=True)<br>(8): ReLU(inplace)`|
 
 <!--
 転倒：-1<br>連続 `NUM_TIME_STEP`回成功：+`NUM_TIME_STEP=200`<br>それ以外：+1|

@@ -31,7 +31,10 @@ class NoopResetEnv( gym.Wrapper ):
     ・atari_wrappers.py と同じ内容
 
     [public]
+        env : OpenAIGym の ENV
         noop_max : <int> 何も学習しないステップ数
+        override_num_noops : 
+        noop_action : <int> 何もしない行動の値
 
     [protected] 変数名の前にアンダースコア _ を付ける
 
@@ -72,6 +75,25 @@ class NoopResetEnv( gym.Wrapper ):
 
 
 class EpisodicLifeEnv(gym.Wrapper):
+    """
+    Breakout は５機のライフがあるので、５回失敗でゲーム終了となるが、
+    この残機では学習が面倒なので、１回失敗でゲーム終了に設定する。
+    但し、１回失敗毎に完全にリセットすると、初期状態ばかり学習してしまい、過学習してしまいやすいので、
+    １回失敗でのリセットでは、崩したブロックの状態はそのままにしておいて、
+    ５回失敗でのリセットでは、崩したブロックの状態もリセットする完全なリセットとする。
+    ・OpenAI Gym の env をラッピングして実装している。
+    ・atari_wrappers.py と同じ内容？
+
+    [public]
+        env : OpenAIGym の ENV
+        lives : <int> 残機
+        was_real_done : <bool> 完全なリセットの意味での終了フラグ
+
+    [protected] 変数名の前にアンダースコア _ を付ける
+
+    [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
+
+    """
     def __init__(self, env):
         gym.Wrapper.__init__(self, env)
         self.lives = 0
@@ -79,6 +101,7 @@ class EpisodicLifeEnv(gym.Wrapper):
 
     def step(self, action):
         """
+        step() メソッドをオーバーライト
         """
         obs, reward, done, info = self.env.step(action)
         self.was_real_done = done
@@ -94,7 +117,10 @@ class EpisodicLifeEnv(gym.Wrapper):
         return obs, reward, done, info
 
     def reset(self, **kwargs):
-        '''5機とも失敗したら、本当にリセット'''
+        """
+        reset() メソッドをオーバーライト
+        ・5機とも失敗したら、本当にリセット
+        """
         if self.was_real_done:
             obs = self.env.reset(**kwargs)
         else:
@@ -102,3 +128,160 @@ class EpisodicLifeEnv(gym.Wrapper):
             obs, _, _, _ = self.env.step(0)
         self.lives = self.env.unwrapped.ale.lives()
         return obs
+
+
+class MaxAndSkipEnv(gym.Wrapper):
+    """
+    Breakout は 60FPS で動作するが、この速さで動かすと早すぎるので、
+    ４フレーム単位で行動を判断させ、４フレーム連続で同じ行動を行うようにする。
+    これにより、60FPS → 15 FPS となる。
+    但し、atari のゲームには、奇数フレームと偶数フレームで現れる画像が異なるゲームがあるために、
+    画面上のチラツキを抑える意味で、最後の3、4フレームの最大値をとった画像を observation として採用する。
+    ・OpenAI Gym の env をラッピングして実装している。
+    ・atari_wrappers.py と同じ内容？
+
+    [public]
+        env : OpenAIGym の ENV
+
+    [protected] 変数名の前にアンダースコア _ を付ける
+        _obs_buffer :
+        _skip : <int> フレームのスキップ数
+
+    [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
+
+    """
+    def __init__(self, env, skip=4):
+        gym.Wrapper.__init__(self, env)
+        # most recent raw observations (for max pooling across time steps)
+        self._obs_buffer = np.zeros(
+            (2,)+env.observation_space.shape, dtype=np.uint8)
+        self._skip = skip
+
+    def step(self, action):
+        """
+        step() メソッドをオーバーライト
+        Repeat action, sum reward, and max over last observations.
+        """
+        total_reward = 0.0
+        done = None
+        for i in range(self._skip):
+            obs, reward, done, info = self.env.step(action)
+            if i == self._skip - 2:
+                self._obs_buffer[0] = obs
+            if i == self._skip - 1:
+                self._obs_buffer[1] = obs
+            total_reward += reward
+            if done:
+                break
+        # Note that the observation on the done=True frame
+        # doesn't matter
+        max_frame = self._obs_buffer.max(axis=0)
+
+        return max_frame, total_reward, done, info
+
+    def reset(self, **kwargs):
+        """
+        reset() メソッドをオーバーライト
+        """
+        return self.env.reset(**kwargs)
+
+
+class WarpFrame(gym.ObservationWrapper):
+    """
+    画像サイズをNatureのDQN論文と同じ84x84のグレースケールに reshape する。
+
+    [public]
+        env : OpenAIGym の ENV
+        observation_space : <spaces.Box> obsevation の shape / 継承先の gym.ObservationWrapper からの変数
+        width : <int> 入力画像の幅のリサイズ後の値
+        height : <int> 入力画像の高さのリサイズ後の値
+
+    [protected] 変数名の前にアンダースコア _ を付ける
+
+    [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
+
+    """
+    def __init__(self, env):
+        gym.ObservationWrapper.__init__(self, env)
+        self.width = 84
+        self.height = 84
+        self.observation_space = spaces.Box(
+            low=0, high=255,
+            shape=(self.height, self.width, 1), dtype=np.uint8
+        )
+
+    def observation(self, frame):
+        """
+        observation の Getter をオーバーライド
+        """
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        frame = cv2.resize(frame, (self.width, self.height),
+                           interpolation=cv2.INTER_AREA)
+        return frame[:, :, None]
+
+"""
+class Wrap4Frame(gym.ObservationWrapper):
+    """
+    強化学習環境の画像の４フレーム分を、入力画像とする。
+    """
+    def __init__(self, env=None):
+        super(Wrap4Frame, self).__init__(env)
+        obs_shape = self.observation_space.shape
+        self.width = 84
+        self.height = 84
+        self.observation_space = spaces.Box(
+            low=0, high=255,
+            shape=(self.height, self.width, 4), dtype=np.uint8
+        )
+        return
+
+
+    def observation(self, observation):
+        """
+        observation の Getter をオーバーライド
+        """
+        #observation = ( observation[0] * 4, 
+        return observation
+"""
+
+
+class WrapMiniBatch(gym.ObservationWrapper):
+    """
+    obsevation を ミニバッチ学習用のインデックス順に reshape する。
+    [n_channels, height, width] → [height, width, n_channels]
+    """
+    def __init__(self, env=None):
+        super(WrapMiniBatch, self).__init__(env)
+        obs_shape = self.observation_space.shape
+        self.observation_space = Box(
+            self.observation_space.low[0, 0, 0],
+            self.observation_space.high[0, 0, 0],
+            [obs_shape[2], obs_shape[1], obs_shape[0]],
+            dtype=self.observation_space.dtype
+        )
+        return
+
+    def observation(self, observation):
+        """
+        observation の Getter をオーバーライド
+        """
+        # [n_channels, height, width] → [height, width, n_channels] に reshape
+        return observation.transpose(2, 0, 1)
+
+
+def make_env( env_id, seed ):
+    """
+    上記 Wrapper による強化学習環境の生成メソッド
+    """
+    # OpenAI Gym の強化学習環境生成
+    env = gym.make(env_id)
+
+    # env をラッピングしていくことで、独自の設定を適用する。
+    env = NoopResetEnv(env, noop_max=30)
+    env = MaxAndSkipEnv(env, skip=4)
+    env.seed(seed)                  # 乱数シードの設定
+    env = EpisodicLifeEnv(env)
+    env = WarpFrame(env)
+    env = WrapMiniBatch(env)
+
+    return env

@@ -24,17 +24,23 @@ from Agent import Agent
 from BreakoutAgent import BreakoutAgent
 from ExperienceReplay import ExperienceReplay
 
+from BreakoutAtariWrappers import *
+
+
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
-RL_ENV = "Breakout-v0"     # 利用する強化学習環境の課題名
+RL_ENV = "BreakoutNoFrameskip-v0"     # 利用する強化学習環境の課題名
 NUM_EPISODE = 5                 # エピソード試行回数
 NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
+NUM_STACK_FRAME = 4             # 
 BRAIN_LEARNING_RATE = 0.0001    # 学習率
 BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
 BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
 BRAIN_GAMMDA = 0.99             # 利得の割引率
 MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセットのメモリの最大の長さ
+
+
 
 
 def main():
@@ -56,8 +62,9 @@ def main():
     # 学習環境、エージェント生成フェイズ
     #===================================
     # OpenAI-Gym の ENV を作成
-    env = gym.make( RL_ENV )
-    env.seed(8)
+    #env = gym.make( RL_ENV )
+    #env.seed(8)
+    env = make_env( env_id = RL_ENV, seed = 8 )
 
     print( "env.observation_space :", env.observation_space )
     print( "env.action_space :", env.action_space )
@@ -86,7 +93,7 @@ def main():
     )
     
     # モデルの構造を定義する。
-    brain.model()
+    #brain.model()
 
     # 損失関数を設定する。
     #brain.loss()
