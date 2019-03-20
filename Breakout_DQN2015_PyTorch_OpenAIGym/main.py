@@ -30,17 +30,17 @@ from BreakoutAtariWrappers import *
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
-RL_ENV = "BreakoutNoFrameskip-v0"     # 利用する強化学習環境の課題名
-NUM_EPISODE = 5                 # エピソード試行回数
-NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
-NUM_STACK_FRAME = 4             # 
-BRAIN_LEARNING_RATE = 0.0001    # 学習率
-BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99             # 利得の割引率
-MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセットのメモリの最大の長さ
-
-
+RL_ENV = "BreakoutNoFrameskip-v0"   # 利用する強化学習環境の課題名
+NUM_EPISODE = 200                   # エピソード試行回数
+NUM_TIME_STEP = 1000                # １エピソードの時間ステップの最大数
+NUM_NOOP = 30                       # エピソード開始からの何も学習しないステップ数
+NUM_SKIP_FRAME = 4                  # スキップするフレーム数
+NUM_STACK_FRAME = 1                 # モデルに一度に入力する画像データのフレーム数
+BRAIN_LEARNING_RATE = 0.0001        # 学習率
+BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ
+BRAIN_GREEDY_EPSILON = 0.5          # ε-greedy 法の ε 値
+BRAIN_GAMMDA = 0.99                 # 利得の割引率
+MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データセットのメモリの最大の長さ
 
 
 def main():
@@ -64,7 +64,12 @@ def main():
     # OpenAI-Gym の ENV を作成
     #env = gym.make( RL_ENV )
     #env.seed(8)
-    env = make_env( env_id = RL_ENV, seed = 8 )
+    env = make_env( 
+        env_id = RL_ENV, 
+        seed = 8,
+        n_noop_max = NUM_NOOP,
+        n_skip_frame = NUM_SKIP_FRAME
+    )
 
     print( "env.observation_space :", env.observation_space )
     print( "env.action_space :", env.action_space )
@@ -89,7 +94,8 @@ def main():
         gamma = BRAIN_GAMMDA,
         learning_rate = BRAIN_LEARNING_RATE,
         batch_size = BRAIN_BATCH_SIZE,
-        memory_capacity = MEMORY_CAPACITY
+        memory_capacity = MEMORY_CAPACITY,
+        n_stack_frames = NUM_STACK_FRAME
     )
     
     # モデルの構造を定義する。

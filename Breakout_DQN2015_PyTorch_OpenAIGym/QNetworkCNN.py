@@ -37,15 +37,15 @@ class QNetworkCNN( nn.Module ):
 
         self.layer = nn.Sequential(
             nn.Conv2d( in_channels = in_channles, out_channels = 32, kernel_size = 8, stride = 4 ),
-            nn.ReLU( inplace = True ),
+            nn.ReLU(),
             nn.Conv2d( in_channels = 32, out_channels = 64, kernel_size = 4, stride = 2 ),
-            nn.ReLU( inplace = True ),
+            nn.ReLU(),
             nn.Conv2d( in_channels = 64, out_channels = 64, kernel_size = 3, stride = 1 ),
-            nn.ReLU( inplace = True ),
+            nn.ReLU(),
             Flatten(),
             #nn.Linear( in_features = 64*7*7, out_features = 512 ),
             nn.Linear( in_features = 64*7*7, out_features = n_actions ),
-            nn.ReLU( inplace = True )
+            nn.ReLU()
         )
 
         return

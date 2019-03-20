@@ -138,7 +138,7 @@ class MaxAndSkipEnv(gym.Wrapper):
     但し、atari のゲームには、奇数フレームと偶数フレームで現れる画像が異なるゲームがあるために、
     画面上のチラツキを抑える意味で、最後の3、4フレームの最大値をとった画像を observation として採用する。
     ・OpenAI Gym の env をラッピングして実装している。
-    ・atari_wrappers.py と同じ内容？
+    ・atari_wrappers.py とほぼ同じ内容
 
     [public]
         env : OpenAIGym の ENV
@@ -244,7 +244,7 @@ class WrapMiniBatch(gym.ObservationWrapper):
         return observation.transpose(2, 0, 1)
 
 
-def make_env( env_id, seed ):
+def make_env( env_id, seed = 8, n_noop_max = 30, n_skip_frame = 4 ):
     """
     上記 Wrapper による強化学習環境の生成メソッド
     """
@@ -252,8 +252,8 @@ def make_env( env_id, seed ):
     env = gym.make(env_id)
 
     # env をラッピングしていくことで、独自の設定を適用する。
-    env = NoopResetEnv(env, noop_max=30)
-    env = MaxAndSkipEnv(env, skip=4)
+    env = NoopResetEnv( env, noop_max = n_noop_max )
+    env = MaxAndSkipEnv( env, skip = n_skip_frame )
     env.seed(seed)                  # 乱数シードの設定
     env = EpisodicLifeEnv(env)
     env = WarpFrame(env)

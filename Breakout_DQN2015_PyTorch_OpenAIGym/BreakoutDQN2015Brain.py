@@ -44,6 +44,8 @@ class BreakoutDQN2015Brain( Brain ):
         _loss_fn : <torch.> モデルの損失関数
         _optimizer : <torch.optimizer> モデルの最適化アルゴリズム
 
+        _n_stack_frames : <int> モデルに一度に入力する画像のフレーム数
+
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
@@ -53,13 +55,15 @@ class BreakoutDQN2015Brain( Brain ):
         n_actions,
         epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001,
         batch_size = 32,
-        memory_capacity = 10000
+        memory_capacity = 10000,
+        n_stack_frames = 4
     ):
         super().__init__( n_states, n_actions )
         self._epsilon = epsilon
         self._gamma = gamma
         self._learning_rate = learning_rate
         self._batch_size = batch_size
+        self._n_stack_frames = n_stack_frames
 
         self._main_network = None
         self._target_network = None
@@ -87,6 +91,7 @@ class BreakoutDQN2015Brain( Brain ):
         print( "_gamma : \n", self._gamma )
         print( "_learning_rate : \n", self._learning_rate )
         print( "_batch_size : \n", self._batch_size )
+        print( "_n_stack_frames : \n", self._n_stack_frames )
 
         print( "_q_function : \n", self._q_function )
         print( "_expected_q_function : \n", self._expected_q_function )
@@ -118,12 +123,12 @@ class BreakoutDQN2015Brain( Brain ):
         # ネットワーク構成
         #------------------------------------------------        
         self._main_network = QNetworkCNN(
-            in_channles = 4,
+            in_channles = self._n_stack_frames,
             n_actions = self._n_actions
         )
 
         self._target_network = QNetworkCNN(
-            in_channles = 4,
+            in_channles = self._n_stack_frames,
             n_actions = self._n_actions
         )
         
@@ -208,7 +213,7 @@ class BreakoutDQN2015Brain( Brain ):
         # 全部 0 で初期化
         next_state_values = torch.zeros( self._batch_size )
 
-        # CartPole が done ではなく、next_state が存在するインデックス用のマスク
+        # エージェントが done ではなく、next_state が存在するインデックス用のマスク
         non_final_mask = torch.ByteTensor(
             tuple( map(lambda s: s is not None,batch.next_state) )
         )

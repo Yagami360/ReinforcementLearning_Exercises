@@ -35,9 +35,14 @@ class BreakoutAgent( Agent ):
     ):
         super().__init__( brain, gamma, 0 )
         self._env = env        
-        self._observations = []
         self._total_reward = torch.FloatTensor( [0.0] )
         self._loss_historys = []
+
+        obs_shape = self._env.observation_space.shape  # (1, 84, 84)
+
+        # shape = [mini_batch, n_stack_frames(=n_channels), height, width]
+        #self._observations = torch.zeros( 1, 4, obs_shape[1], obs_shape[2] )
+        self._observations = torch.zeros( 1, 1, obs_shape[1], obs_shape[2] )
         return
 
     def print( self, str ):
@@ -63,7 +68,18 @@ class BreakoutAgent( Agent ):
         """
         エージェントの再初期化処理
         """
-        self._observations = self._env.reset()
+        observations_next = self._env.reset()   # shape = [1,84,84]
+
+        # numpy → Tensor に型変換
+        observations_next = torch.from_numpy(observations_next).float()
+
+        # ミニバッチ用の次元を追加
+        observations_next = torch.unsqueeze( observations_next, dim = 0 )
+
+        #self._observations[:-1] = self._observations[1:]  # 0～2番目に1～3番目を上書き
+        #self._observations[-1:] = observations_next  # 4番目に最新のobsを格納
+        self._observations = observations_next
+
         self._total_reward = torch.FloatTensor( [0.0] )
         self._done = False
         return
@@ -86,59 +102,49 @@ class BreakoutAgent( Agent ):
             return self._done
 
         #-------------------------------------------------------------------
-        # 現在の状態 s_t を求める
-        #-------------------------------------------------------------------
-        # 観測値をそのまま状態として採用する（状態の離散化を行わない）
-        state = self._observations
-
-        # numpy → PyTorch 用の型に変換
-        state = torch.from_numpy( state ).type( torch.FloatTensor)
-        
-        # shape = 4 → １*4 に reshape
-        state = torch.unsqueeze( state, dim = 0 )
-        #print( "_state :", state )
-
-        #-------------------------------------------------------------------
         # 離散化した現在の状態 s_t を元に、行動 a_t を求める
         #-------------------------------------------------------------------
         self._brain.decay_epsilon( episode )
-        action = self._brain.action( state )
-    
+        action = self._brain.action( self._observations )
+        #print( "action :", action )
+
         #-------------------------------------------------------------------
         # 行動を実行する。
         #-------------------------------------------------------------------
         observations_next, reward, env_done, info = self._env.step( action.item() )
-        print( "reward :", reward )
-        print( "env_done :", env_done )
-        print( "info :", info )
+
+        # numpy → PyTorch 用の型に変換
+        observations_next = torch.from_numpy(observations_next).float()
+
+        # ミニバッチ学習用の次元を追加
+        observations_next = torch.unsqueeze( observations_next, dim = 0 )
+
+        #print( "reward :", reward )
+        #print( "env_done :", env_done )
+        #print( "info :", info )
 
         #------------------------------------------------------------------
         # 行動の実行により、次の時間での状態 s_{t+1} 報酬 r_{t+1} を求める。
         #------------------------------------------------------------------
-        reward = torch.FloatTensor( reward )
+        reward = torch.FloatTensor( [reward] )
 
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
             # 次の状態は存在しない（＝終端状態）ので、None に設定する
-            next_state = None
+            observations_next = None
         else:
-            # 観測値をそのまま状態として採用する（状態の離散化を行わない）
-            next_state = observations_next
-        
-            # numpy → PyTorch 用の型に変換
-            next_state = torch.from_numpy( next_state ).type( torch.FloatTensor)
-
-            # shape = 4 → １*4 に reshape
-            next_state = torch.unsqueeze( next_state, dim = 0 )
+            pass
 
         #----------------------------------------
         # 価値関数の更新
         #----------------------------------------
-        self._brain.update_q_function( state, action, next_state, reward )
+        self._brain.update_q_function( self._observations, action, observations_next, reward )
 
         #----------------------------------------
         # 状態の更新
         #----------------------------------------
+        #self._observations[:-1] = self._observations[1:]  # 0～2番目に1～3番目を上書き
+        #self._observations[-1:] = observations_next  # 4番目に最新のobsを格納
         self._observations = observations_next
 
         #----------------------------------------
