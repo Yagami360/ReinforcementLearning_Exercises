@@ -244,9 +244,13 @@ class WrapMiniBatch(gym.ObservationWrapper):
         return observation.transpose(2, 0, 1)
 
 
-def make_env( env_id, seed = 8, n_noop_max = 30, n_skip_frame = 4 ):
+def make_env( device, env_id, seed = 8, n_noop_max = 30, n_skip_frame = 4 ):
     """
     上記 Wrapper による強化学習環境の生成メソッド
+
+    [Args]
+        device : <torch.device> 実行デバイス
+        env_id : 
     """
     # OpenAI Gym の強化学習環境生成
     env = gym.make(env_id)

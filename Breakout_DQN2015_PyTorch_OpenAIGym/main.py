@@ -31,12 +31,12 @@ from BreakoutAtariWrappers import *
 # 設定可能な定数
 #--------------------------------
 RL_ENV = "BreakoutNoFrameskip-v0"   # 利用する強化学習環境の課題名
-NUM_EPISODE = 200                   # エピソード試行回数
+NUM_EPISODE = 500                   # エピソード試行回数
 NUM_TIME_STEP = 1000                # １エピソードの時間ステップの最大数
 NUM_NOOP = 30                       # エピソード開始からの何も学習しないステップ数
 NUM_SKIP_FRAME = 4                  # スキップするフレーム数
 NUM_STACK_FRAME = 1                 # モデルに一度に入力する画像データのフレーム数
-BRAIN_LEARNING_RATE = 0.0001        # 学習率
+BRAIN_LEARNING_RATE = 0.005        # 学習率
 BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ
 BRAIN_GREEDY_EPSILON = 0.5          # ε-greedy 法の ε 値
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
@@ -59,12 +59,18 @@ def main():
     torch.manual_seed(8)
 
     #===================================
+    # 実行 Device の設定
+    #===================================
+    use_cuda = torch.cuda.is_available()
+    device = torch.device( "cuda" if use_cuda else "cpu" )
+    print( "実行デバイス :", device)
+
+    #===================================
     # 学習環境、エージェント生成フェイズ
     #===================================
     # OpenAI-Gym の ENV を作成
-    #env = gym.make( RL_ENV )
-    #env.seed(8)
     env = make_env( 
+        device = device,
         env_id = RL_ENV, 
         seed = 8,
         n_noop_max = NUM_NOOP,
@@ -88,6 +94,7 @@ def main():
     # Brain の生成
     #-----------------------------------
     brain = BreakoutDQN2015Brain(
+        device = device,
         n_states = env.observation_space.shape[0] * env.observation_space.shape[1] * env.observation_space.shape[2],
         n_actions = env.action_space.n,
         epsilon = BRAIN_GREEDY_EPSILON,
@@ -111,6 +118,7 @@ def main():
 	# Agent の生成
     #-----------------------------------
     agent = BreakoutAgent(
+        device = device,
         env = env,
         brain = brain,
         gamma = BRAIN_GAMMDA

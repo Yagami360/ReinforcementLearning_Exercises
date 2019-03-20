@@ -27,6 +27,8 @@ class ExperienceReplay( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _device : <torch.device> 実行デバイス
+
         _capacity : [int] メモリの最大値
         _memory : [list] (s,a,s',a',r) のリスト（学習用データ）
         _index : [int] 現在のメモリのインデックス
@@ -36,8 +38,10 @@ class ExperienceReplay( object ):
     """
     def __init__(
         self,
+        device,
         capacity = 10000
     ):
+        self._device = device
         self._capacity = capacity
         self._memory = []
         self._index = 0
@@ -51,6 +55,7 @@ class ExperienceReplay( object ):
         print( "CartPoleAgent" )
         print( self )
         print( str )
+        print( "_device :", self._device )
         print( "_capacity :", self._capacity )
         print( "_memory : \n", self._memory )
         print( "_index : \n", self._index )
@@ -109,7 +114,6 @@ class ExperienceReplay( object ):
         # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size / shape = 32 * 4
         # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
         batch = Transition( *zip(*transitions) )
-        #print( "batch :", batch )
 
         #
         state_batch = torch.cat( batch.state )

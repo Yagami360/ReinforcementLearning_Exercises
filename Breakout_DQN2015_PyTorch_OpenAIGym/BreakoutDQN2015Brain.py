@@ -30,6 +30,8 @@ class BreakoutDQN2015Brain( Brain ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _device : <torch.device> 実行デバイス
+
         _epsilon : <float> ε-greedy 法の ε 値
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
@@ -51,6 +53,7 @@ class BreakoutDQN2015Brain( Brain ):
     """
     def __init__(
         self,
+        device,
         n_states,
         n_actions,
         epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001,
@@ -59,6 +62,7 @@ class BreakoutDQN2015Brain( Brain ):
         n_stack_frames = 4
     ):
         super().__init__( n_states, n_actions )
+        self._device = device
         self._epsilon = epsilon
         self._gamma = gamma
         self._learning_rate = learning_rate
@@ -74,7 +78,7 @@ class BreakoutDQN2015Brain( Brain ):
 
         self._q_function = None
         self._expected_q_function = None
-        self._memory = ExperienceReplay( capacity = memory_capacity )
+        self._memory = ExperienceReplay( device = device, capacity = memory_capacity )
 
         self._b_loss_init = False
 
@@ -85,6 +89,7 @@ class BreakoutDQN2015Brain( Brain ):
         print( "BreakoutDQN2015Brain" )
         print( self )
         print( str )
+        print( "_device :", self._device )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
         print( "_epsilon : \n", self._epsilon )
@@ -123,14 +128,16 @@ class BreakoutDQN2015Brain( Brain ):
         # ネットワーク構成
         #------------------------------------------------        
         self._main_network = QNetworkCNN(
+            device = self._device,
             in_channles = self._n_stack_frames,
             n_actions = self._n_actions
-        )
+        ).to(self._device)
 
         self._target_network = QNetworkCNN(
+            device = self._device,
             in_channles = self._n_stack_frames,
             n_actions = self._n_actions
-        )
+        ).to(self._device)
         
         print( "main network :", self._main_network )
         print( "target network :", self._target_network )
@@ -197,35 +204,35 @@ class BreakoutDQN2015Brain( Brain ):
         # model(引数) で呼び出せるのは、__call__ をオーバライトしているため
         #--------------------------------------------------------------------
         # outputs / shape = batch_size * _n_actions
-        outputs = self._main_network( state_batch )
+        outputs = self._main_network( state_batch ).to(self._device)
         #print( "outputs :", outputs )
 
         # outputs から実際にエージェントが選択した action を取り出す
         # gather(...) : 
         # dim = 1 : 列方向
         # index = action_batch : エージェントが実際に選択した行動は action_batch 
-        self._q_function = outputs.gather( 1, action_batch )
+        self._q_function = outputs.gather( 1, action_batch ).to(self._device)
         #print( "_q_function :", self._q_function )
 
         #--------------------------------------------------------------------
         # 次の状態を求める
         #--------------------------------------------------------------------
         # 全部 0 で初期化
-        next_state_values = torch.zeros( self._batch_size )
+        next_state_values = torch.zeros( self._batch_size ).to(self._device)
 
         # エージェントが done ではなく、next_state が存在するインデックス用のマスク
         non_final_mask = torch.ByteTensor(
             tuple( map(lambda s: s is not None,batch.next_state) )
-        )
+        ).to(self._device)
         #print( "non_final_mask :", non_final_mask )
 
         # Main Network ではなく Target Network からの出力
-        next_outputs = self._target_network( non_final_next_states )
+        next_outputs = self._target_network( non_final_next_states ).to(self._device)
         #print( "next_outputs :", next_outputs )
 
         # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
+        next_state_values[non_final_mask] = next_outputs.max(1)[0].detach().to(self._device)
         #print( "next_state_values :", next_state_values )
 
         #--------------------------------------------------------------------
@@ -288,7 +295,7 @@ class BreakoutDQN2015Brain( Brain ):
             # 微分を行わない処理の範囲を with 構文で囲む
             with torch.no_grad():
                 # テストデータをモデルに流し込み、モデルの出力を取得する
-                outputs = self._main_network( state )
+                outputs = self._main_network( state ).to(self._device)
                 #print( "outputs :", outputs )
                 #print( "outputs.data :", outputs.data )
 
@@ -298,7 +305,7 @@ class BreakoutDQN2015Brain( Brain ):
                 #print( "max_index :", max_index )
 
                 # .view(1,1) : [torch.LongTensor of size 1] → size 1×1 に reshape
-                action = max_index.view(1,1)
+                action = max_index.view(1,1).to(self._device)
                 #print( "action :", action )
 
         else:
@@ -306,7 +313,7 @@ class BreakoutDQN2015Brain( Brain ):
             #action = np.random.choice( self._n_actions )
             action = torch.LongTensor(
                 [ [random.randrange(self._n_actions)] ]
-            )
+            ).to(self._device)
 
         return action
 

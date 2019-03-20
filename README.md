@@ -39,7 +39,7 @@
     1. [./FrozenLake_Qlearning_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/FrozenLake_Qlearning_OpenAIGym)
     1. ./FrozenLake_EveryVisitMonteCarlo_OpenAIGym
 1. Breakout（ブロック崩しゲーム）
-    1. ./Breakout_DQN2015_PyTorch_OpenAIGym（実装中...）
+    1. [./Breakout_DQN2015_PyTorch_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/Breakout_DQN2015_PyTorch_OpenAIGym)
 1. OpenAI Gym
     1. [./Processing_OpenAIGym](https://github.com/Yagami360/ReinforcementLearning_Exercises/tree/master/Processing_OpenAIGym)
 1. Unity ML-Agents

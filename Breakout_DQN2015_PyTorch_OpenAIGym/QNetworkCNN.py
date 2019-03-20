@@ -27,13 +27,16 @@ class QNetworkCNN( nn.Module ):
     [public]
 
     """
-    def __init__( self, in_channles, n_actions ):
+    def __init__( self, device, in_channles, n_actions ):
         """
         [Args]
+            _device : <torch.device> 実行デバイス
+
             in_channles : チャンネル数（＝入力画像データの枚数）
             n_actions : 状態数 |A| / 出力ノード数に対応する。
         """
         super( QNetworkCNN, self ).__init__()
+        self._device = device
 
         self.layer = nn.Sequential(
             nn.Conv2d( in_channels = in_channles, out_channels = 32, kernel_size = 8, stride = 4 ),

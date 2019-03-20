@@ -23,17 +23,21 @@ class BreakoutAgent( Agent ):
     OpenAIGym の Breakout のエージェント
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _device : <torch.device> 実行デバイス
+
         _env : OpenAI Gym の ENV
         _losses : list<float> 損失関数の値のリスト（長さはエピソード長）
 
     """
     def __init__( 
         self,
+        device,
         env,
         brain = None, 
         gamma = 0.9
     ):
         super().__init__( brain, gamma, 0 )
+        self._device = device
         self._env = env        
         self._total_reward = torch.FloatTensor( [0.0] )
         self._loss_historys = []
@@ -42,7 +46,7 @@ class BreakoutAgent( Agent ):
 
         # shape = [mini_batch, n_stack_frames(=n_channels), height, width]
         #self._observations = torch.zeros( 1, 4, obs_shape[1], obs_shape[2] )
-        self._observations = torch.zeros( 1, 1, obs_shape[1], obs_shape[2] )
+        self._observations = torch.zeros( 1, 1, obs_shape[1], obs_shape[2] ).to(self._device)
         return
 
     def print( self, str ):
@@ -50,6 +54,7 @@ class BreakoutAgent( Agent ):
         print( "BreakoutAgent" )
         print( self )
         print( str )
+        print( "_device :", self._device )
         print( "_env :", self._env )
         print( "_brain : \n", self._brain )
         print( "_observations : \n", self._observations )
@@ -71,10 +76,10 @@ class BreakoutAgent( Agent ):
         observations_next = self._env.reset()   # shape = [1,84,84]
 
         # numpy → Tensor に型変換
-        observations_next = torch.from_numpy(observations_next).float()
+        observations_next = torch.from_numpy(observations_next).float().to(self._device)
 
         # ミニバッチ用の次元を追加
-        observations_next = torch.unsqueeze( observations_next, dim = 0 )
+        observations_next = torch.unsqueeze( observations_next, dim = 0 ).to(self._device)
 
         #self._observations[:-1] = self._observations[1:]  # 0～2番目に1～3番目を上書き
         #self._observations[-1:] = observations_next  # 4番目に最新のobsを格納
@@ -114,10 +119,10 @@ class BreakoutAgent( Agent ):
         observations_next, reward, env_done, info = self._env.step( action.item() )
 
         # numpy → PyTorch 用の型に変換
-        observations_next = torch.from_numpy(observations_next).float()
+        observations_next = torch.from_numpy(observations_next).float().to(self._device)
 
         # ミニバッチ学習用の次元を追加
-        observations_next = torch.unsqueeze( observations_next, dim = 0 )
+        observations_next = torch.unsqueeze( observations_next, dim = 0 ).to(self._device)
 
         #print( "reward :", reward )
         #print( "env_done :", env_done )
@@ -126,7 +131,8 @@ class BreakoutAgent( Agent ):
         #------------------------------------------------------------------
         # 行動の実行により、次の時間での状態 s_{t+1} 報酬 r_{t+1} を求める。
         #------------------------------------------------------------------
-        reward = torch.FloatTensor( [reward] )
+        self.add_reward( reward, time_step )
+        reward = torch.FloatTensor( [reward] ).to(self._device)
 
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
