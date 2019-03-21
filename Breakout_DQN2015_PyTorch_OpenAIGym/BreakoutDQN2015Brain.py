@@ -54,20 +54,24 @@ class BreakoutDQN2015Brain( Brain ):
     def __init__(
         self,
         device,
-        n_states,
-        n_actions,
-        epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001,
+        n_states, n_actions,
+        epsilon_init = 1.0, epsilon_final = 0.1, n_epsilon_step = 1000000,
+        gamma = 0.9, learning_rate = 0.0001,
         batch_size = 32,
         memory_capacity = 10000,
-        n_stack_frames = 4
+        n_stack_frames = 4,
+        n_skip_frames = 4
     ):
         super().__init__( n_states, n_actions )
         self._device = device
-        self._epsilon = epsilon
+        self._epsilon = epsilon_init
+        self._epsilon_init = epsilon_init
+        self._epsilon_final = epsilon_final
         self._gamma = gamma
         self._learning_rate = learning_rate
         self._batch_size = batch_size
         self._n_stack_frames = n_stack_frames
+        self._n_skip_frames = n_skip_frames
 
         self._main_network = None
         self._target_network = None
@@ -82,6 +86,9 @@ class BreakoutDQN2015Brain( Brain ):
 
         self._b_loss_init = False
 
+        self._epsilon_step = ( epsilon_init - epsilon_final ) / n_epsilon_step
+        self._action_repeat = torch.LongTensor( [0] )
+
         return
 
     def print( self, str ):
@@ -90,13 +97,17 @@ class BreakoutDQN2015Brain( Brain ):
         print( self )
         print( str )
         print( "_device :", self._device )
-        print( "_n_states : \n", self._n_states )
-        print( "_n_actions : \n", self._n_actions )
-        print( "_epsilon : \n", self._epsilon )
-        print( "_gamma : \n", self._gamma )
-        print( "_learning_rate : \n", self._learning_rate )
-        print( "_batch_size : \n", self._batch_size )
-        print( "_n_stack_frames : \n", self._n_stack_frames )
+        print( "_n_states : ", self._n_states )
+        print( "_n_actions : ", self._n_actions )
+        print( "_epsilon : ", self._epsilon )
+        print( "_epsilon_init : ", self._epsilon_init )
+        print( "_epsilon_final : ", self._epsilon_final )
+        print( "_epsilon_step : ", self._epsilon_step )
+        print( "_gamma : ", self._gamma )
+        print( "_learning_rate : ", self._learning_rate )
+        print( "_batch_size : ", self._batch_size )
+        print( "_n_stack_frames : ", self._n_stack_frames )
+        print( "_n_skip_frames : ", self._n_skip_frames )
 
         print( "_q_function : \n", self._q_function )
         print( "_expected_q_function : \n", self._expected_q_function )
@@ -267,16 +278,17 @@ class BreakoutDQN2015Brain( Brain ):
 
         return
 
-    def decay_epsilon( self, episode ):
+    def decay_epsilon( self ):
         """
         ε-greedy 法の ε 値を減衰させる。
         """
-        #self._epsilon = self._epsilon / 2.0
-        self._epsilon = 0.5 * ( 1 / (episode + 1) )
+        if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
+            self._epsilon -= self._epsilon_step
+
         return
 
 
-    def action( self, state ):
+    def action( self, state, time_step ):
         """
         Brain のロジックに従って、現在の状態 s での行動 a を決定する。
         ・ε-グリーディー法に従った行動選択
@@ -284,36 +296,42 @@ class BreakoutDQN2015Brain( Brain ):
             state : int
                 現在の状態
         """
-        # ε-グリーディー法に従った行動選択
-        if( self._epsilon <= np.random.uniform(0,1) ):
-            #------------------------------
-            # Q の最大化する行動を選択
-            #------------------------------
-            # model を推論モードに切り替える（PyTorch特有の処理）
-            self._main_network.eval()
-
-            # 微分を行わない処理の範囲を with 構文で囲む
-            with torch.no_grad():
-                # テストデータをモデルに流し込み、モデルの出力を取得する
-                outputs = self._main_network( state ).to(self._device)
-                #print( "outputs :", outputs )
-                #print( "outputs.data :", outputs.data )
-
-                # dim = 1 ⇒ 列方向で最大値をとる
-                # Returns : (Tensor, LongTensor)
-                _, max_index = torch.max( outputs.data, dim = 1 )
-                #print( "max_index :", max_index )
-
-                # .view(1,1) : [torch.LongTensor of size 1] → size 1×1 に reshape
-                action = max_index.view(1,1).to(self._device)
-                #print( "action :", action )
-
+        # フレームスキップ間は、同じ行動をする。
+        if( (time_step % self._n_skip_frames) != 0 ):
+            action = self._action_repeat
         else:
-            # ε の確率でランダムな行動を選択
-            #action = np.random.choice( self._n_actions )
-            action = torch.LongTensor(
-                [ [random.randrange(self._n_actions)] ]
-            ).to(self._device)
+            # ε-グリーディー法に従った行動選択
+            if( self._epsilon <= np.random.uniform(0,1) ):
+                #------------------------------
+                # Q の最大化する行動を選択
+                #------------------------------
+                # model を推論モードに切り替える（PyTorch特有の処理）
+                self._main_network.eval()
+
+                # 微分を行わない処理の範囲を with 構文で囲む
+                with torch.no_grad():
+                    # テストデータをモデルに流し込み、モデルの出力を取得する
+                    outputs = self._main_network( state ).to(self._device)
+                    #print( "outputs :", outputs )
+                    #print( "outputs.data :", outputs.data )
+
+                    # dim = 1 ⇒ 列方向で最大値をとる
+                    # Returns : (Tensor, LongTensor)
+                    _, max_index = torch.max( outputs.data, dim = 1 )
+                    #print( "max_index :", max_index )
+
+                    # .view(1,1) : [torch.LongTensor of size 1] → size 1×1 に reshape
+                    action = max_index.view(1,1).to(self._device)
+
+            else:
+                # ε の確率でランダムな行動を選択
+                #action = np.random.choice( self._n_actions )
+                action = torch.LongTensor(
+                    [ [random.randrange(self._n_actions)] ]
+                ).to(self._device)
+
+        #print( "action :", action )
+        self._action_repeat = action
 
         return action
 

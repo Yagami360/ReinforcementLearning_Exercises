@@ -51,20 +51,21 @@ MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データ�
 
 |パラメータ名|値（実行条件１）|値（実行条件２）|
 |---|---|---|
-|エピソード試行回数：`NUM_EPISODE`|200|500|
+|エピソード試行回数：`NUM_EPISODE`|500|500|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|1000|←|
 |エピソード開始からの何も学習しないステップ数：`NUM_NOOP`|30|←|
 |モデルに一度に入力する画像データのフレーム数：`NUM_STACK_FRAME`|1|4|
 |スキップするフレーム数：`NUM_SKIP_FRAME`|4|←|
-|学習率：`learning_rate`|0.0001|←|
 |ミニバッチサイズ：`BRAIN_LEARNING_RATE`|32|←|
 |最適化アルゴリズム|Adam<br>減衰率：`beta1=0.9,beta2=0.999`|←|
+|学習率：`learning_rate`|0.0001|←|
+|損失関数|smooth L1 関数（＝Huber 関数）|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|初期値：0.5（減衰）<br>`ε=0.5*(1/episode+1)`|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
 |報酬の設定|Breakout のデフォルト報酬<br>・下段の青色＆緑色のブロック崩し：１点<br>・中央の黄色＆黄土色のブロック崩し：４点<br>・上段のオレンジ＆赤色のブロック崩し：７点|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
-|DQNのネットワーク構成|CNN<br>(0): Conv2d(in_channels=**1**, out_channels=32, kernel_size=(8, 8), stride=(4, 4))<br>(1): ReLU()<br>(2): Conv2d(in_channels=32, out_channels=64, kernel_size=(4, 4), stride=(2, 2))<br>(3): ReLU()<br>(4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1))<br>(5): ReLU()<br>(6): Flatten()<br>(7): Linear(in_features=3136, out_features=**4**, bias=True)<br>(8): ReLU()`|←|
+|DQNのネットワーク構成|CNN<br>(0): Conv2d(in_channels=**1**, out_channels=32, kernel_size=(8, 8), stride=(4, 4))<br>(1): ReLU()<br>(2): Conv2d(in_channels=32, out_channels=64, kernel_size=(4, 4), stride=(2, 2))<br>(3): ReLU()<br>(4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1))<br>(5): ReLU()<br>(6): Flatten()<br>(7): Linear(in_features=7*7*64, out_features=512, bias=True)<br>(8): ReLU()<br>Linear(in_features=512, out_features=**4**, bias=True)|←|
 
 <br>
 

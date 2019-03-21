@@ -14,7 +14,6 @@ import torch.nn.functional as F
 
 class Flatten( nn.Module) :
     '''コンボリューション層の出力画像を1次元に変換する層を定義'''
-
     def forward(self, x):
         return x.view(x.size(0), -1)
 
@@ -38,20 +37,33 @@ class QNetworkCNN( nn.Module ):
         super( QNetworkCNN, self ).__init__()
         self._device = device
 
+        def init_wight( module ):
+            """
+            ネットワーク層の重みが直交行列になるように初期化
+            """
+            # ? gain 値を取得（Relu⇒√2）
+            gain = nn.init.calculate_gain( "relu" )
+
+            #
+            nn.init.orthogonal_( module.weight.data, gain = gain )
+            nn.init.constant_( module.bias.data, 0 )
+            return module
+
         self.layer = nn.Sequential(
-            nn.Conv2d( in_channels = in_channles, out_channels = 32, kernel_size = 8, stride = 4 ),
+            init_wight( nn.Conv2d( in_channels = in_channles, out_channels = 32, kernel_size = 8, stride = 4 ) ),
             nn.ReLU(),
-            nn.Conv2d( in_channels = 32, out_channels = 64, kernel_size = 4, stride = 2 ),
+            init_wight( nn.Conv2d( in_channels = 32, out_channels = 64, kernel_size = 4, stride = 2 ) ),
             nn.ReLU(),
-            nn.Conv2d( in_channels = 64, out_channels = 64, kernel_size = 3, stride = 1 ),
+            init_wight( nn.Conv2d( in_channels = 64, out_channels = 64, kernel_size = 3, stride = 1 ) ),
             nn.ReLU(),
             Flatten(),
-            #nn.Linear( in_features = 64*7*7, out_features = 512 ),
-            nn.Linear( in_features = 64*7*7, out_features = n_actions ),
-            nn.ReLU()
+            init_wight( nn.Linear( in_features = 7*7*64, out_features = 512 ) ),
+            nn.ReLU(),
+            init_wight( nn.Linear( in_features = 512, out_features = n_actions ) )
         )
 
         return
+
 
     def forward( self, x ):
         """

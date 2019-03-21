@@ -30,17 +30,19 @@ from BreakoutAtariWrappers import *
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
-RL_ENV = "BreakoutNoFrameskip-v0"   # 利用する強化学習環境の課題名
-NUM_EPISODE = 500                   # エピソード試行回数
-NUM_TIME_STEP = 1000                # １エピソードの時間ステップの最大数
-NUM_NOOP = 30                       # エピソード開始からの何も学習しないステップ数
-NUM_SKIP_FRAME = 4                  # スキップするフレーム数
-NUM_STACK_FRAME = 1                 # モデルに一度に入力する画像データのフレーム数
-BRAIN_LEARNING_RATE = 0.005        # 学習率
-BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON = 0.5          # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99                 # 利得の割引率
-MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データセットのメモリの最大の長さ
+RL_ENV = "BreakoutNoFrameskip-v0"       # 利用する強化学習環境の課題名
+NUM_EPISODE = 200                       # エピソード試行回数
+NUM_TIME_STEP = 5000                    # １エピソードの時間ステップの最大数
+NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数
+NUM_SKIP_FRAME = 4                      # スキップするフレーム数
+NUM_STACK_FRAME = 1                     # モデルに一度に入力する画像データのフレーム数
+BRAIN_LEARNING_RATE = 0.005             # 学習率
+BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ
+BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_FINAL = 0.1        # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_STEPS = 1000000    # ε-greedy 法の ε が減少していくフレーム数
+BRAIN_GAMMDA = 0.99                     # 利得の割引率
+MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ
 
 
 def main():
@@ -97,12 +99,13 @@ def main():
         device = device,
         n_states = env.observation_space.shape[0] * env.observation_space.shape[1] * env.observation_space.shape[2],
         n_actions = env.action_space.n,
-        epsilon = BRAIN_GREEDY_EPSILON,
+        epsilon_init = BRAIN_GREEDY_EPSILON_INIT, epsilon_final = BRAIN_GREEDY_EPSILON_FINAL, n_epsilon_step = BRAIN_GREEDY_EPSILON_STEPS,
         gamma = BRAIN_GAMMDA,
         learning_rate = BRAIN_LEARNING_RATE,
         batch_size = BRAIN_BATCH_SIZE,
         memory_capacity = MEMORY_CAPACITY,
-        n_stack_frames = NUM_STACK_FRAME
+        n_stack_frames = NUM_STACK_FRAME,
+        n_skip_frames = NUM_SKIP_FRAME
     )
     
     # モデルの構造を定義する。
@@ -121,7 +124,8 @@ def main():
         device = device,
         env = env,
         brain = brain,
-        gamma = BRAIN_GAMMDA
+        gamma = BRAIN_GAMMDA,
+        n_stack_frames = NUM_STACK_FRAME
     )
 
     # Agent の Brain を設定
@@ -164,7 +168,10 @@ def main():
     plt.legend( loc = "lower right" )
     plt.tight_layout()
 
-    plt.savefig( "{}_DQN2015_Reward_episode{}.png".format( RL_ENV, NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( 
+        "{}_DQN2015_Reward_episode{}_ts{}_lr{}_noop{}.png".format( RL_ENV, NUM_EPISODE, NUM_TIME_STEP, BRAIN_LEARNING_RATE, NUM_NOOP ), 
+        dpi = 300, bbox_inches = "tight"
+    )
     plt.show()
 
     #-----------------------------------
@@ -187,7 +194,10 @@ def main():
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
-    plt.savefig( "{}_DQN2015_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
+    plt.savefig(
+        "{}_DQN2015_Loss_episode{}_ts{}_lr{}_noop{}.png".format( RL_ENV, NUM_EPISODE, NUM_TIME_STEP, BRAIN_LEARNING_RATE, NUM_NOOP ),  
+        dpi = 300, bbox_inches = "tight"
+    )
     plt.show()
 
     print("Finish main()")

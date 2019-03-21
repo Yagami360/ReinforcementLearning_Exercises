@@ -52,9 +52,10 @@ MEMORY_CHANGE_EPISODE = 30          # Experience Replay → PrioritizedExperienc
 |---|---|
 |エピソード試行回数：`NUM_EPISODE`|500|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|200|
-|学習率：`learning_rate`|0.0001|
 |ミニバッチサイズ：`BRAIN_LEARNING_RATE`|32|
-|最適化アルゴリズム|Adam|
+|学習率：`learning_rate`|0.0001|←|
+|最適化アルゴリズム|Adam<br>減衰率：`beta1=0.9,beta2=0.999`|←|
+|損失関数|smooth L1 関数（＝Huber 関数）|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5（減衰）|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|
