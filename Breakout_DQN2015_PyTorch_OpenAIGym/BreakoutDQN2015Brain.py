@@ -188,7 +188,14 @@ class BreakoutDQN2015Brain( Brain ):
             self._optimizer : <torch.optimizer> モデルの最適化アルゴリズム            
         """
         # 最適化アルゴリズムとして、Adam を採用
+        """
         self._optimizer = optim.Adam( 
+            params = self._main_network.parameters(), 
+            lr = self._learning_rate 
+        )
+        """
+        # 最適化アルゴリズムとして、RMSprop を採用
+        self._optimizer = optim.RMSprop(
             params = self._main_network.parameters(), 
             lr = self._learning_rate 
         )
@@ -287,6 +294,10 @@ class BreakoutDQN2015Brain( Brain ):
 
         return
 
+    def decay_epsilon_episode( self, episode ):
+        self._epsilon = 0.5 * ( 1 / (episode + 1) )
+        return
+
 
     def action( self, state, time_step ):
         """
@@ -362,6 +373,14 @@ class BreakoutDQN2015Brain( Brain ):
         # ミニバッチデータを取得する
         #-----------------------------------------
         batch, state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_mini_batch( self._batch_size )
+
+        # ミニバッチデータの確認
+        # shape = [mini_batch, n_channels, height, width ] / torch.Size([32, 4, 84, 84])
+        #np_state_batch0 = state_batch[0].numpy()
+        #np_state_batch0 = np_state_batch0.transpose(1,2,0)
+        #import matplotlib.pyplot as plt
+        #plt.imshow( np_state_batch0 )
+        #plt.show()
 
         #-----------------------------------------
         # 教師信号となる推定行動価値関数を求める 

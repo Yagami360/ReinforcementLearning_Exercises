@@ -77,14 +77,7 @@ class BreakoutAgent( Agent ):
         obs_new = self._env.reset()   # shape = [1,84,84]
         obs_new = torch.from_numpy( obs_new ).float().to(self._device)    # numpy → Tensor に型変換
         obs_new = torch.unsqueeze( obs_new, dim = 0 ).to(self._device)  # ミニバッチ用の次元を追加
-
-        #self._observations[:-1] = self._observations[1:]    # 0～2番目に1～3番目を上書き
-        #self._observations[-1:] = obs_new                   # 4番目に最新のobsを格納
         self._observations = obs_new
-
-        #self._observations_next[:-1] = self._observations_next[1:]    # 0～2番目に1～3番目を上書き
-        #self._observations_next[-1:] = obs_new                   # 4番目に最新のobsを格納
-        self._observations_next = obs_new
 
         self._total_reward = torch.FloatTensor( [0.0] )
         self._done = False
@@ -108,22 +101,27 @@ class BreakoutAgent( Agent ):
             return self._done
 
         #-------------------------------------------------------------------
-        # 離散化した現在の状態 s_t を元に、行動 a_t を求める
+        # ε-greedy 法の ε 値を減衰させる。
         #-------------------------------------------------------------------
-        self._brain.decay_epsilon()
+        #self._brain.decay_epsilon()
+        self._brain.decay_epsilon_episode( episode )
+
+        #-------------------------------------------------------------------
+        # 行動 a_t を求める
+        #-------------------------------------------------------------------
         action = self._brain.action( self._observations, time_step )
         #print( "action :", action )
 
         #-------------------------------------------------------------------
         # 行動を実行する。
         #-------------------------------------------------------------------
-        obs_new, reward, env_done, info = self._env.step( action.item() )
+        observations_next, reward, env_done, info = self._env.step( action.item() )
 
         # numpy → PyTorch 用の型に変換
-        obs_new = torch.from_numpy( obs_new ).float().to(self._device)
+        observations_next = torch.from_numpy(observations_next).float().to(self._device)
 
         # ミニバッチ学習用の次元を追加
-        obs_new = torch.unsqueeze( obs_new, dim = 0 ).to(self._device)
+        observations_next = torch.unsqueeze( observations_next, dim = 0 ).to(self._device)
 
         #print( "reward :", reward )
         #print( "env_done :", env_done )
@@ -138,26 +136,20 @@ class BreakoutAgent( Agent ):
         # env_done :  ⇒ True
         if( env_done == True ):
             # 次の状態は存在しない（＝終端状態）ので、None に設定する
-            obs_new = None
+            observations_next = None
 
         else:
             pass
 
-        #self._observations_next[:-1] = self._observations_next[1:]     # 0～2番目に1～3番目を上書き
-        #self._observations_next[-1:] = obs_new                         # 4番目に最新のobsを格納
-        self._observations_next = obs_new
-
         #----------------------------------------
         # 価値関数の更新
         #----------------------------------------
-        self._brain.update_q_function( self._observations, action, self._observations_next, reward )
+        self._brain.update_q_function( self._observations, action, observations_next, reward )
 
         #----------------------------------------
         # 状態の更新
         #----------------------------------------
-        #self._observations[:-1] = self._observations[1:]    # 0～2番目に1～3番目を上書き
-        #self._observations[-1:] = obs_new                   # 4番目に最新のobsを格納
-        self._observations = obs_new
+        self._observations = observations_next
 
         #----------------------------------------
         # 完了時の処理

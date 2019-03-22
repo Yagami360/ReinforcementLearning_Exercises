@@ -8,6 +8,7 @@
     [xx/xx/xx] : 
 """
 import numpy as np
+from collections import deque
 
 # OpenAI Gym
 import gym
@@ -186,6 +187,15 @@ class MaxAndSkipEnv(gym.Wrapper):
         return self.env.reset(**kwargs)
 
 
+class ClipRewardEnv(gym.RewardWrapper):
+    """
+    報酬のクリッピング
+    """
+    def _reward(self, reward):
+        """Bin reward to {+1, 0, -1} by its sign."""
+        return np.sign(reward)
+
+
 class WarpFrame(gym.ObservationWrapper):
     """
     画像サイズをNatureのDQN論文と同じ84x84のグレースケールに reshape する。
@@ -207,23 +217,77 @@ class WarpFrame(gym.ObservationWrapper):
         self.height = 84
         self.observation_space = spaces.Box(
             low=0, high=255,
-            shape=(self.height, self.width, 1), dtype=np.uint8
+            shape=(self.height, self.width, 1),
+            dtype=np.uint8
         )
 
     def observation(self, frame):
         """
         observation の Getter をオーバーライド
         """
+        # 入力画像をグレースケールに変換
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        frame = cv2.resize(frame, (self.width, self.height),
-                           interpolation=cv2.INTER_AREA)
-        return frame[:, :, None]
+
+        #
+        frame = cv2.resize(
+            frame, (self.width, self.height),
+            interpolation=cv2.INTER_AREA
+        )
+
+        return frame    # [width,height] で return
+
+
+class WrapFrameStack(gym.Wrapper):
+    def __init__(self, env, n_stack_frames = 4 ):
+        """
+        obsevation を４フレーム分重ねる。
+        モデルに一度に入力する画像データのフレーム数
+        """
+        gym.Wrapper.__init__(self, env)
+        self.n_stack_frames = n_stack_frames
+        self.frames = deque( [], maxlen = n_stack_frames )  # deque 構造で４フレーム分だけ確保
+        obs_shape = env.observation_space.shape
+        self.observation_space = spaces.Box( 
+            low = 0, high = 255, 
+            shape = ( obs_shape[0], obs_shape[1], obs_shape[2] * n_stack_frames )
+        )
+        return
+
+
+    def reset(self):
+        obs = self.env.reset()
+        for _ in range(self.n_stack_frames):
+            self.frames.append( obs )
+
+        # list 部分を numpy 化
+        observation = np.array( self.frames )
+        #observation = list( self.frames )
+        return observation
+
+    def step(self, action):
+        """
+        step() メソッドをオーバーライト
+        """
+        obs, reward, done, info = self.env.step(action)
+        self.frames.append(obs)
+
+        # list 部分を numpy 化
+        observation = np.array( self.frames )
+        #observation = list( self.frames )
+        return observation, reward, done, info
+
+
+class ScaledFloatFrame(gym.ObservationWrapper):
+    def _observation(self, observation):
+        # careful! This undoes the memory optimization, use
+        # with smaller replay buffers only.
+        return np.array(observation).astype(np.float32) / 255.0
 
 
 class WrapMiniBatch(gym.ObservationWrapper):
     """
     obsevation を ミニバッチ学習用のインデックス順に reshape する。
-    [n_channels, height, width] → [height, width, n_channels]
+    [height, width, n_channels(=n_skip_frames)] → [n_channels(=n_skip_frames), height, width] 
     """
     def __init__(self, env=None):
         super(WrapMiniBatch, self).__init__(env)
@@ -231,7 +295,7 @@ class WrapMiniBatch(gym.ObservationWrapper):
         self.observation_space = Box(
             self.observation_space.low[0, 0, 0],
             self.observation_space.high[0, 0, 0],
-            [obs_shape[2], obs_shape[1], obs_shape[0]],
+            shape = [obs_shape[2], obs_shape[0], obs_shape[1] ],
             dtype=self.observation_space.dtype
         )
         return
@@ -240,11 +304,16 @@ class WrapMiniBatch(gym.ObservationWrapper):
         """
         observation の Getter をオーバーライド
         """
-        # [n_channels, height, width] → [height, width, n_channels] に reshape
-        return observation.transpose(2, 0, 1)
+        # [height, width, n_channels(=n_skip_frames)] → [n_channels(=n_skip_frames), height, width] に reshape
+        #observation[0] = observation[0].transpose(0, 1)
+        #observation[1] = observation[0].transpose(0, 1)
+        #observation[2] = observation[0].transpose(0, 1)
+        #observation[3] = observation[0].transpose(0, 1)
+        observation = observation.transpose(2, 0, 1)
+        return observation
 
 
-def make_env( device, env_id, seed = 8, n_noop_max = 30, n_skip_frame = 4 ):
+def make_env( device, env_id, seed = 8, n_noop_max = 30, n_skip_frame = 4, n_stack_frames = 4 ):
     """
     上記 Wrapper による強化学習環境の生成メソッド
 
@@ -261,6 +330,9 @@ def make_env( device, env_id, seed = 8, n_noop_max = 30, n_skip_frame = 4 ):
     env.seed(seed)                  # 乱数シードの設定
     env = EpisodicLifeEnv(env)
     env = WarpFrame(env)
-    env = WrapMiniBatch(env)
+    env = ScaledFloatFrame(env)
+    env = ClipRewardEnv(env)
+    env = WrapFrameStack(env, n_stack_frames )
+    #env = WrapMiniBatch(env)
 
     return env

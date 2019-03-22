@@ -111,11 +111,12 @@ class ExperienceReplay( object ):
         #print( "transitions :", transitions )
 
         # 取り出したデータをミニバッチ学習用に reshape
-        # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size / shape = 32 * 4
+        # transtions : shape = 1 step 毎の (s,a,s',r)のペア * batch_size / shape = 32 * 4
         # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
         batch = Transition( *zip(*transitions) )
+        #print( "batch :", batch )
 
-        #
+        # torch.cat() : Tensorをリスト入れてして渡すことで、それらを連結したTensorを返す。連結する軸はdimによって指定
         state_batch = torch.cat( batch.state )
         action_batch = torch.cat( batch.action )
         reward_batch = torch.cat( batch.reward )

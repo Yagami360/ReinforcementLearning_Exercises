@@ -70,8 +70,8 @@ class QNetworkCNN( nn.Module ):
         ネットワークの順方向での更新処理
         """
         # 画像のピクセル値0-255を0-1に正規化する
-        x = x / 255.0
-
+        #x = x / 255.0
+        
         output = self.layer(x)
 
         return output
