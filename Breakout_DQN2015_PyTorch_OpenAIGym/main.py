@@ -33,20 +33,27 @@ from BreakoutAtariWrappers import *
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
-#RL_ENV = "BreakoutNoFrameskip-v0"       # 利用する強化学習環境の課題名
-RL_ENV = "Breakout-v0"       # 利用する強化学習環境の課題名
-NUM_EPISODE = 1000                      # エピソード試行回数(12000)
-NUM_TIME_STEP = 5000                    # １エピソードの時間ステップの最大数
+#DEVICE = "CPU" # 使用デバイス
+DEVICE = "GPU" # 使用デバイス
+
+RL_ENV = "BreakoutNoFrameskip-v0"       # 利用する強化学習環境の課題名
+#RL_ENV = "Breakout-v0"                 # 利用する強化学習環境の課題名
+
+NUM_EPISODE = 5000                       # エピソード試行回数(12000)
+NUM_TIME_STEP = 2000                    # １エピソードの時間ステップの最大数
+NUM_SAVE_STEP = 100                      # 強化学習環境の動画の保存間隔（単位：エピソード数）
+
 NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数
 NUM_SKIP_FRAME = 4                      # スキップするフレーム数
 NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数
-BRAIN_LEARNING_RATE = 0.001             # 学習率(0.00025)
+
+BRAIN_LEARNING_RATE = 5e-5             # 学習率(0.00025) 10e-3
 BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ
 BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値
 BRAIN_GREEDY_EPSILON_FINAL = 0.1        # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_STEPS = 1000000    # ε-greedy 法の ε が減少していくフレーム数(1000000)
+BRAIN_GREEDY_EPSILON_STEPS = 10000    # ε-greedy 法の ε が減少していくフレーム数(1000000)
 BRAIN_GAMMDA = 0.99                     # 利得の割引率
-MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ
+MEMORY_CAPACITY = 10000                  # Experience Relay 用の学習用データセットのメモリの最大の長さ
 
 
 def main():
@@ -68,9 +75,18 @@ def main():
     #===================================
     # 実行 Device の設定
     #===================================
-    use_cuda = torch.cuda.is_available()
-    device = torch.device( "cuda" if use_cuda else "cpu" )
+    if( DEVICE == "GPU" ):
+        use_cuda = torch.cuda.is_available()
+        if( use_cuda == True ):
+            device = torch.device( "cuda" )
+        else:
+            print( "can't using gpu." )
+            device = torch.device( "cpu" )
+    else:
+        device = torch.device( "cpu" )
+
     print( "実行デバイス :", device)
+    print( "GPU名 :", torch.cuda.get_device_name(0))
 
     #===================================
     # 学習環境、エージェント生成フェイズ
@@ -95,7 +111,7 @@ def main():
     academy = BreakoutAcademy( 
         env = env, 
         max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, 
-        save_step = 100
+        save_step = NUM_SAVE_STEP
     )
 
     #-----------------------------------

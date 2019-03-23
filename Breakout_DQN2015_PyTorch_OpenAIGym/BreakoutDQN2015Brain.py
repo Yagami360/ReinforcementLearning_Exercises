@@ -375,12 +375,23 @@ class BreakoutDQN2015Brain( Brain ):
         batch, state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_mini_batch( self._batch_size )
 
         # ミニバッチデータの確認
-        # shape = [mini_batch, n_channels, height, width ] / torch.Size([32, 4, 84, 84])
-        #np_state_batch0 = state_batch[0].numpy()
-        #np_state_batch0 = np_state_batch0.transpose(1,2,0)
-        #import matplotlib.pyplot as plt
-        #plt.imshow( np_state_batch0 )
-        #plt.show()
+        # shape = [mini_batch, n_channels, width, height ] / torch.Size([32, 4, 84, 84])
+        """
+        np_state_batch0 = state_batch[0,0,:,:].numpy()
+        np_state_batch1 = state_batch[0,1,:,:].numpy()
+        np_state_batch2 = state_batch[0,2,:,:].numpy()
+        np_state_batch3 = state_batch[0,3,:,:].numpy()
+        import matplotlib.pyplot as plt
+        plt.gray()
+        plt.imshow( np_state_batch0 )   # imshow() は BGR フォーマット
+        plt.show()
+        plt.imshow( np_state_batch1 )
+        plt.show()
+        plt.imshow( np_state_batch2 )
+        plt.show()
+        plt.imshow( np_state_batch3 )
+        plt.show()
+        """
 
         #-----------------------------------------
         # 教師信号となる推定行動価値関数を求める 

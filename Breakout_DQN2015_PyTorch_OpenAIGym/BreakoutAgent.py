@@ -46,7 +46,6 @@ class BreakoutAgent( Agent ):
         # shape = [mini_batch, n_stack_frames(=n_channels), height, width]
         obs_shape = self._env.observation_space.shape  # (1, 84, 84)
         self._observations = torch.zeros( 1, n_stack_frames, obs_shape[1], obs_shape[2] )
-        self._observations_next = torch.zeros( 1, n_stack_frames, obs_shape[1], obs_shape[2] )
         return
 
     def print( self, str ):
@@ -58,7 +57,6 @@ class BreakoutAgent( Agent ):
         print( "_env :", self._env )
         print( "_brain : \n", self._brain )
         print( "_observations : \n", self._observations )
-        print( "_observations_next : \n", self._observations_next )
         print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )

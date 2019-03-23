@@ -21,7 +21,7 @@ import torch.nn.functional as F
 
 # OpenCV
 import cv2
-cv2.ocl.setUseOpenCL(False)     # ?
+#cv2.ocl.setUseOpenCL(False)     # ?
 
 
 class NoopResetEnv( gym.Wrapper ):
@@ -191,7 +191,7 @@ class ClipRewardEnv(gym.RewardWrapper):
     """
     報酬のクリッピング
     """
-    def _reward(self, reward):
+    def reward(self, reward):
         """Bin reward to {+1, 0, -1} by its sign."""
         return np.sign(reward)
 
@@ -228,14 +228,28 @@ class WarpFrame(gym.ObservationWrapper):
         # 入力画像をグレースケールに変換
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
-        #
+        # (width, height) に reshape
         frame = cv2.resize(
             frame, (self.width, self.height),
-            interpolation=cv2.INTER_AREA
+            interpolation = cv2.INTER_AREA
         )
 
         return frame    # [width,height] で return
 
+class LazyFrames(object):
+    def __init__(self, frames):
+        """This object ensures that common frames between the observations are only stored once.
+        It exists purely to optimize memory usage which can be huge for DQN's 1M frames replay
+        buffers.
+        This object should only be converted to numpy array before being passed to the model.
+        You'd not believe how complex the previous solution was."""
+        self._frames = frames
+
+    def __array__(self, dtype=None):
+        out = np.stack(self._frames, axis=0)
+        if dtype is not None:
+            out = out.astype(dtype)
+        return out
 
 class WrapFrameStack(gym.Wrapper):
     def __init__(self, env, n_stack_frames = 4 ):
@@ -260,8 +274,12 @@ class WrapFrameStack(gym.Wrapper):
             self.frames.append( obs )
 
         # list 部分を numpy 化
-        observation = np.array( self.frames )
+        #observation = np.array( self.frames )
         #observation = list( self.frames )
+
+        observation = LazyFrames( list(self.frames) )
+        observation = np.array( observation )
+
         return observation
 
     def step(self, action):
@@ -272,13 +290,16 @@ class WrapFrameStack(gym.Wrapper):
         self.frames.append(obs)
 
         # list 部分を numpy 化
-        observation = np.array( self.frames )
+        #observation = np.array( self.frames )
         #observation = list( self.frames )
+        observation = LazyFrames( list(self.frames) )
+        observation = np.array( observation )
+
         return observation, reward, done, info
 
 
 class ScaledFloatFrame(gym.ObservationWrapper):
-    def _observation(self, observation):
+    def observation(self, observation):
         # careful! This undoes the memory optimization, use
         # with smaller replay buffers only.
         return np.array(observation).astype(np.float32) / 255.0
@@ -287,7 +308,7 @@ class ScaledFloatFrame(gym.ObservationWrapper):
 class WrapMiniBatch(gym.ObservationWrapper):
     """
     obsevation を ミニバッチ学習用のインデックス順に reshape する。
-    [height, width, n_channels(=n_skip_frames)] → [n_channels(=n_skip_frames), height, width] 
+    [width, height, n_channels(=n_skip_frames)] → [n_channels(=n_skip_frames), width, height] 
     """
     def __init__(self, env=None):
         super(WrapMiniBatch, self).__init__(env)
@@ -304,7 +325,7 @@ class WrapMiniBatch(gym.ObservationWrapper):
         """
         observation の Getter をオーバーライド
         """
-        # [height, width, n_channels(=n_skip_frames)] → [n_channels(=n_skip_frames), height, width] に reshape
+        # [width, height, n_channels(=n_skip_frames)] → [n_channels(=n_skip_frames), width, height] に reshape
         #observation[0] = observation[0].transpose(0, 1)
         #observation[1] = observation[0].transpose(0, 1)
         #observation[2] = observation[0].transpose(0, 1)

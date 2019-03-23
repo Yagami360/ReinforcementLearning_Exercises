@@ -53,7 +53,7 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 
 |パラメータ名|値（実行条件１）|値（実行条件２）|
 |---|---|---|
-|エピソード試行回数：`NUM_EPISODE`|1000|12000|
+|エピソード試行回数：`NUM_EPISODE`|1000|10000|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|5000|←|
 |エピソード開始からの何も学習しないステップ数：`NUM_NOOP`|30|←|
 |モデルに一度に入力する画像データのフレーム数：`NUM_STACK_FRAME`|4|4|
@@ -83,6 +83,7 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 -->
 
 ![BreakoutNoFrameskip-v0_DQN2015_Reward_episode1000_ts5000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/54817959-825a1000-4cdb-11e9-9bfc-83ef632291ad.png)<br>
+> うまく学習が進んでいない？
 
 - 損失関数のグラフ（実行条件１）<br>
 <!--
@@ -90,6 +91,7 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 -->
 
 ![BreakoutNoFrameskip-v0_DQN2015_Loss_episode1000_ts5000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/54818011-9f8ede80-4cdb-11e9-9a13-c418b62ec7bc.png)<br>
+> うまく学習が進んでいない？
 
 以下のアニメーションは、Breakout のブロック崩しを行う様子を示したアニメーションである。<br>
 <!--
