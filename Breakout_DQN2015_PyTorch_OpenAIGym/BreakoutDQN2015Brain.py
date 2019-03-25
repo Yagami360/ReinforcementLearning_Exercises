@@ -114,7 +114,7 @@ class BreakoutDQN2015Brain( Brain ):
 
         print( "_q_function : \n", self._q_function )
         print( "_expected_q_function : \n", self._expected_q_function )
-        print( "_memory :", self._memory )
+        print( "len( _memory ) :", len( self._memory ) )
 
         print( "_main_network :\n", self._main_network )
         print( "_target_network :", self._target_network )
@@ -334,11 +334,9 @@ class BreakoutDQN2015Brain( Brain ):
                     _, max_index = torch.max( outputs.data, dim = 1 )
                     #print( "max_index :", max_index )
 
-                    # .view(1,1) : [torch.LongTensor of size 1] → size 1×1 に reshape
-                    action = max_index.view(1,1)
-
-                    # tensor → numpy に変換 / shape = [1,1] → shape = 1
-                    action = action.cpu().numpy()[0,0]
+                    # tensor → int に変換
+                    action = max_index.item()
+                    #print( "action :", action )
 
             else:
                 # ε の確率でランダムな行動を選択
@@ -365,30 +363,22 @@ class BreakoutDQN2015Brain( Brain ):
 
         """
         #-----------------------------------------
-        # メモリに保管する値を Tensor に変換
-        # 更に、ミニバッチ用の次元を追加
-        #-----------------------------------------
-        state = torch.from_numpy( state ).to(self._device)
-        state = torch.unsqueeze( state, dim = 0 ).to(self._device)
-        action = torch.LongTensor( [[action]] ).to(self._device)                # [[x]] で shape = [1,1] にしておき、ミニバッチ用の次元を用意
-        reward = torch.FloatTensor( [[reward]] ).to(self._device)
-        next_state = torch.from_numpy( next_state ).to(self._device)
-        next_state = torch.unsqueeze( next_state, dim = 0 ).to(self._device)
-        done = torch.FloatTensor( [[done]] ).to(self._device)
-
-        #-----------------------------------------
         # 経験に基づく学習用データを追加
         #-----------------------------------------
         self._memory.push( state = state, action = action, next_state = next_state, reward = reward, done = done )
+        #self._memory.push_tensor( state = state, action = action, next_state = next_state, reward = reward, done = done )
 
         # 学習用データがミニバッチサイズ以下ならば、以降の処理は行わない
         if( total_time_step <= self._batch_size ):
+        #if( total_time_step <= self._memory._capacity ):
             return
         
         #-----------------------------------------        
         # ミニバッチデータを取得する
         #-----------------------------------------
         state_batch, action_batch, reward_batch, next_state_batch, done_batch = self._memory.get_mini_batch( self._batch_size )
+        #state_batch, action_batch, reward_batch, next_state_batch, done_batch = self._memory.get_mini_batch_from_tensor( self._batch_size )
+
         #print( "state_batch.size() :", state_batch.size() )
         #print( "action_batch.size() :", action_batch.size() )
         #print( "reward_batch.size() :", reward_batch.size() )
@@ -441,7 +431,7 @@ class BreakoutDQN2015Brain( Brain ):
                 state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
             )
 
-            # ?
+            # ? 自動微分を行わないようにする。別途必要？
             for param in self._target_network.parameters():
                 param.requires_grad = False
 

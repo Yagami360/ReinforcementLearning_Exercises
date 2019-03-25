@@ -58,7 +58,6 @@ class BreakoutAgent( Agent ):
         print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
-        #print( "_s_a_historys : \n", self._s_a_historys )
         print( "len( _reward_historys ) : \n", len( self._reward_historys ) )
         print( "_total_time_step : \n", self._total_time_step )
         print( "----------------------------------" )
@@ -115,14 +114,6 @@ class BreakoutAgent( Agent ):
 
         # 行動の実行により、次の時間での報酬 r_{t+1} を割引利得に加算
         self.add_reward( reward, time_step )
-
-        # Debug
-        if( time_step >= 900 ):
-            print( "action :", action )
-            print( "reward :", reward )
-            print( "env_done :", env_done )
-            print( "info :", info )
-            pass
 
         #----------------------------------------
         # 価値関数の更新

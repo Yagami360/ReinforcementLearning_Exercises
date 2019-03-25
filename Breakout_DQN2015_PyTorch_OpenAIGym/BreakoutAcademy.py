@@ -61,7 +61,7 @@ class BreakoutAcademy( Academy ):
         #self.academy_reset()
 
         # エピソードを試行
-        for episode in tqdm( range( 0, self._max_episode ), desc = "Episode :" ):
+        for episode in tqdm( range( 0, self._max_episode ), desc = "Episode" ):
             # 学習環境を RESET
             self.academy_reset()
 
@@ -73,7 +73,7 @@ class BreakoutAcademy( Academy ):
                 if( episode % self._save_step == 0 ):
                     # 学習環境の動画のフレームを追加
                     self.add_frame( episode, time_step )
-                if( episode == self._max_episode - 1 ):
+                if( episode == self._max_episode ):
                     # 学習環境の動画のフレームを追加
                     self.add_frame( episode, time_step )
 
@@ -95,7 +95,7 @@ class BreakoutAcademy( Academy ):
                 self.save_frames( "RL_ENV_{}_Episode{}.gif".format(self._env.spec.id, episode) )
                 self._frames = []
 
-            if( episode == self._max_episode - 1 ):
+            if( episode == self._max_episode ):
                 self.save_frames( "RL_ENV_{}_Episode{}.gif".format(self._env.spec.id, episode) )
                 self._frames = []
 

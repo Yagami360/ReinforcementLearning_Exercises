@@ -37,25 +37,27 @@ from BreakoutAtariWrappers import *
 #DEVICE = "CPU" # 使用デバイス
 DEVICE = "GPU" # 使用デバイス
 
-RL_ENV = "BreakoutNoFrameskip-v0"       # 利用する強化学習環境の課題名
 #RL_ENV = "Breakout-v0"                 # 利用する強化学習環境の課題名
+RL_ENV = "BreakoutNoFrameskip-v0"      
+#RL_ENV = "BreakoutNoFrameskip-v4"      
+#RL_ENV = "PongNoFrameskip-v0"
 
-NUM_EPISODE = 200                      # エピソード試行回数(10000)
+NUM_EPISODE = 10000                     # エピソード試行回数(10000)
 NUM_TIME_STEP = 1000                    # １エピソードの時間ステップの最大数
 NUM_SAVE_STEP = 100                     # 強化学習環境の動画の保存間隔（単位：エピソード数）
 
-NUM_NOOP = 10                           # エピソード開始からの何も学習しないステップ数(30)
+NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数(30)
 NUM_SKIP_FRAME = 4                      # スキップするフレーム数(4)
 NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数(4)
 
-BRAIN_LEARNING_RATE = 0.0005           # 学習率(5e-5)
+BRAIN_LEARNING_RATE = 0.00005           # 学習率(5e-5)
 BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ
 BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_FINAL = 0.05        # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_STEPS = 5000       # ε-greedy 法の ε が減少していくフレーム数(1000000)
+BRAIN_GREEDY_EPSILON_FINAL = 0.01       # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_STEPS = 50000      # ε-greedy 法の ε が減少していくフレーム数(1_000_000)
 BRAIN_GAMMDA = 0.99                     # 利得の割引率
-BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（10000） 
-MEMORY_CAPACITY = 2000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ
+BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（10_000） 
+MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ(1_000_000)
 
 
 def main():
