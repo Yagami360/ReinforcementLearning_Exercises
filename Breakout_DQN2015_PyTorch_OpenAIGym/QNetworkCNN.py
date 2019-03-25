@@ -37,29 +37,17 @@ class QNetworkCNN( nn.Module ):
         super( QNetworkCNN, self ).__init__()
         self._device = device
 
-        def init_wight( module ):
-            """
-            ネットワーク層の重みが直交行列になるように初期化
-            """
-            # ? gain 値を取得（Relu⇒√2）
-            gain = nn.init.calculate_gain( "relu" )
-
-            #
-            nn.init.orthogonal_( module.weight.data, gain = gain )
-            nn.init.constant_( module.bias.data, 0 )
-            return module
-
         self.layer = nn.Sequential(
-            init_wight( nn.Conv2d( in_channels = in_channles, out_channels = 32, kernel_size = 8, stride = 4 ) ),
+            nn.Conv2d( in_channels = in_channles, out_channels = 32, kernel_size = 8, stride = 4 ),
             nn.ReLU(),
-            init_wight( nn.Conv2d( in_channels = 32, out_channels = 64, kernel_size = 4, stride = 2 ) ),
+            nn.Conv2d( in_channels = 32, out_channels = 64, kernel_size = 4, stride = 2 ),
             nn.ReLU(),
-            init_wight( nn.Conv2d( in_channels = 64, out_channels = 64, kernel_size = 3, stride = 1 ) ),
+            nn.Conv2d( in_channels = 64, out_channels = 64, kernel_size = 3, stride = 1 ),
             nn.ReLU(),
             Flatten(),
-            init_wight( nn.Linear( in_features = 7*7*64, out_features = 512 ) ),
+            nn.Linear( in_features = 7*7*64, out_features = 512 ),
             nn.ReLU(),
-            init_wight( nn.Linear( in_features = 512, out_features = n_actions ) )
+            nn.Linear( in_features = 512, out_features = n_actions )
         )
 
         return

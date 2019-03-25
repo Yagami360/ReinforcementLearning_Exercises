@@ -13,10 +13,11 @@ import random
 import torch
 
 from collections import namedtuple
+from collections import deque
 
 Transition = namedtuple(
     typename = "Transition",
-    field_names = ( "state", "action", "next_state", "reward" )
+    field_names = ( "state", "action", "next_state", "reward", "done" )
 )
 
 
@@ -28,10 +29,8 @@ class ExperienceReplay( object ):
 
     [protected] 変数名の前にアンダースコア _ を付ける
         _device : <torch.device> 実行デバイス
-
         _capacity : [int] メモリの最大値
         _memory : [list] (s,a,s',a',r) のリスト（学習用データ）
-        _index : [int] 現在のメモリのインデックス
              
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -39,12 +38,11 @@ class ExperienceReplay( object ):
     def __init__(
         self,
         device,
-        capacity = 10000
+        capacity = 1000
     ):
         self._device = device
         self._capacity = capacity
-        self._memory = []
-        self._index = 0
+        self._memory = deque( maxlen = capacity )
         return
 
     def __len__( self ):
@@ -52,35 +50,27 @@ class ExperienceReplay( object ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "CartPoleAgent" )
+        print( "ExperienceReplay" )
         print( self )
         print( str )
         print( "_device :", self._device )
         print( "_capacity :", self._capacity )
         print( "_memory : \n", self._memory )
-        print( "_index : \n", self._index )
         return
 
-    def push( self, state, action, next_state, reward ):
+    def push( self, state, action, next_state, reward, done ):
         """
         学習用のデータのメモリに、データを push する
         [Args]
-            state : <> 現在の状態 s
-            action : <> 現在の行動 a
-            next_state : <> 次の状態 s'
-            reword : <> 報酬        
+            state : <ndarray> 現在の状態 s
+            action : <int> 現在の行動 a
+            next_state : <ndarray> 次の状態 s'
+            reword : <float> 報酬        
+            done : <bool> 完了フラグ
         [Returns]
         """
-        # 現在のメモリサイズが上限値以下なら、新たに容量を確保する。
-        if( len(self._memory) < self._capacity ):
-            self._memory.append( None )
-
         # nametuple を使用して、メモリに値を格納
-        self._memory[ self._index ] = Transition( state, action, next_state, reward )
-
-        # 現在のインデックスをづらす
-        self._index = ( self._index + 1 ) % self._capacity
-
+        self._memory.append( Transition( state, action, next_state, reward, done ) )
         return
 
     def pop( self, batch_size ):
@@ -95,34 +85,64 @@ class ExperienceReplay( object ):
 
     def get_mini_batch( self, batch_size ):
         """
-        ミニバッチデータを取得する
+        Experience Replay に基いた、ミニバッチデータを取得する
         [Args]
+            batch_size : <int> ミニバッチサイズ
         [Returns]
+            state_batch : <Tensor/torch.float32> 現在の状態 s のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            action_batch : <Tensor/torch.int64> 現在の行動 a のミニバッチデータ / shape = [batch_size,1]
+            next_state_batch : <Tensor/torch.float32> 次の状態 s' のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            reword_batch : <Tensor/torch.float32> 報酬のミニバッチデータ / shape = [batch_size,1]
+            done_batch : <Tensor/torch.float32> 完了フラグのミニバッチデータ / shape = [batch_size,1]
         """
-        #----------------------------------------------------------------------
-        # Experience Replay に基づき、ミニバッチ処理用のデータセットを生成する。
-        #----------------------------------------------------------------------
-        # メモリサイズがまだミニバッチサイズより小さい場合は、処理を行わない
-        if( len(self._memory) < batch_size ):
-            return None, None, None, None, None
-
         # ミニバッチサイズ以上ならば、学習用データを pop する
-        transitions = self.pop( batch_size )
-        #print( "transitions :", transitions )
-
-        # 取り出したデータをミニバッチ学習用に reshape
-        # transtions : shape = 1 step 毎の (s,a,s',r)のペア * batch_size / shape = 32 * 4
-        # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
-        batch = Transition( *zip(*transitions) )
+        # batch : shape = 1 step 毎の (s,a,s',r,done)のペア * batch_size / shape = 32 * 5
+        batch = self.pop( batch_size )
         #print( "batch :", batch )
 
-        # torch.cat() : Tensorをリスト入れてして渡すことで、それらを連結したTensorを返す。連結する軸はdimによって指定
+        # batch : shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = [5,32] のタプル
+        batch = Transition( *zip(*batch) )
+
+        # torch.cat() : Tensorをリスト入れてして渡すことで、それらを連結したTensorを返す。連結する軸はdimによって指定。
+        #               Tensor の配列(shepe=batch_size)である batch[0]=batch.state → 1つの Tensor である state.batch に変換
         state_batch = torch.cat( batch.state )
         action_batch = torch.cat( batch.action )
         reward_batch = torch.cat( batch.reward )
+        next_state_batch = torch.cat( batch.next_state )
+        done_batch = torch.cat( batch.done )
 
-        non_final_next_states = torch.cat(
-            [s for s in batch.next_state if s is not None]
-        )
+        #--------------------------------------------------------------------
+        # メモリの値を Tensor ではなく、nump で保管している場合の処理
+        # numpy → Tensor に変換
+        # ミニバッチデータの段階で Tensor に変換するのは、GPUメモリ削減のため
+        # .to(self._device) で Tensor を GPU に転送
+        #--------------------------------------------------------------------
+        # 以下の操作を一度に行っている。
+        # state_batch = torch.from_numpy( b.state ).float().to(self._device)
+        # state_batch = torch.unsqueeze( state_batch, dim = 0 ).to(self._device)
+        # state_batch = torch.cat( batch_state_tsr ).to(self._device)
+        """
+        state_batch = torch.cat(
+            [ torch.from_numpy(b.state).unsqueeze(0) for b in batch ], 
+            dim=0
+        ).to(self._device)
 
-        return batch, state_batch, action_batch, reward_batch, non_final_next_states
+        action_batch = torch.cat(
+            [ torch.LongTensor([[b.action]]) for b in batch ]   # [[x]] で shape = [batch_size, 1] にしておく
+        ).to(self._device)
+
+        reward_batch = torch.cat(
+            [ torch.FloatTensor([[b.reward]]) for b in batch ]
+        ).to(self._device)
+
+        next_state_batch = torch.cat(
+            [ torch.from_numpy(b.next_state).unsqueeze(0) for b in batch ], 
+            dim=0
+        ).to(self._device)
+
+        done_batch = torch.cat(
+            [ torch.FloatTensor([[b.done]]) for b in batch ]
+        ).to(self._device)
+        """
+
+        return state_batch, action_batch, reward_batch, next_state_batch, done_batch

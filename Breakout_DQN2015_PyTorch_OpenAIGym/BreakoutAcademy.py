@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 import os.path
+from tqdm import tqdm
 
 # 自作クラス
 from Academy import Academy
@@ -60,12 +61,13 @@ class BreakoutAcademy( Academy ):
         #self.academy_reset()
 
         # エピソードを試行
-        for episode in range( 0, self._max_episode ):
+        for episode in tqdm( range( 0, self._max_episode ), desc = "Episode :" ):
             # 学習環境を RESET
             self.academy_reset()
 
             # 時間ステップを 1ステップづつ進める
             for time_step in range( 0 ,self._max_time_step ):
+                #print( "time_step :", time_step )
                 dones = []
 
                 if( episode % self._save_step == 0 ):

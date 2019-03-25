@@ -40,12 +40,10 @@ class BreakoutAgent( Agent ):
         super().__init__( brain, gamma, 0 )
         self._device = device
         self._env = env        
-        self._total_reward = torch.FloatTensor( [0.0] )
+        self._total_reward = 0.0
         self._loss_historys = []
-
-        # shape = [mini_batch, n_stack_frames(=n_channels), height, width]
-        obs_shape = self._env.observation_space.shape  # (1, 84, 84)
-        self._observations = torch.zeros( 1, n_stack_frames, obs_shape[1], obs_shape[2] )
+        self._total_time_step = 0
+        self._observations = None
         return
 
     def print( self, str ):
@@ -60,8 +58,9 @@ class BreakoutAgent( Agent ):
         print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
-        print( "_s_a_historys : \n", self._s_a_historys )
-        print( "_reward_historys : \n", self._reward_historys )
+        #print( "_s_a_historys : \n", self._s_a_historys )
+        print( "len( _reward_historys ) : \n", len( self._reward_historys ) )
+        print( "_total_time_step : \n", self._total_time_step )
         print( "----------------------------------" )
         return
 
@@ -72,12 +71,8 @@ class BreakoutAgent( Agent ):
         """
         エージェントの再初期化処理
         """
-        obs_new = self._env.reset()   # shape = [1,84,84]
-        obs_new = torch.from_numpy( obs_new ).float().to(self._device)    # numpy → Tensor に型変換
-        obs_new = torch.unsqueeze( obs_new, dim = 0 ).to(self._device)  # ミニバッチ用の次元を追加
-        self._observations = obs_new
-
-        self._total_reward = torch.FloatTensor( [0.0] )
+        self._observations = self._env.reset()   # shape = [n_stack_frames,84,84]
+        self._total_reward = 0.0
         self._done = False
         return
 
@@ -101,8 +96,8 @@ class BreakoutAgent( Agent ):
         #-------------------------------------------------------------------
         # ε-greedy 法の ε 値を減衰させる。
         #-------------------------------------------------------------------
-        #self._brain.decay_epsilon()
-        self._brain.decay_epsilon_episode( episode )
+        self._brain.decay_epsilon()
+        #self._brain.decay_epsilon_episode( episode )
 
         #-------------------------------------------------------------------
         # 行動 a_t を求める
@@ -113,47 +108,42 @@ class BreakoutAgent( Agent ):
         #-------------------------------------------------------------------
         # 行動を実行する。
         #-------------------------------------------------------------------
-        observations_next, reward, env_done, info = self._env.step( action.item() )
-
-        # numpy → PyTorch 用の型に変換
-        observations_next = torch.from_numpy(observations_next).float().to(self._device)
-
-        # ミニバッチ学習用の次元を追加
-        observations_next = torch.unsqueeze( observations_next, dim = 0 ).to(self._device)
-
+        observations_next, reward, env_done, info = self._env.step( action )
         #print( "reward :", reward )
         #print( "env_done :", env_done )
         #print( "info :", info )
 
-        #------------------------------------------------------------------
-        # 行動の実行により、次の時間での状態 s_{t+1} 報酬 r_{t+1} を求める。
-        #------------------------------------------------------------------
+        # 行動の実行により、次の時間での報酬 r_{t+1} を割引利得に加算
         self.add_reward( reward, time_step )
-        reward = torch.FloatTensor( [reward] ).to(self._device)
 
-        # env_done :  ⇒ True
-        if( env_done == True ):
-            # 次の状態は存在しない（＝終端状態）ので、None に設定する
-            observations_next = None
-
-        else:
+        # Debug
+        if( time_step >= 900 ):
+            print( "action :", action )
+            print( "reward :", reward )
+            print( "env_done :", env_done )
+            print( "info :", info )
             pass
 
         #----------------------------------------
         # 価値関数の更新
         #----------------------------------------
-        self._brain.update_q_function( self._observations, action, observations_next, reward )
+        self._brain.update_q_function( self._observations, action, observations_next, reward, env_done, self._total_time_step )
 
         #----------------------------------------
         # 状態の更新
         #----------------------------------------
         self._observations = observations_next
 
+        # 一定間隔で、Target Network と Main Network を同期する
+        self._brain.update_target_q_function( episode, time_step, self._total_time_step )
+
         #----------------------------------------
         # 完了時の処理
         #----------------------------------------
         if( env_done == True ):
             self.done()
+
+        self._total_time_step += 1
 
         return self._done
 
@@ -166,17 +156,16 @@ class BreakoutAgent( Agent ):
         [Args]
             episode : <int> 現在のエピソード数
         """
-        print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
+        print( "エピソード = {0} / 全時間ステップ数 = {1} / 最終時間ステップ数 = {2}".format( episode, self._total_time_step, time_step )  )
+
+        #
+        print( "epsilon = %0.6f" % self._brain._epsilon )
 
         # 利得の履歴に追加
         self._reward_historys.append( self._total_reward )
 
         # 損失関数の履歴に追加
-        print( "loss = %0.6f" % self._brain.get_loss() )
+        print( "loss = %0.8f" % self._brain.get_loss() )
         self._loss_historys.append( self._brain.get_loss() )
-
-        # 一定間隔で、Target Network と Main Network を同期する
-        if( (episode % 2) == 0 ):
-            self._brain.update_target_q_function()
 
         return

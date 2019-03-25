@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from matplotlib import animation
+from datetime import datetime
 
 # OpenAI Gym
 import gym
@@ -39,21 +40,22 @@ DEVICE = "GPU" # 使用デバイス
 RL_ENV = "BreakoutNoFrameskip-v0"       # 利用する強化学習環境の課題名
 #RL_ENV = "Breakout-v0"                 # 利用する強化学習環境の課題名
 
-NUM_EPISODE = 5000                       # エピソード試行回数(12000)
-NUM_TIME_STEP = 2000                    # １エピソードの時間ステップの最大数
-NUM_SAVE_STEP = 100                      # 強化学習環境の動画の保存間隔（単位：エピソード数）
+NUM_EPISODE = 200                      # エピソード試行回数(10000)
+NUM_TIME_STEP = 1000                    # １エピソードの時間ステップの最大数
+NUM_SAVE_STEP = 100                     # 強化学習環境の動画の保存間隔（単位：エピソード数）
 
-NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数
-NUM_SKIP_FRAME = 4                      # スキップするフレーム数
-NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数
+NUM_NOOP = 10                           # エピソード開始からの何も学習しないステップ数(30)
+NUM_SKIP_FRAME = 4                      # スキップするフレーム数(4)
+NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数(4)
 
-BRAIN_LEARNING_RATE = 5e-5             # 学習率(0.00025) 10e-3
+BRAIN_LEARNING_RATE = 0.0005           # 学習率(5e-5)
 BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ
 BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_FINAL = 0.1        # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_STEPS = 10000    # ε-greedy 法の ε が減少していくフレーム数(1000000)
+BRAIN_GREEDY_EPSILON_FINAL = 0.05        # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_STEPS = 5000       # ε-greedy 法の ε が減少していくフレーム数(1000000)
 BRAIN_GAMMDA = 0.99                     # 利得の割引率
-MEMORY_CAPACITY = 10000                  # Experience Relay 用の学習用データセットのメモリの最大の長さ
+BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（10000） 
+MEMORY_CAPACITY = 2000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ
 
 
 def main():
@@ -68,9 +70,27 @@ def main():
     print( "PyTorch :", torch.__version__ )
     print( "OpenCV :", cv2.__version__ )
 
-    np.random.seed(8)
-    random.seed(8)
-    torch.manual_seed(8)
+    # 実行条件の出力
+    print( "----------------------------------------------" )
+    print( "実行条件" )
+    print( "開始時間：", datetime.now() )
+    print( "DEVICE : ", DEVICE )
+    print( "RL_ENV : ", RL_ENV )
+    print( "NUM_EPISODE : ", NUM_EPISODE )
+    print( "NUM_TIME_STEP : ", NUM_TIME_STEP )
+    print( "NUM_SAVE_STEP : ", NUM_SAVE_STEP )
+    print( "NUM_NOOP : ", NUM_NOOP )
+    print( "NUM_SKIP_FRAME : ", NUM_SKIP_FRAME )
+    print( "NUM_STACK_FRAME : ", NUM_STACK_FRAME )
+    print( "BRAIN_LEARNING_RATE : ", BRAIN_LEARNING_RATE )
+    print( "BRAIN_BATCH_SIZE : ", BRAIN_BATCH_SIZE )
+    print( "BRAIN_GREEDY_EPSILON_INIT : ", BRAIN_GREEDY_EPSILON_INIT )
+    print( "BRAIN_GREEDY_EPSILON_FINAL : ", BRAIN_GREEDY_EPSILON_FINAL )
+    print( "BRAIN_GREEDY_EPSILON_STEPS : ", BRAIN_GREEDY_EPSILON_STEPS )
+    print( "BRAIN_GAMMDA : ", BRAIN_GAMMDA )
+    print( "BRAIN_FREC_TARGET_UPDATE : ", BRAIN_FREC_TARGET_UPDATE )
+    print( "MEMORY_CAPACITY : ", MEMORY_CAPACITY )
+    print( "----------------------------------------------" )
 
     #===================================
     # 実行 Device の設定
@@ -91,6 +111,11 @@ def main():
     #===================================
     # 学習環境、エージェント生成フェイズ
     #===================================
+    # seed 値の設定
+    np.random.seed(8)
+    random.seed(8)
+    torch.manual_seed(8)
+
     # OpenAI-Gym の ENV を作成
     env = make_env( 
         device = device,
@@ -127,7 +152,8 @@ def main():
         batch_size = BRAIN_BATCH_SIZE,
         memory_capacity = MEMORY_CAPACITY,
         n_stack_frames = NUM_STACK_FRAME,
-        n_skip_frames = NUM_SKIP_FRAME
+        n_skip_frames = NUM_SKIP_FRAME,
+        n_frec_target_update = BRAIN_FREC_TARGET_UPDATE
     )
     
     # モデルの構造を定義する。
@@ -179,7 +205,7 @@ def main():
         range(0,NUM_EPISODE+1), reward_historys,
         label = 'gamma = {}'.format(BRAIN_GAMMDA),
         linestyle = '-',
-        linewidth = 0.5,
+        linewidth = 0.2,
         color = 'black'
     )
     plt.title( "Reward History" )
@@ -206,7 +232,7 @@ def main():
         range( 0, NUM_EPISODE ), loss_historys,
         label = 'mini_batch_size = %d, learning_rate = %0.4f' % ( BRAIN_BATCH_SIZE, BRAIN_LEARNING_RATE ),
         linestyle = '-',
-        #linewidth = 2,
+        linewidth = 0.2,
         color = 'black'
     )
     plt.title( "loss / Smooth L1" )
@@ -222,6 +248,7 @@ def main():
     )
     plt.show()
 
+    print( "終了時間：", datetime.now() )
     print("Finish main()")
     return
 
