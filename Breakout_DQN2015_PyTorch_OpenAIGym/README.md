@@ -1,4 +1,4 @@
-# DQN（2015年NatureバージョンのTargetNetwork使用）によるブロック崩しゲーム（Breakout）【実装中...】
+# DQN（2015年NatureバージョンのTargetNetwork使用）によるブロック崩しゲーム（Breakout）
 強化学習の学習環境用のブロック崩しゲーム（Breakout）<br>
 ディープラーニングを用いた強化学習手法であるDQN [Deep Q-Network] （2015年NatureバージョンのTarget Q-Network使用）によって、Breakout を解く。<br>
 
@@ -18,7 +18,7 @@
 - Anaconda : 5.0.1
 - OpenAIGym : 0.10.9
 - OpenAIGym [atari]
-- PyTorch : 1.0.0
+- PyTorch : 1.0.1
 - OpenCV : 4.0.0
 
 ## ■ 使用法
@@ -57,7 +57,7 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 
 |パラメータ名|値（実行条件１）|値（実行条件２）|
 |---|---|---|
-|エピソード試行回数：`NUM_EPISODE`|50,000|50,000|
+|エピソード試行回数：`NUM_EPISODE`|5,000|10,000|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|1000|←|
 |エピソード開始からの何も学習しないステップ数：`NUM_NOOP`|30|10|
 |モデルに一度に入力する画像データのフレーム数：`NUM_STACK_FRAME`|4|←|
@@ -69,7 +69,7 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON_INIT`|1.0|←|
 |ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.01|←|
-|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|500,000|←|
+|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|50,000|100,00|
 |Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|1000|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10,000|←|
 |報酬の設定|Breakout のデフォルト報酬<br>・下段の青色＆緑色のブロック崩し：１点<br>・中央の黄色＆黄土色のブロック崩し：４点<br>・上段のオレンジ＆赤色のブロック崩し：７点<br>に対して、符号化関数 sign で 0.0 or 1.0 の範囲にクリッピング|←|
@@ -83,29 +83,10 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 <br>
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
-<!--
-![BreakoutNoFrameskip-v0_DQN2015_Reward_episode200](https://user-images.githubusercontent.com/25688193/54664421-7f1e2300-4b27-11e9-9c02-82b6349da583.png)<br>
--->
-<!--
-![BreakoutNoFrameskip-v0_DQN2015_Reward_episode1000_ts5000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/54817959-825a1000-4cdb-11e9-9bfc-83ef632291ad.png)<br>
--->
-<!--
-![BreakoutNoFrameskip-v0_DQN2015_Reward_episode10000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/54873955-05d34880-4e25-11e9-96a4-03ffb857df6c.png)
-> うまく学習が進んでいない？
--->
+<br>
 
 - 損失関数のグラフ（実行条件１）<br>
-<!--
-![BreakoutNoFrameskip-v0_DQN2015_episode200](https://user-images.githubusercontent.com/25688193/54664422-7f1e2300-4b27-11e9-9e14-1f39098044de.png)<br>
--->
-<!--
-![BreakoutNoFrameskip-v0_DQN2015_Loss_episode1000_ts5000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/54818011-9f8ede80-4cdb-11e9-9a13-c418b62ec7bc.png)<br>
--->
-<!--
-![BreakoutNoFrameskip-v0_DQN2015_Loss_episode10000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/54873954-0370ee80-4e25-11e9-814f-6e61f0fe958f.png)<br>
-
-> うまく学習が進んでいない？
--->
+<br>
 
 <br>
 
@@ -116,10 +97,10 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 
 
 - エピソード = 0 / 最終時間ステップ数 = 24（実行条件１）<br>
-![RL_ENV_BreakoutNoFrameskip-v0_Episode0_ts24](https://user-images.githubusercontent.com/25688193/54930390-8ba4e000-4f5a-11e9-935e-0bb6c7aca562.gif)<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode0](https://user-images.githubusercontent.com/25688193/54999042-c9fdd600-5012-11e9-97af-ae7153c8f860.gif)<br>
 
-- エピソード = 100 / 最終時間ステップ数 = 60（実行条件１）<br>
-![RL_ENV_BreakoutNoFrameskip-v0_Episode100_ts60](https://user-images.githubusercontent.com/25688193/54930545-ca3a9a80-4f5a-11e9-94d4-bd05bd52468b.gif)<br>
+- エピソード = 100 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
 
 - エピソード = 500 / 最終時間ステップ数 = xx（実行条件１）<br>
 <br>

@@ -35,13 +35,13 @@ RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
 
 NUM_EPISODE = 500                   # エピソード試行回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
-NUM_SAVE_STEP = 100                 # 強化学習環境の動画の保存間隔（単位：エピソード数）
+NUM_SAVE_STEP = 50                  # 強化学習環境の動画の保存間隔（単位：エピソード数）
 
 BRAIN_LEARNING_RATE = 0.0001        # 学習率
 BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ (Default:32)
 BRAIN_GREEDY_EPSILON_INIT = 0.5     # ε-greedy 法の ε 値の初期値
 BRAIN_GREEDY_EPSILON_FINAL = 0.001  # ε-greedy 法の ε 値の最終値
-BRAIN_GREEDY_EPSILON_STEPS = 1000   # ε-greedy 法の ε が減少していくフレーム数
+BRAIN_GREEDY_EPSILON_STEPS = 5000   # ε-greedy 法の ε が減少していくフレーム数
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
 MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データセットのメモリの最大の長さ
 

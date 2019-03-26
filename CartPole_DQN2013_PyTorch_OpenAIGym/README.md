@@ -17,7 +17,7 @@
 - Python : 3.6
 - Anaconda : 5.0.1
 - OpenAIGym : 0.10.9
-- PyTorch : 1.0.0
+- PyTorch : 1.0.1
 
 ## ■ 使用法
 
@@ -29,13 +29,21 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
-NUM_EPISODE = 500               # エピソード試行回数
-NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
-BRAIN_LEARNING_RATE = 0.0001    # 学習率
-BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99             # 利得の割引率
-MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセットのメモリの最大の長さ
+DEVICE = "GPU"                      # 使用デバイス ("CPU" or "GPU")
+RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
+
+NUM_EPISODE = 500                   # エピソード試行回数
+NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
+NUM_SAVE_STEP = 100                 # 強化学習環境の動画の保存間隔（単位：エピソード数）
+
+BRAIN_LEARNING_RATE = 0.0001        # 学習率
+BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ (Default:32)
+BRAIN_GREEDY_EPSILON_INIT = 0.5     # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_FINAL = 0.001  # ε-greedy 法の ε 値の最終値
+BRAIN_GREEDY_EPSILON_STEPS = 1000   # ε-greedy 法の ε が減少していくフレーム数
+BRAIN_GAMMDA = 0.99                 # 利得の割引率
+BRAIN_FREC_TARGET_UPDATE = 20       # Target Network との同期頻度（Default:10_000） 
+MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データセットのメモリの最大の長さ
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -53,31 +61,39 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 |最適化アルゴリズム|Adam<br>減衰率：`beta1=0.9,beta2=0.999`|←|
 |損失関数|smooth L1 関数（＝Huber 関数）|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
-|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5（減衰）|←|
+|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON_INIT`|1.0|←|
+|ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.001|←|
+|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|5000|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
-|DQNのネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>出力層：行動数（2）|MLP（4層）<br>入力層：状態数（4）<br>隠れ層１：32ノード<br>隠れ層２：32ノード<br>出力層：行動数（2）|
+|DQNのネットワーク構成|MLP（3層）<br>(0): Linear(in_features=4, out_features=32, bias=True)<br>(1): ReLU()<br>(2): Linear(in_features=32, out_features=32, bias=True)<br>(5): ReLU()<br>(6): Linear(in_features=32, out_features=2, bias=True)|MLP（4層）<br>(0): Linear(in_features=4, out_features=32, bias=True)<br>(1): ReLU()<br>(2): Linear(in_features=32, out_features=32, bias=True)<br>(3): ReLU()<br>(4): Linear(in_features=32, out_features=32, bias=True)<br>(5): ReLU()<br>(6): Linear(in_features=32, out_features=2, bias=True)|
 
 <!--
 転倒：-1<br>連続 `NUM_TIME_STEP`回成功：+`NUM_TIME_STEP=200`<br>それ以外：+1|
 -->
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
-![cartpole-v0_dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/53067895-90b8de80-3519-11e9-982e-a027e512fafa.png)<br>
+![CartPole-v0_DQN2013_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54998197-e0a32d80-5010-11e9-890a-61542dfc6fb6.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
-![cartpole-v0_dqn2013_episode500](https://user-images.githubusercontent.com/25688193/53067890-8ac2fd80-3519-11e9-8117-925c7e4f9d92.png)<br>
+![CartPole-v0_DQN2013_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54998194-e0a32d80-5010-11e9-9dcd-15e0ab566bb6.png)<br>
+
+<!--
 > 途中で損失関数の値が発散しており、その後０付近の収束しておらず、うまく学習できていないことがわかる。<br>
+-->
 
 - 割引利得のエピソード毎の履歴（実行条件２）<br>
-![cartpole-v0_dqn2013_reward_episode500](https://user-images.githubusercontent.com/25688193/53067446-8eee1b80-3517-11e9-882a-5d32b68e3468.png)<br>
+![CartPole-v0_DQN2013_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54996397-84d6a580-500c-11e9-9b2b-4e0116d9eab1.png)<br>
 
 - 損失関数のグラフ（実行条件２）<br>
-![cartpole-v0_dqn2013_episode500](https://user-images.githubusercontent.com/25688193/53067444-8c8bc180-3517-11e9-9efd-d07609072ca3.png)<br>
+![CartPole-v0_DQN2013_Loss_episode100_lr0 0001](https://user-images.githubusercontent.com/25688193/54996753-7b9a0880-500d-11e9-8efc-9c0bb6fb3231.png)<br>
+![CartPole-v0_DQN2013_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54996396-84d6a580-500c-11e9-82b8-86af38a9ac1e.png)<br>
+
+<!--
 > エピソードが経過するにつれて、損失関数の値が０付近の値に向かって収束しており、うまく学習できていることがわかる。<br>
 > また、実行条件１より、学習が安定化していることがわかる。（実行条件１のMLPより、層数が多いため？）<br>
-
+-->
 
 <br>
 
@@ -88,35 +104,22 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 -->
 
 - エピソード = 0 / 最終時間ステップ数 = 10（実行条件２）<br>
-![rl_env_cartpole-v0_episode0](https://user-images.githubusercontent.com/25688193/53067035-bd6af700-3515-11e9-8f05-2be510a31487.gif)<br>
+![RL_ENV_CartPole-v0_Episode0](https://user-images.githubusercontent.com/25688193/54994129-d54b0480-5006-11e9-95fd-ab1e86aa23e0.gif)<br>
 
-- エピソード = 50 / 最終時間ステップ数 = 15<br>
-![rl_env_cartpole-v0_episode50](https://user-images.githubusercontent.com/25688193/53067037-be038d80-3515-11e9-9020-47436bea93c0.gif)<br>
+- エピソード = 50 / 最終時間ステップ数 = 52<br>
+![RL_ENV_CartPole-v0_Episode50](https://user-images.githubusercontent.com/25688193/54994369-6de18480-5007-11e9-885a-8e20f264c3ba.gif)<br>
 
-- エピソード = 100 / 最終時間ステップ数 = 14<br>
-![rl_env_cartpole-v0_episode100](https://user-images.githubusercontent.com/25688193/53067038-be9c2400-3515-11e9-9547-872a4a59cfad.gif)<br>
+- エピソード = 100 / 最終時間ステップ数 = 199<br>
+![RL_ENV_CartPole-v0_Episode100](https://user-images.githubusercontent.com/25688193/54994812-869e6a00-5008-11e9-86df-5be5b748d188.gif)<br>
 
-- エピソード = 150 / 最終時間ステップ数 = 20<br>
-![rl_env_cartpole-v0_episode150](https://user-images.githubusercontent.com/25688193/53067031-bcd26080-3515-11e9-8651-92b9f726da33.gif)<br>
+- エピソード = 150 / 最終時間ステップ数 = 145<br>
+![RL_ENV_CartPole-v0_Episode150](https://user-images.githubusercontent.com/25688193/54994813-869e6a00-5008-11e9-9e13-a6d97335686b.gif)<br>
 
 - エピソード = 200 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode200](https://user-images.githubusercontent.com/25688193/53067032-bcd26080-3515-11e9-940d-9b3da2dec366.gif)<br>
+![RL_ENV_CartPole-v0_Episode200](https://user-images.githubusercontent.com/25688193/54995672-a20a7480-500a-11e9-8001-e76f1c1a7cb9.gif)<br>
 
-- エピソード = 250 / 最終時間ステップ数 = 187<br>
-![rl_env_cartpole-v0_episode250](https://user-images.githubusercontent.com/25688193/53067034-bd6af700-3515-11e9-85d2-f40d8b03705d.gif)<br>
-
-- エピソード = 300 / 最終時間ステップ数 = 133<br>
-![rl_env_cartpole-v0_episode300](https://user-images.githubusercontent.com/25688193/53067076-ef7c5900-3515-11e9-9a46-5eba1861e3cc.gif)<br>
+- エピソード = 300 / 最終時間ステップ数 = 199<br>
+![RL_ENV_CartPole-v0_Episode300](https://user-images.githubusercontent.com/25688193/54995675-a3d43800-500a-11e9-88d9-89d98a9042b3.gif)<br>
 
 - エピソード = 400 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode400](https://user-images.githubusercontent.com/25688193/53067258-cad4b100-3516-11e9-953e-b27132242d61.gif)<br>
-
-- エピソード = 500 / 最終時間ステップ数 = 199<br>
-![rl_env_cartpole-v0_episode499](https://user-images.githubusercontent.com/25688193/53067451-91e90c00-3517-11e9-9872-31a85674f57a.gif)<br>
-
-
-### ◎ コードの説明
-
-
-## ■ デバッグ情報
-
+![RL_ENV_CartPole-v0_Episode400](https://user-images.githubusercontent.com/25688193/54996099-bc911d80-500b-11e9-8d12-afdb28b56593.gif)<br>

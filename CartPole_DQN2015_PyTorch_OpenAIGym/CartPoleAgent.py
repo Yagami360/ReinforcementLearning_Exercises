@@ -24,22 +24,22 @@ class CartPoleAgent( Agent ):
 
     [protected] 変数名の前にアンダースコア _ を付ける
         _env : OpenAI Gym の ENV
-        _losses : list<float> 損失関数の値のリスト（長さはエピソード長）
+        _loss_historys : list<float> 損失関数の値のリスト（長さはエピソード長）
 
     """
     def __init__( 
         self,
         env,
         brain = None, 
-        gamma = 0.9
+        gamma = 0.9,
+        max_time_step = 200
     ):
         super().__init__( brain, gamma, 0 )
         self._env = env
-        
-        self._observations = self._env.reset()
-        self._total_reward = torch.FloatTensor( [0.0] )
+        self._max_time_step = max_time_step
+        self._observations = []
+        self._total_reward = 0.0
         self._loss_historys = []
-        #self._n_succeeded_episode = 0
         return
 
     def print( self, str ):
@@ -53,119 +53,88 @@ class CartPoleAgent( Agent ):
         print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
-        print( "_s_a_historys : \n", self._s_a_historys )
         print( "_reward_historys : \n", self._reward_historys )
         print( "----------------------------------" )
         return
 
-    def get_num_states( self ):
-        """
-        エージェントの状態数を取得する
-        """
-        num_states = self._env.observation_space.shape[0]
-        return num_states
-
-    def get_num_actions( self ):
-        """
-        エージェントの状態数を取得する
-        """
-        num_actions = self._env.action_space.n
-        return num_actions
-
     def get_loss_historys( self ):
         return self._loss_historys
+
 
     def agent_reset( self ):
         """
         エージェントの再初期化処理
         """
         self._observations = self._env.reset()
-        self._total_reward = torch.FloatTensor( [0.0] )
+        self._total_reward = 0.0
         self._done = False
         return
 
-    def agent_step( self, episode, time_step ):
+    def agent_step( self, episode, time_step, total_time_step ):
         """
-        エージェント [Agent] の次の状態を決定する。
+        エージェントの時間ステップ度の処理を記述するコールバック関数
         ・Academy から各時間ステップ度にコールされるコールバック関数
 
         [Args]
-            episode : 現在のエピソード数
-            time_step : 現在の時間ステップ
+            episode : <int> 現在のエピソード数
+            time_step : <int> 現在のエピソードにおける経過時間ステップ数
+            total_time_step : <int> 全てのエピソードにおける全経過時間ステップ数
 
         [Returns]
-            done : bool
-                   エピソードの完了フラグ
+            done : <bool> エピソードの完了フラグ
         """
         # 既にエピソードが完了状態なら、そのまま return して、全エージェントの完了を待つ
         if( self._done == True):
             return self._done
 
         #-------------------------------------------------------------------
-        # 現在の状態 s_t を求める
+        # ε-greedy 法の ε 値を減衰させる。
         #-------------------------------------------------------------------
-        # 観測値をそのまま状態として採用する（状態の離散化を行わない）
-        state = self._observations
-
-        # numpy → PyTorch 用の型に変換
-        state = torch.from_numpy( state ).type( torch.FloatTensor)
+        #self._brain.decay_epsilon()
+        self._brain.decay_epsilon_episode( episode )
         
-        # shape = 4 → １*4 に reshape
-        state = torch.unsqueeze( state, dim = 0 )
-        #print( "_state :", state )
+        #-------------------------------------------------------------------
+        # 行動 a_t を求める
+        #-------------------------------------------------------------------
+        action = self._brain.action( self._observations )
+        #print( "action :", action )
 
-        #-------------------------------------------------------------------
-        # 離散化した現在の状態 s_t を元に、行動 a_t を求める
-        #-------------------------------------------------------------------
-        self._brain.decay_epsilon( episode )
-        action = self._brain.action( state )
-    
         #-------------------------------------------------------------------
         # 行動を実行する。
         #-------------------------------------------------------------------
-        observations_next, _, env_done, _ = self._env.step( action.item() )
+        observations_next, reward, env_done, info = self._env.step( action )
         #print( "env_done :", env_done )
         #print( "info :", info )
 
         #------------------------------------------------------------------
-        # 行動の実行により、次の時間での状態 s_{t+1} 報酬 r_{t+1} を求める。
+        # 行動の実行により、次の時間での報酬 r_{t+1} を求める。
         #------------------------------------------------------------------
-        reward = torch.FloatTensor( [0.0] )
+        reward = 0.0
         # env_done : ステップ数が最大数経過 OR 一定角度以上傾くと ⇒ True
         if( env_done == True ):
-            # 次の状態は存在しない（＝終端状態）ので、None に設定する
-            next_state = None
-
             # 時間ステップの最大回数に近づいたら
-            if time_step < 195:
+            if time_step < self._max_time_step - 5:
                 # 途中でコケたら、報酬－１
-                reward = torch.FloatTensor( [-1.0] )
+                reward = -1.0
                 self.add_reward( reward, time_step )
-                #self._n_succeeded_episode = 0
             else:
                 # 立ったまま終了時は、報酬＋１
-                reward = torch.FloatTensor( [1.0] )
+                reward = 1.0
                 self.add_reward( reward, time_step )
-                #self._n_succeeded_episode += 1
         else:
-            # 観測値をそのまま状態として採用する（状態の離散化を行わない）
-            next_state = observations_next
-        
-            # numpy → PyTorch 用の型に変換
-            next_state = torch.from_numpy( next_state ).type( torch.FloatTensor)
-
-            # shape = 4 → １*4 に reshape
-            next_state = torch.unsqueeze( next_state, dim = 0 )
-
             # 途中報酬
             #self.set_reward( reward )
-            #reward = torch.FloatTensor( [1.0] )
+            #reward = 1.0
             #self.add_reward( reward, time_step )
+            pass
 
         #----------------------------------------
         # 価値関数の更新
         #----------------------------------------
-        self._brain.update_q_function( state, action, next_state, reward )
+        self._brain.update( 
+            state = self._observations, action = action, next_state = observations_next, reward = reward, done = env_done, 
+            episode = episode, time_step = time_step, total_time_step = total_time_step
+        )
 
         #----------------------------------------
         # 状態の更新
@@ -181,15 +150,20 @@ class CartPoleAgent( Agent ):
         return self._done
 
 
-    def agent_on_done( self, episode, time_step ):
+    def agent_on_done( self, episode, time_step, total_time_step ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
 
         [Args]
             episode : <int> 現在のエピソード数
+            time_step : エピソード完了時の時間ステップ数
+            total_time_step : <int> 全てのエピソードにおける全経過時間ステップ数
         """
-        print( "エピソード = {0} / 最終時間ステップ数 = {1}".format( episode, time_step )  )
+        print( "エピソード = {0} / 全時間ステップ数 = {1} / 最終時間ステップ数 = {2}".format( episode, total_time_step, time_step )  )
+
+        # ε-greedy 法の ε 値を出力
+        print( "epsilon = %0.6f" % self._brain._epsilon )
 
         # 利得の履歴に追加
         self._reward_historys.append( self._total_reward )
@@ -197,9 +171,5 @@ class CartPoleAgent( Agent ):
         # 損失関数の履歴に追加
         print( "loss = %0.6f" % self._brain.get_loss() )
         self._loss_historys.append( self._brain.get_loss() )
-
-        # 一定間隔で、Target Network と Main Network を同期する
-        if( (episode % 2) == 0 ):
-            self._brain.update_target_q_function()
 
         return

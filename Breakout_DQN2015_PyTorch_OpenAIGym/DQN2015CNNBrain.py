@@ -205,7 +205,7 @@ class DQN2015CNNBrain( Brain ):
         return self._optimizer
 
 
-    def predict( self, batch, state_batch, action_batch, reward_batch, non_done_next_states ):
+    def predict( self, state_batch, action_batch, next_state_batch, reward_batch, done_batch ):
         """
         教師信号となる行動価値関数を求める
 
@@ -237,27 +237,23 @@ class DQN2015CNNBrain( Brain ):
         #--------------------------------------------------------------------
         # 次の状態を求める
         #--------------------------------------------------------------------
-        # 全部 0 で初期化
-        next_q_function = torch.zeros( self._batch_size ).to(self._device)
-
-        # エージェントが done ではなく、next_state が存在するインデックス用のマスク
-        non_done_mask = torch.ByteTensor(
-            tuple( map(lambda s: s is not None,batch.next_state) )
-        )
-
-        next_outputs = self._target_network( non_done_next_states ).to(self._device)
+        # Main Network ではなく Target Network からの出力
+        next_outputs = self._target_network( next_state_batch ).to(self._device)
         #print( "next_outputs :", next_outputs )
 
         # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        next_q_function[non_done_mask] = next_outputs.max(dim=1)[0].detach().to(self._device)
+        next_q_function = next_outputs.max(dim=1)[0].detach().to(self._device)
         #print( "next_q_function :", next_q_function )
 
         #--------------------------------------------------------------------
         # ネットワークの出力となる推定行動価値関数を求める
         #--------------------------------------------------------------------
         gamma_tsr = torch.FloatTensor( [self._gamma] ).to(self._device)
-        self._expected_q_function = reward_batch + gamma_tsr * next_q_function
+
+        # done = 0 ⇒ 価値関数の更新は行われる
+        # done = 1 ⇒ 価値関数の更新は行われない
+        self._expected_q_function = reward_batch + gamma_tsr * next_q_function * ( 1 - done_batch )
 
         return
 
@@ -370,22 +366,6 @@ class DQN2015CNNBrain( Brain ):
 
         """
         #-----------------------------------------
-        # メモリに保管する値を Tensor に変換
-        # この際に、ミニバッチ用の次元を追加
-        #-----------------------------------------
-        state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)
-        state = torch.unsqueeze( state, dim = 0 ).to(self._device)
-        action = torch.LongTensor( [[action]] ).to(self._device)                # [[x]] で shape = [1,1] にしておき、ミニバッチ用の次元を用意
-        reward = torch.FloatTensor( [[reward]] ).to(self._device)
-        next_state = torch.from_numpy( next_state ).type(torch.FloatTensor).to(self._device)
-        next_state = torch.unsqueeze( next_state, dim = 0 ).to(self._device)
-        if( done == True ):
-            next_state = None
-
-        done = torch.FloatTensor( [[done]] ).to(self._device)
-
-
-        #-----------------------------------------
         # 経験に基づく学習用データを追加
         #-----------------------------------------
         self._memory.push( state = state, action = action, next_state = next_state, reward = reward, done = done )
@@ -398,13 +378,8 @@ class DQN2015CNNBrain( Brain ):
         #-----------------------------------------        
         # ミニバッチデータを取得する
         #-----------------------------------------
-        batch, state_batch, action_batch, reward_batch, done_batch = self._memory.get_mini_batch( self._batch_size )
+        state_batch, action_batch, next_state_batch, reward_batch, done_batch = self._memory.get_mini_batch( self._batch_size )
         
-        # done = True を除いた次状態のデータ
-        non_done_next_states = torch.cat(
-            [s for s in batch.next_state if s is not None]
-        )
-
         #print( "state_batch.size() :", state_batch.size() )
         #print( "action_batch.size() :", action_batch.size() )
         #print( "reward_batch.size() :", reward_batch.size() )
@@ -433,7 +408,7 @@ class DQN2015CNNBrain( Brain ):
         #-----------------------------------------
         # 教師信号となる推定行動価値関数を求める 
         #-----------------------------------------
-        self.predict( batch, state_batch, action_batch, reward_batch, non_done_next_states )
+        self.predict( state_batch, action_batch, next_state_batch, reward_batch, done_batch )
 
         #-----------------------------------------
         # ネットワークを学習し、パラメーターを更新する。
