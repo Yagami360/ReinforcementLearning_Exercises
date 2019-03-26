@@ -18,7 +18,6 @@ class Academy( object ):
     """
     エージェントの強化学習環境
     ・強化学習モデルにおける環境 Enviroment に対応
-    ・学習や推論を行うための設定を行う。
     
     [public]
 

@@ -22,8 +22,6 @@ class Agent( object ):
         _total_reward : <float> 割引利得の総和
         _gamma : <float> 収益の割引率
         _done : <bool> エピソードの完了フラグ
-        _state : <int> エージェントの現在の状態 s
-        _action : <int> エピソードの現在の行動 a
         _reward_historys : list<float> 割引利得の履歴 / shape = [n_episode]
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
@@ -32,16 +30,13 @@ class Agent( object ):
     def __init__( 
         self, 
         brain = None, 
-        gamma = 0.9, 
-        state0 = 0
+        gamma = 0.9
     ):
         self._brain = brain
         self._observations = []
         self._total_reward = 0.0
         self._gamma = gamma
         self._done = False
-        self._state = state0
-        self._action = np.nan
         self._reward_historys = [self._total_reward]
         return
 
@@ -56,8 +51,6 @@ class Agent( object ):
         print( "_total_reward : \n", self._total_reward )
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
-        print( "_state : \n", self._state )
-        print( "_action : \n", self._action )
         print( "_reward_historys : \n", self._reward_historys )
         print( "----------------------------------" )
         return
@@ -107,9 +100,6 @@ class Agent( object ):
         """
         self._total_reward = 0.0
         self._done = False
-        self._state = self._s_a_historys[0][0]
-        self._action = self._s_a_historys[0][1]
-        self._s_a_historys = [ [ self._state, self._action ] ]
         return
 
     def agent_step( self, episode, time_step, total_time_step ):

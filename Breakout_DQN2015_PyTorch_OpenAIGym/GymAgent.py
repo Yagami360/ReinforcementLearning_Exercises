@@ -18,9 +18,9 @@ import torch
 from Agent import Agent
 
 
-class AtariAgent( Agent ):
+class GymAgent( Agent ):
     """
-    OpenAIGym の atari ゲームのエージェント
+    OpenAIGym のエージェント
 
     [protected] 変数名の前にアンダースコア _ を付ける
         _device : <torch.device> 実行デバイス
@@ -36,7 +36,7 @@ class AtariAgent( Agent ):
         brain = None, 
         gamma = 0.9
     ):
-        super().__init__( brain, gamma, 0 )
+        super().__init__( brain, gamma )
         self._device = device
         self._env = env        
         self._total_reward = 0.0
@@ -46,7 +46,7 @@ class AtariAgent( Agent ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "AtariAgent" )
+        print( "GymAgent" )
         print( self )
         print( str )
         print( "_device :", self._device )

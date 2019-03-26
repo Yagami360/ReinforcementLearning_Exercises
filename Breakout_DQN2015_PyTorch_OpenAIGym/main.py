@@ -25,7 +25,7 @@ from GymAcademy import GymAcademy
 from Brain import Brain
 from DQN2015CNNBrain import DQN2015CNNBrain
 from Agent import Agent
-from AtariAgent import AtariAgent
+from GymAgent import GymAgent
 from ExperienceReplay import ExperienceReplay
 
 from AtariWrappers import *
@@ -42,7 +42,7 @@ RL_ENV = "BreakoutNoFrameskip-v0"
 #RL_ENV = "BreakoutNoFrameskip-v4"      
 #RL_ENV = "PongNoFrameskip-v0"
 
-NUM_EPISODE = 10000                     # エピソード試行回数 (Default:10000)
+NUM_EPISODE = 5000                      # エピソード試行回数 (Default:10000)
 NUM_TIME_STEP = 1000                    # １エピソードの時間ステップの最大数
 NUM_SAVE_STEP = 100                     # 強化学習環境の動画の保存間隔（単位：エピソード数）
 
@@ -54,10 +54,10 @@ BRAIN_LEARNING_RATE = 0.00005           # 学習率 (Default:5e-5)
 BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ (Default:32)
 BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値 (Default:1.0)
 BRAIN_GREEDY_EPSILON_FINAL = 0.01       # ε-greedy 法の ε 値の最終値 (Default:0.1)
-BRAIN_GREEDY_EPSILON_STEPS = 100000     # ε-greedy 法の ε が減少していくフレーム数 (Default:1_000_000)
+BRAIN_GREEDY_EPSILON_STEPS = 50000      # ε-greedy 法の ε が減少していくフレーム数 (Default:1_000_000)
 BRAIN_GAMMDA = 0.99                     # 利得の割引率 (Default:0.99)
 BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（Default:10_000） 
-MEMORY_CAPACITY = 1000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ (Default:1_000_000)
+MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ (Default:1_000_000)
 
 
 def main():
@@ -170,7 +170,7 @@ def main():
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = AtariAgent(
+    agent = GymAgent(
         device = device,
         env = env,
         brain = brain,
@@ -206,7 +206,7 @@ def main():
         range(0,NUM_EPISODE+1), reward_historys,
         label = 'gamma = {}'.format(BRAIN_GAMMDA),
         linestyle = '-',
-        linewidth = 0.2,
+        linewidth = 0.1,
         color = 'black'
     )
     plt.title( "Reward History" )
@@ -233,7 +233,7 @@ def main():
         range( 0, NUM_EPISODE ), loss_historys,
         label = 'mini_batch_size = %d, learning_rate = %0.4f' % ( BRAIN_BATCH_SIZE, BRAIN_LEARNING_RATE ),
         linestyle = '-',
-        linewidth = 0.2,
+        linewidth = 0.1,
         color = 'black'
     )
     plt.title( "loss / Smooth L1" )

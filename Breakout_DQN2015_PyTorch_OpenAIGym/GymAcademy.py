@@ -19,7 +19,7 @@ from Agent import Agent
 
 class GymAcademy( Academy ):
     """
-    エージェントの強化学習環境
+    OpenAI Gym を利用したエージェントの強化学習環境
     
     [public]
 
