@@ -18,9 +18,9 @@ import torch
 from Agent import Agent
 
 
-class BreakoutAgent( Agent ):
+class AtariAgent( Agent ):
     """
-    OpenAIGym の Breakout のエージェント
+    OpenAIGym の atari ゲームのエージェント
 
     [protected] 変数名の前にアンダースコア _ を付ける
         _device : <torch.device> 実行デバイス
@@ -34,21 +34,19 @@ class BreakoutAgent( Agent ):
         device,
         env,
         brain = None, 
-        gamma = 0.9,
-        n_stack_frames = 4
+        gamma = 0.9
     ):
         super().__init__( brain, gamma, 0 )
         self._device = device
         self._env = env        
         self._total_reward = 0.0
         self._loss_historys = []
-        self._total_time_step = 0
         self._observations = None
         return
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "BreakoutAgent" )
+        print( "AtariAgent" )
         print( self )
         print( str )
         print( "_device :", self._device )
@@ -59,7 +57,6 @@ class BreakoutAgent( Agent ):
         print( "_gamma : \n", self._gamma )
         print( "_done : \n", self._done )
         print( "len( _reward_historys ) : \n", len( self._reward_historys ) )
-        print( "_total_time_step : \n", self._total_time_step )
         print( "----------------------------------" )
         return
 
@@ -75,7 +72,7 @@ class BreakoutAgent( Agent ):
         self._done = False
         return
 
-    def agent_step( self, episode, time_step ):
+    def agent_step( self, episode, time_step, total_time_step ):
         """
         エージェント [Agent] の次の状態を決定する。
         ・Academy から各時間ステップ度にコールされるコールバック関数
@@ -83,6 +80,7 @@ class BreakoutAgent( Agent ):
         [Args]
             episode : 現在のエピソード数
             time_step : 現在の時間ステップ
+            total_time_step : <int> 全てのエピソードにおける全経過時間ステップ数
 
         [Returns]
             done : bool
@@ -118,15 +116,15 @@ class BreakoutAgent( Agent ):
         #----------------------------------------
         # 価値関数の更新
         #----------------------------------------
-        self._brain.update_q_function( self._observations, action, observations_next, reward, env_done, self._total_time_step )
+        self._brain.update( 
+            state = self._observations, action = action, next_state = observations_next, reward = reward, done = env_done, 
+            episode = episode, time_step = time_step, total_time_step = total_time_step
+        )
 
         #----------------------------------------
         # 状態の更新
         #----------------------------------------
         self._observations = observations_next
-
-        # 一定間隔で、Target Network と Main Network を同期する
-        self._brain.update_target_q_function( episode, time_step, self._total_time_step )
 
         #----------------------------------------
         # 完了時の処理
@@ -134,22 +132,22 @@ class BreakoutAgent( Agent ):
         if( env_done == True ):
             self.done()
 
-        self._total_time_step += 1
-
         return self._done
 
 
-    def agent_on_done( self, episode, time_step ):
+    def agent_on_done( self, episode, time_step, total_time_step ):
         """
         Academy のエピソード完了後にコールされ、エピソードの終了時の処理を記述する。
         ・Academy からコールされるコールバック関数
 
         [Args]
             episode : <int> 現在のエピソード数
+            time_step : エピソード完了時の時間ステップ数
+            total_time_step : <int> 全てのエピソードにおける全経過時間ステップ数
         """
-        print( "エピソード = {0} / 全時間ステップ数 = {1} / 最終時間ステップ数 = {2}".format( episode, self._total_time_step, time_step )  )
+        print( "エピソード = {0} / 全時間ステップ数 = {1} / 最終時間ステップ数 = {2}".format( episode, total_time_step, time_step )  )
 
-        #
+        # ε-greedy 法の ε 値を出力
         print( "epsilon = %0.6f" % self._brain._epsilon )
 
         # 利得の履歴に追加

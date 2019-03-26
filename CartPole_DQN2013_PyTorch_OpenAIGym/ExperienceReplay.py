@@ -13,10 +13,11 @@ import random
 import torch
 
 from collections import namedtuple
+from collections import deque
 
 Transition = namedtuple(
     typename = "Transition",
-    field_names = ( "state", "action", "next_state", "reward" )
+    field_names = ( "state", "action", "next_state", "reward", "done" )
 )
 
 
@@ -27,20 +28,21 @@ class ExperienceReplay( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _device : <torch.device> 実行デバイス
         _capacity : [int] メモリの最大値
         _memory : [list] (s,a,s',a',r) のリスト（学習用データ）
-        _index : [int] 現在のメモリのインデックス
              
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
     def __init__(
         self,
-        capacity = 10000
+        device,
+        capacity = 1000
     ):
+        self._device = device
         self._capacity = capacity
-        self._memory = []
-        self._index = 0
+        self._memory = deque( maxlen = capacity )
         return
 
     def __len__( self ):
@@ -48,34 +50,27 @@ class ExperienceReplay( object ):
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "CartPoleAgent" )
+        print( "ExperienceReplay" )
         print( self )
         print( str )
+        print( "_device :", self._device )
         print( "_capacity :", self._capacity )
         print( "_memory : \n", self._memory )
-        print( "_index : \n", self._index )
         return
 
-    def push( self, state, action, next_state, reward ):
+    def push( self, state, action, next_state, reward, done ):
         """
         学習用のデータのメモリに、データを push する
         [Args]
-            state : <> 現在の状態 s
-            action : <> 現在の行動 a
-            next_state : <> 次の状態 s'
-            reword : <> 報酬        
+            state : 現在の状態 s
+            action : 現在の行動 a
+            next_state : 次の状態 s'
+            reword : 報酬        
+            done : エピソードの完了フラグ
         [Returns]
         """
-        # 現在のメモリサイズが上限値以下なら、新たに容量を確保する。
-        if( len(self._memory) < self._capacity ):
-            self._memory.append( None )
-
         # nametuple を使用して、メモリに値を格納
-        self._memory[ self._index ] = Transition( state, action, next_state, reward )
-
-        # 現在のインデックスをづらす
-        self._index = ( self._index + 1 ) % self._capacity
-
+        self._memory.append( Transition( state, action, next_state, reward, done ) )
         return
 
     def pop( self, batch_size ):
@@ -93,6 +88,11 @@ class ExperienceReplay( object ):
         ミニバッチデータを取得する
         [Args]
         [Returns]
+            state_batch : <Tensor/torch.float32> 現在の状態 s のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            action_batch : <Tensor/torch.int64> 現在の行動 a のミニバッチデータ / shape = [batch_size,1]
+            next_state_batch : <Tensor/torch.float32> 次の状態 s' のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            reword_batch : <Tensor/torch.float32> 報酬のミニバッチデータ / shape = [batch_size,1]
+            done_batch : <Tensor/torch.float32> 完了フラグのミニバッチデータ / shape = [batch_size,1]
         """
         #----------------------------------------------------------------------
         # Experience Replay に基づき、ミニバッチ処理用のデータセットを生成する。
@@ -112,11 +112,11 @@ class ExperienceReplay( object ):
         #print( "batch :", batch )
 
         #
-        state_batch = torch.cat( batch.state )
-        action_batch = torch.cat( batch.action )
-        reward_batch = torch.cat( batch.reward )
-        non_final_next_states = torch.cat(
-            [s for s in batch.next_state if s is not None]
-        )
+        state_batch = torch.cat( batch.state ).to(self._device)
+        action_batch = torch.cat( batch.action ).to(self._device)
+        reward_batch = torch.cat( batch.reward ).to(self._device)
+        done_batch = torch.cat( batch.done ).to(self._device)
 
-        return batch, state_batch, action_batch, reward_batch, non_final_next_states
+        return batch, state_batch, action_batch, reward_batch, done_batch
+
+

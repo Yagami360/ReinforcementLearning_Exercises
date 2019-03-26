@@ -36,8 +36,8 @@ class Brain( object ):
         print( "Brain" )
         print( self )
         print( str )
-        print( "_n_states : \n", self._n_states )
-        print( "_n_actions : \n", self._n_actions )
+        print( "_n_states : ", self._n_states )
+        print( "_n_actions : ", self._n_actions )
         print( "----------------------------------" )
         return
 

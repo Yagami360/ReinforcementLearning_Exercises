@@ -48,7 +48,7 @@ class QNetworkCNN( nn.Module ):
             nn.Linear( in_features = 7*7*64, out_features = 512 ),
             nn.ReLU(),
             nn.Linear( in_features = 512, out_features = n_actions )
-        )
+        ).to(self._device)
 
         return
 

@@ -21,43 +21,43 @@ import cv2
 
 # 自作モジュール
 from Academy import Academy
-from BreakoutAcademy import BreakoutAcademy
+from GymAcademy import GymAcademy
 from Brain import Brain
-from BreakoutDQN2015Brain import BreakoutDQN2015Brain
+from DQN2015CNNBrain import DQN2015CNNBrain
 from Agent import Agent
-from BreakoutAgent import BreakoutAgent
+from AtariAgent import AtariAgent
 from ExperienceReplay import ExperienceReplay
 
-from BreakoutAtariWrappers import *
+from AtariWrappers import *
 
 
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
-#DEVICE = "CPU" # 使用デバイス
-DEVICE = "GPU" # 使用デバイス
+#DEVICE = "CPU"                         # 使用デバイス ("CPU" or "GPU")
+DEVICE = "GPU"                          # 使用デバイス ("CPU" or "GPU")
 
 #RL_ENV = "Breakout-v0"                 # 利用する強化学習環境の課題名
 RL_ENV = "BreakoutNoFrameskip-v0"      
 #RL_ENV = "BreakoutNoFrameskip-v4"      
 #RL_ENV = "PongNoFrameskip-v0"
 
-NUM_EPISODE = 10000                     # エピソード試行回数(10000)
+NUM_EPISODE = 10000                     # エピソード試行回数 (Default:10000)
 NUM_TIME_STEP = 1000                    # １エピソードの時間ステップの最大数
 NUM_SAVE_STEP = 100                     # 強化学習環境の動画の保存間隔（単位：エピソード数）
 
-NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数(30)
-NUM_SKIP_FRAME = 4                      # スキップするフレーム数(4)
-NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数(4)
+NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数 (Default:30)
+NUM_SKIP_FRAME = 4                      # スキップするフレーム数 (Default:4)
+NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数 (Default:4)
 
-BRAIN_LEARNING_RATE = 0.00005           # 学習率(5e-5)
-BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_FINAL = 0.01       # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_STEPS = 50000      # ε-greedy 法の ε が減少していくフレーム数(1_000_000)
-BRAIN_GAMMDA = 0.99                     # 利得の割引率
-BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（10_000） 
-MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ(1_000_000)
+BRAIN_LEARNING_RATE = 0.00005           # 学習率 (Default:5e-5)
+BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ (Default:32)
+BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値 (Default:1.0)
+BRAIN_GREEDY_EPSILON_FINAL = 0.01       # ε-greedy 法の ε 値の最終値 (Default:0.1)
+BRAIN_GREEDY_EPSILON_STEPS = 100000     # ε-greedy 法の ε が減少していくフレーム数 (Default:1_000_000)
+BRAIN_GAMMDA = 0.99                     # 利得の割引率 (Default:0.99)
+BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（Default:10_000） 
+MEMORY_CAPACITY = 1000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ (Default:1_000_000)
 
 
 def main():
@@ -135,7 +135,7 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = BreakoutAcademy( 
+    academy = GymAcademy( 
         env = env, 
         max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, 
         save_step = NUM_SAVE_STEP
@@ -144,7 +144,7 @@ def main():
     #-----------------------------------
     # Brain の生成
     #-----------------------------------
-    brain = BreakoutDQN2015Brain(
+    brain = DQN2015CNNBrain(
         device = device,
         n_states = env.observation_space.shape[0] * env.observation_space.shape[1] * env.observation_space.shape[2],
         n_actions = env.action_space.n,
@@ -170,12 +170,11 @@ def main():
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = BreakoutAgent(
+    agent = AtariAgent(
         device = device,
         env = env,
         brain = brain,
-        gamma = BRAIN_GAMMDA,
-        n_stack_frames = NUM_STACK_FRAME
+        gamma = BRAIN_GAMMDA
     )
 
     # Agent の Brain を設定

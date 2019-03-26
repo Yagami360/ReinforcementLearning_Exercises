@@ -31,22 +31,22 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
-NUM_EPISODE = 500                       # エピソード試行回数(12000)
-NUM_TIME_STEP = 5000                    # １エピソードの時間ステップの最大数
+DEVICE = "GPU"                          # 使用デバイス ("CPU" or "GPU")
+RL_ENV = "BreakoutNoFrameskip-v0"       # 利用する atari の強化学習環境の課題名
+NUM_EPISODE = 50000                     # エピソード試行回数 (Default:10000)
+NUM_TIME_STEP = 1000                    # １エピソードの時間ステップの最大数
 NUM_SAVE_STEP = 100                     # 強化学習環境の動画の保存間隔（単位：エピソード数）
-
-NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数
-NUM_SKIP_FRAME = 4                      # スキップするフレーム数
-NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数
-
-BRAIN_LEARNING_RATE = 0.001             # 学習率(0.00025)
-BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_FINAL = 0.1        # ε-greedy 法の ε 値の初期値
-BRAIN_GREEDY_EPSILON_STEPS = 1000000    # ε-greedy 法の ε が減少していくフレーム数(1000000)
-BRAIN_GAMMDA = 0.99                     # 利得の割引率
-BRAIN_FREC_TARGET_UPDATE = 2000         # Target Network との同期頻度（10000） 
-MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ
+NUM_NOOP = 30                           # エピソード開始からの何も学習しないステップ数 (Default:30)
+NUM_SKIP_FRAME = 4                      # スキップするフレーム数 (Default:4)
+NUM_STACK_FRAME = 4                     # モデルに一度に入力する画像データのフレーム数 (Default:4)
+BRAIN_LEARNING_RATE = 0.00005           # 学習率 (Default:5e-5)
+BRAIN_BATCH_SIZE = 32                   # ミニバッチサイズ (Default:32)
+BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値 (Default:1.0)
+BRAIN_GREEDY_EPSILON_FINAL = 0.01       # ε-greedy 法の ε 値の最終値 (Default:0.1)
+BRAIN_GREEDY_EPSILON_STEPS = 1000000    # ε-greedy 法の ε が減少していくフレーム数　(Default:1_000_000)
+BRAIN_GAMMDA = 0.99                     # 利得の割引率 (Default:0.99)
+BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（Default:10_000） 
+MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ (Default:1_000_000)
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -57,7 +57,7 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 
 |パラメータ名|値（実行条件１）|値（実行条件２）|
 |---|---|---|
-|エピソード試行回数：`NUM_EPISODE`|10000|50000|
+|エピソード試行回数：`NUM_EPISODE`|50,000|50,000|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|1000|←|
 |エピソード開始からの何も学習しないステップ数：`NUM_NOOP`|30|10|
 |モデルに一度に入力する画像データのフレーム数：`NUM_STACK_FRAME`|4|←|
@@ -68,10 +68,10 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 |損失関数|smooth L1 関数（＝Huber 関数）|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON_INIT`|1.0|←|
-|ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.1|←|
-|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|50000|←|
-|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|2000|1000|
-|Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|5000|←|
+|ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.01|←|
+|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|500,000|←|
+|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|1000|←|
+|Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10,000|←|
 |報酬の設定|Breakout のデフォルト報酬<br>・下段の青色＆緑色のブロック崩し：１点<br>・中央の黄色＆黄土色のブロック崩し：４点<br>・上段のオレンジ＆赤色のブロック崩し：７点<br>に対して、符号化関数 sign で 0.0 or 1.0 の範囲にクリッピング|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
 |DQNのネットワーク構成|CNN<br>(0): Conv2d(in_channels=**1**, out_channels=32, kernel_size=(8, 8), stride=(4, 4))<br>(1): ReLU()<br>(2): Conv2d(in_channels=32, out_channels=64, kernel_size=(4, 4), stride=(2, 2))<br>(3): ReLU()<br>(4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1))<br>(5): ReLU()<br>(6): Flatten()<br>(7): Linear(in_features=7×7×64, out_features=512, bias=True)<br>(8): ReLU()<br>Linear(in_features=512, out_features=**4**, bias=True)|←|
@@ -89,8 +89,10 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 <!--
 ![BreakoutNoFrameskip-v0_DQN2015_Reward_episode1000_ts5000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/54817959-825a1000-4cdb-11e9-9bfc-83ef632291ad.png)<br>
 -->
+<!--
 ![BreakoutNoFrameskip-v0_DQN2015_Reward_episode10000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/54873955-05d34880-4e25-11e9-96a4-03ffb857df6c.png)
 > うまく学習が進んでいない？
+-->
 
 - 損失関数のグラフ（実行条件１）<br>
 <!--
@@ -99,15 +101,51 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 <!--
 ![BreakoutNoFrameskip-v0_DQN2015_Loss_episode1000_ts5000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/54818011-9f8ede80-4cdb-11e9-9a13-c418b62ec7bc.png)<br>
 -->
+<!--
 ![BreakoutNoFrameskip-v0_DQN2015_Loss_episode10000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/54873954-0370ee80-4e25-11e9-814f-6e61f0fe958f.png)<br>
 
 > うまく学習が進んでいない？
+-->
+
+<br>
 
 以下のアニメーションは、Breakout のブロック崩しを行う様子を示したアニメーションである。<br>
 <!--
 エピソードの経過と共に、徐々にブロック崩しが出来るようになっており、徐々に学習できていることがわかる。<br>
 -->
 
+
+- エピソード = 0 / 最終時間ステップ数 = 24（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode0_ts24](https://user-images.githubusercontent.com/25688193/54930390-8ba4e000-4f5a-11e9-935e-0bb6c7aca562.gif)<br>
+
+- エピソード = 100 / 最終時間ステップ数 = 60（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode100_ts60](https://user-images.githubusercontent.com/25688193/54930545-ca3a9a80-4f5a-11e9-94d4-bd05bd52468b.gif)<br>
+
+- エピソード = 500 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+- エピソード = 1000 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+- エピソード = 5000 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+- エピソード = 10000 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+- エピソード = 20000 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+- エピソード = 30000 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+- エピソード = 40000 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+- エピソード = 50000 / 最終時間ステップ数 = xx（実行条件１）<br>
+<br>
+
+<!--
 - エピソード = 0 / 最終時間ステップ数 = 40（実行条件１）<br>
 ![RL_ENV_BreakoutNoFrameskip-v0_Episode0](https://user-images.githubusercontent.com/25688193/54874023-86df0f80-4e26-11e9-831a-7ceb512b0b64.gif)<br>
 
@@ -146,7 +184,7 @@ MEMORY_CAPACITY = 50000                 # Experience Relay 用の学習用デー
 
 - エピソード = 10000 / 最終時間ステップ数 = 76<br>
 ![RL_ENV_BreakoutNoFrameskip-v0_Episode9999](https://user-images.githubusercontent.com/25688193/54874083-682d4880-4e27-11e9-82a6-001054c41210.gif)<br>
-
+-->
 
 <!--
 - エピソード = 100 / 最終時間ステップ数 = 56（実行条件１）<br>

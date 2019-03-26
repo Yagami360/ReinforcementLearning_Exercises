@@ -22,22 +22,21 @@ from torch import optim
 import torch.nn.functional as F
 
 
-class BreakoutDQN2015Brain( Brain ):
+class DQN2015CNNBrain( Brain ):
     """
-    Breakoutの Brain。
-    ・DQN によるアルゴリズム
+    DQN (2015年バージョン ; CNNベース）の Brain。
     
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける
-        _device : <torch.device> 実行デバイス
+        _device : 実行デバイス
 
         _epsilon : <float> ε-greedy 法の ε 値
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
 
-        _q_function : <> 教師信号である古いパラメーター θ- で固定化された行動状態関数 Q(s,a,θ-)
-        _expected_q_function : <> 推定行動状態関数 Q(s,a,θ)
+        _q_function : <Tensor> 教師信号である古いパラメーター θ- で固定化された行動状態関数 Q(s,a,θ-)
+        _expected_q_function : <Tensor> 推定行動状態関数 Q(s,a,θ)
         _memory : <ExperienceRelay> ExperienceRelayに基づく学習用のデータセット
 
         _main_network : <QNetwork> DQNのネットワーク
@@ -89,13 +88,13 @@ class BreakoutDQN2015Brain( Brain ):
         self._b_loss_init = False
 
         self._epsilon_step = ( epsilon_init - epsilon_final ) / n_epsilon_step
-        self._action_repeat = torch.LongTensor( [0] )
+        self._action_repeat = 0
 
         return
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "BreakoutDQN2015Brain" )
+        print( "AtariDQN2015Brain" )
         print( self )
         print( str )
         print( "_device :", self._device )
@@ -162,7 +161,7 @@ class BreakoutDQN2015Brain( Brain ):
         モデルの損失関数を設定する。
         [Args]
         [Returns]
-            self._loss_fn : <> モデルの損失関数
+            self._loss_fn : モデルの損失関数
         """
         # smooth L1 関数（＝Huber 関数）
         self._loss_fn = F.smooth_l1_loss( 
@@ -206,7 +205,7 @@ class BreakoutDQN2015Brain( Brain ):
         return self._optimizer
 
 
-    def predict( self, state_batch, action_batch, reward_batch, next_state_batch, done_batch ):
+    def predict( self, batch, state_batch, action_batch, reward_batch, non_done_next_states ):
         """
         教師信号となる行動価値関数を求める
 
@@ -238,26 +237,30 @@ class BreakoutDQN2015Brain( Brain ):
         #--------------------------------------------------------------------
         # 次の状態を求める
         #--------------------------------------------------------------------
-        # Main Network ではなく Target Network からの出力
-        next_outputs = self._target_network( next_state_batch ).to(self._device)
-        #print( "next_outputs.size() :", next_outputs.size() )
+        # 全部 0 で初期化
+        next_q_function = torch.zeros( self._batch_size ).to(self._device)
+
+        # エージェントが done ではなく、next_state が存在するインデックス用のマスク
+        non_done_mask = torch.ByteTensor(
+            tuple( map(lambda s: s is not None,batch.next_state) )
+        )
+
+        next_outputs = self._target_network( non_done_next_states ).to(self._device)
+        #print( "next_outputs :", next_outputs )
 
         # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        next_q_function = next_outputs.max(dim=1)[0].detach().to(self._device)
-        #print( "next_q_function.size() :", next_q_function.size() )
+        next_q_function[non_done_mask] = next_outputs.max(dim=1)[0].detach().to(self._device)
+        #print( "next_q_function :", next_q_function )
 
         #--------------------------------------------------------------------
         # ネットワークの出力となる推定行動価値関数を求める
         #--------------------------------------------------------------------
         gamma_tsr = torch.FloatTensor( [self._gamma] ).to(self._device)
-
-        # *( 1 - done_batch )
-        # done : 0 ⇒ 更新が行われる
-        # done : 1 ⇒ 更新は行われない
-        self._expected_q_function = reward_batch + gamma_tsr * next_q_function * ( 1 - done_batch )
+        self._expected_q_function = reward_batch + gamma_tsr * next_q_function
 
         return
+
 
     def fit( self ):
         """
@@ -316,7 +319,7 @@ class BreakoutDQN2015Brain( Brain ):
                 #------------------------------
                 # Q の最大化する行動を選択
                 #------------------------------
-                state = torch.from_numpy( state ).float().to(self._device)      # numpy → Tensor に型変換
+                state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)              # numpy → Tensor に型変換
                 state = torch.unsqueeze( state, dim = 0 ).to(self._device)      # ミニバッチ用の次元を追加
 
                 # model を推論モードに切り替える（PyTorch特有の処理）
@@ -348,9 +351,13 @@ class BreakoutDQN2015Brain( Brain ):
         return action
 
 
-    def update_q_function( self, state, action, next_state, reward, done, total_time_step ):
+    def update( 
+        self, 
+        state, action, next_state, reward, done, 
+        episode, time_step, total_time_step
+    ):
         """
-        Q 関数の値を更新する。
+        Brain の状態を更新する。
 
         [Args]
             state : <ndarray> 現在の状態 s / shape = [n_channels, width, height]
@@ -363,10 +370,25 @@ class BreakoutDQN2015Brain( Brain ):
 
         """
         #-----------------------------------------
+        # メモリに保管する値を Tensor に変換
+        # この際に、ミニバッチ用の次元を追加
+        #-----------------------------------------
+        state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)
+        state = torch.unsqueeze( state, dim = 0 ).to(self._device)
+        action = torch.LongTensor( [[action]] ).to(self._device)                # [[x]] で shape = [1,1] にしておき、ミニバッチ用の次元を用意
+        reward = torch.FloatTensor( [[reward]] ).to(self._device)
+        next_state = torch.from_numpy( next_state ).type(torch.FloatTensor).to(self._device)
+        next_state = torch.unsqueeze( next_state, dim = 0 ).to(self._device)
+        if( done == True ):
+            next_state = None
+
+        done = torch.FloatTensor( [[done]] ).to(self._device)
+
+
+        #-----------------------------------------
         # 経験に基づく学習用データを追加
         #-----------------------------------------
         self._memory.push( state = state, action = action, next_state = next_state, reward = reward, done = done )
-        #self._memory.push_tensor( state = state, action = action, next_state = next_state, reward = reward, done = done )
 
         # 学習用データがミニバッチサイズ以下ならば、以降の処理は行わない
         if( total_time_step <= self._batch_size ):
@@ -376,8 +398,12 @@ class BreakoutDQN2015Brain( Brain ):
         #-----------------------------------------        
         # ミニバッチデータを取得する
         #-----------------------------------------
-        state_batch, action_batch, reward_batch, next_state_batch, done_batch = self._memory.get_mini_batch( self._batch_size )
-        #state_batch, action_batch, reward_batch, next_state_batch, done_batch = self._memory.get_mini_batch_from_tensor( self._batch_size )
+        batch, state_batch, action_batch, reward_batch, done_batch = self._memory.get_mini_batch( self._batch_size )
+        
+        # done = True を除いた次状態のデータ
+        non_done_next_states = torch.cat(
+            [s for s in batch.next_state if s is not None]
+        )
 
         #print( "state_batch.size() :", state_batch.size() )
         #print( "action_batch.size() :", action_batch.size() )
@@ -407,7 +433,7 @@ class BreakoutDQN2015Brain( Brain ):
         #-----------------------------------------
         # 教師信号となる推定行動価値関数を求める 
         #-----------------------------------------
-        self.predict( state_batch, action_batch, reward_batch, next_state_batch, done_batch )
+        self.predict( batch, state_batch, action_batch, reward_batch, non_done_next_states )
 
         #-----------------------------------------
         # ネットワークを学習し、パラメーターを更新する。
@@ -415,6 +441,11 @@ class BreakoutDQN2015Brain( Brain ):
         # スキップフレーム間隔で勾配再計算
         if( (total_time_step % self._n_skip_frames) == 0 ):
             self.fit()
+
+        #--------------------------------------------------------
+        # 一定間隔で、Target Network と Main Network を同期する
+        #--------------------------------------------------------
+        self.update_target_q_function( episode, time_step, total_time_step )
 
         return self._q_function
 
@@ -431,7 +462,7 @@ class BreakoutDQN2015Brain( Brain ):
                 state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
             )
 
-            # ? 自動微分を行わないようにする。別途必要？
+            # Target Network の勾配計算を行わないようにする。別途必要？
             for param in self._target_network.parameters():
                 param.requires_grad = False
 

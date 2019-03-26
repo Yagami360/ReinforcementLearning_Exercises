@@ -9,10 +9,12 @@
 
 ## ■ 動作環境
 
+- Windows 10
+- Geforce GTX 1050 / 2GB
 - Python : 3.6
 - Anaconda : 5.0.1
 - OpenAI Gym : 0.10.9
-- PyTorch : 1.0.0
+- PyTorch : 1.0.1
 
 ## ■ 項目（フォルダ別）
 

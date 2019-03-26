@@ -22,23 +22,30 @@ class QNetworkMLP3( nn.Module ):
         fc2 : [nn.Linear] 隠れ層
         fc3 : 出力層
     """
-    def __init__( self, n_states, n_hiddens, n_actions ):
+    def __init__( self, device, n_states, n_hiddens, n_actions ):
         """
         [Args]
+            device : 使用デバイス
             n_states : 状態数 |S| / 入力ノード数に対応する。
             n_actions : 状態数 |A| / 出力ノード数に対応する。
         """
         super( QNetworkMLP3, self ).__init__()
-        self.fc1 = nn.Linear( in_features = n_states, out_features = n_hiddens )
-        self.fc2 = nn.Linear( in_features = n_hiddens, out_features = n_hiddens )
-        self.fc3 = nn.Linear( in_features = n_hiddens, out_features = n_actions )
+        self._device = device
+
+        # ４層
+        self.layer = nn.Sequential(
+            nn.Linear( in_features = n_states, out_features = n_hiddens ),
+            nn.ReLU(),
+            nn.Linear( in_features = n_hiddens, out_features = n_hiddens ),
+            nn.ReLU(),
+            nn.Linear( in_features = n_hiddens, out_features = n_actions )
+        ).to(self._device)
+
         return
 
     def forward( self, x ):
         """
         ネットワークの順方向での更新処理
         """
-        h1 = F.relu( self.fc1(x) )
-        h2 = F.relu( self.fc2(h1) )
-        output = self.fc3(h2)
+        output = self.layer(x)
         return output
