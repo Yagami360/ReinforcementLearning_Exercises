@@ -335,9 +335,8 @@ class DDQNMLPBrain( Brain ):
         return
 
     def decay_epsilon_episode( self, episode ):
-        #if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
-        #    self._epsilon = 0.5 * ( 1 / (episode + 1) )
-        self._epsilon = 0.5 * ( 1 / (episode + 1) )
+        if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
+            self._epsilon = 0.5 * ( 1 / (episode + 1) )
         return
 
 
