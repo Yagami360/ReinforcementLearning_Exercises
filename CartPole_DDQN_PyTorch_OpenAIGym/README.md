@@ -17,7 +17,7 @@
 - Python : 3.6
 - Anaconda : 5.0.1
 - OpenAIGym : 0.10.9
-- PyTorch : 1.0.0
+- PyTorch : 1.0.1
 
 ## ■ 使用法
 
@@ -29,13 +29,21 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
-NUM_EPISODE = 500               # エピソード試行回数
-NUM_TIME_STEP = 200             # １エピソードの時間ステップの最大数
-BRAIN_LEARNING_RATE = 0.0001    # 学習率
-BRAIN_BATCH_SIZE = 32           # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON = 0.5      # ε-greedy 法の ε 値
-BRAIN_GAMMDA = 0.99             # 利得の割引率
-MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセットのメモリの最大の長さ
+DEVICE = "GPU"                      # 使用デバイス ("CPU" or "GPU")
+RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
+
+NUM_EPISODE = 500                   # エピソード試行回数
+NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
+NUM_SAVE_STEP = 100                 # 強化学習環境の動画の保存間隔（単位：エピソード数）
+
+BRAIN_LEARNING_RATE = 0.0001        # 学習率
+BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ (Default:32)
+BRAIN_GREEDY_EPSILON_INIT = 0.5     # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_FINAL = 0.001  # ε-greedy 法の ε 値の最終値
+BRAIN_GREEDY_EPSILON_STEPS = 1000   # ε-greedy 法の ε が減少していくフレーム数
+BRAIN_GAMMDA = 0.99                 # 利得の割引率
+BRAIN_FREC_TARGET_UPDATE = 20       # Target Network との同期頻度（Default:10_000） 
+MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データセットのメモリの最大の長さ
 ```
 
 <a id="コード説明＆実行結果"></a>
@@ -46,33 +54,39 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 |パラメータ名|値（実行条件１）|値（実行条件２）|
 |---|---|---|
-|エピソード試行回数：`NUM_EPISODE`|500|500|
+|エピソード試行回数：`NUM_EPISODE`|500|←|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|200|←|
 |ミニバッチサイズ：`BRAIN_LEARNING_RATE`|32|←|
 |学習率：`learning_rate`|0.0001|←|
 |最適化アルゴリズム|Adam<br>減衰率：`beta1=0.9,beta2=0.999`|←|
 |損失関数|smooth L1 関数（＝Huber 関数）|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
-|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5（減衰）|←|
+|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON_INIT`|1.0|←|
+|ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.001|←|
+|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|5000|←|
+|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|20|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
-|DQNのネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>出力層：行動数（2）|MLP（4層）<br>入力層：状態数（4）<br>隠れ層１：32ノード<br>隠れ層２：32ノード<br>出力層：行動数（2）|
-
+|DQNのネットワーク構成|MLP（3層）<br>(0): Linear(in_features=4, out_features=32, bias=True)<br>(1): ReLU()<br>(2): Linear(in_features=32, out_features=32, bias=True)<br>(5): ReLU()<br>(6): Linear(in_features=32, out_features=2, bias=True)|MLP（4層）<br>(0): Linear(in_features=4, out_features=32, bias=True)<br>(1): ReLU()<br>(2): Linear(in_features=32, out_features=32, bias=True)<br>(3): ReLU()<br>(4): Linear(in_features=32, out_features=32, bias=True)<br>(5): ReLU()<br>(6): Linear(in_features=32, out_features=2, bias=True)|
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
+<!--
 ![cartpole-v0_reward_episode500](https://user-images.githubusercontent.com/25688193/53781928-4e969080-3f4e-11e9-8b97-a693e3c4e3cc.png)<br>
+-->
 
 - 損失関数のグラフ（実行条件１）<br>
+<!--
 ![cartpole-v0_loss_episode500](https://user-images.githubusercontent.com/25688193/53781929-4e969080-3f4e-11e9-9671-9c7d5ea6ad40.png)<br>
-
 > 通常の DQN より、学習が安定化されていることがわかる。<br>
+-->
 
 <br>
 
 以下のアニメーションは、本アルゴリズムにより、CarPole のポールのバランスを取る様子を示したアニメーションである。<br>
 エピソードの経過と共に、うまくバランスが取れるようになっており、うまく学習できていることがわかる。<br>
 
+<!--
 - エピソード = 0 / 最終時間ステップ数 = 10（実行条件１）<br>
 ![rl_env_cartpole-v0_episode0](https://user-images.githubusercontent.com/25688193/53781816-bef0e200-3f4d-11e9-9cc8-17c767f10f88.gif)<br>
 
@@ -96,81 +110,4 @@ MEMORY_CAPACITY = 10000         # Experience Relay 用の学習用データセ�
 
 - エピソード = 500 / 最終時間ステップ数 = 199（実行条件１）<br>
 <br>
-
-### ◎ コードの説明
-
-
-## ■ デバッグ情報
-
-```python
-a_m : tensor([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0])
-a_m : tensor([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1,
-        1, 1, 1, 0, 1, 1, 1, 1])
-
-a_m_non_final_next_states : tensor([[1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1],
-        [1]])
-
-next_outputs : tensor([[-0.1413,  0.0316],
-        [-0.1261,  0.0474],
-        [-0.1609,  0.0018],
-        [-0.2363,  0.0498],
-        [-0.2587,  0.0724],
-        [-0.2096,  0.0230],
-        [-0.1899,  0.0059],
-        [-0.1933,  0.0097],
-        [-0.3051,  0.1412],
-        [-0.2574,  0.0723],
-        [-0.2344,  0.0445],
-        [-0.2023,  0.0202],
-        [-0.1230,  0.0511],
-        [-0.2395,  0.0533],
-        [-0.2335,  0.0447],
-        [-0.2625,  0.0776],
-        [-0.2085,  0.0243],
-        [-0.1424,  0.0299],
-        [-0.1247,  0.0490],
-        [-0.1664,  0.0004],
-        [-0.1849,  0.0034],
-        [-0.2039,  0.0211],
-        [-0.1437,  0.0285],
-        [-0.2770,  0.0953],
-        [-0.2295,  0.0451],
-        [-0.2450,  0.0592],
-        [-0.2910,  0.1186],
-        [-0.2103,  0.0224],
-        [-0.2336,  0.0483],
-        [-0.1686,  0.0139]], grad_fn=<AddmmBackward>)
-
-next_state_values : 
-    tensor([0.0316, 0.0474, 0.0018, 0.0498, 0.0724, 0.0230, 0.0059, 0.0097, 0.1412, 0.0723, 0.0445, 0.0202, 0.0511, 0.0533, 0.0447, 0.0776, 0.0243, 0.0299, 0.0490, 0.0004, 0.0034, 0.0000, 0.0211, 0.0285, 0.0953, 0.0451, 0.0592, 0.0000, 0.1186, 0.0224, 0.0483, 0.0139])
-
-```
+-->
