@@ -205,19 +205,6 @@ class DDQNMLPBrain( Brain ):
         [Args]
         [Returns]
         """
-        # ミニバッチデータの修正
-        done_mask = (1-done_batch).type(torch.ByteTensor).to(self._device)
-        #print( "done_mask :", done_mask )
-
-        # done = True の next_state_batch は取り除いた batch data
-        nonfinal_next_state_batch = []
-        for i, done in enumerate(done_mask):
-            done = done.item()
-            if( done == 1 ):    # done ではない
-                nonfinal_next_state_batch.append( next_state_batch[i] )
-        
-        nonfinal_next_state_batch = torch.stack( nonfinal_next_state_batch, dim = 0 ).to(self._device)
-
         #--------------------------------------------------------------------
         # ネットワークを推論モードへ切り替え（PyTorch特有の処理）
         #--------------------------------------------------------------------
@@ -252,18 +239,12 @@ class DDQNMLPBrain( Brain ):
         # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。(requires_grad=True → False)
         # 最後の[1]で行動に対応したindexが返る
-        #a_m = self._main_network( next_state_batch ).detach().max(1)[1]
-
-        a_m = torch.zeros( self._batch_size ).type(torch.LongTensor).to(self._device)
-        a_m[done_mask] = self._main_network( nonfinal_next_state_batch ).detach().max(1)[1]
-
+        a_m = self._main_network( next_state_batch ).detach().max(1)[1]
         #print( "a_m :", a_m )   # shape = [batch_size]
         #print( "a_m.size() :", a_m.size() )   # shape = [batch_size]
 
         # .unsqueeze(1) で gather 用の次元を追加
-        #a_m_batch = a_m.unsqueeze(1)
-
-        a_m_batch = a_m[done_mask].view(-1, 1)
+        a_m_batch = a_m.unsqueeze(1)
         #print( "a_m_batch :", a_m_batch )   # shape = [batch_size,1]
         #print( "a_m_batch.size() :", a_m_batch.size() )   # shape = [batch_size,1]
 
@@ -271,18 +252,14 @@ class DDQNMLPBrain( Brain ):
         # 次の状態を求める
         #--------------------------------------------------------------------
         # Main Network ではなく Target Network からの出力
-        #next_outputs = self._target_network( next_state_batch )
-        next_outputs = self._target_network( nonfinal_next_state_batch )
+        next_outputs = self._target_network( next_state_batch )
         #print( "next_outputs :", next_outputs )
         #print( "next_outputs.size() :", next_outputs.size() )
 
         # detach() : Tensor の誤差逆伝搬による値の更新が止まったもので、Tensorをコピーする。(requires_grad=True → False)
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
         # torch.squeeze() では要素数が1のみの軸を削除
-        #next_q_function = next_outputs.gather(1, a_m_batch).detach().squeeze()
-
-        next_q_function = torch.zeros( self._batch_size ).to(self._device)
-        next_q_function[done_mask] = next_outputs.gather(1, a_m_batch).detach().squeeze()
+        next_q_function = next_outputs.gather(1, a_m_batch).detach().squeeze()
         #print( "next_q_function :", next_q_function )
         #print( "next_q_function.size() :", next_q_function.size() ) # shape = [batch_size]
 
@@ -293,9 +270,7 @@ class DDQNMLPBrain( Brain ):
 
         # done = 0 ⇒ 価値関数の更新は行われる
         # done = 1 ⇒ 価値関数の更新は行われない
-        #self._expected_q_function = reward_batch + gamma_tsr * next_q_function * ( 1 - done_batch )
-
-        self._expected_q_function = reward_batch + gamma_tsr * next_q_function
+        self._expected_q_function = reward_batch + gamma_tsr * next_q_function * ( 1 - done_batch )
 
         return
 
@@ -325,6 +300,7 @@ class DDQNMLPBrain( Brain ):
 
         return
 
+
     def decay_epsilon( self ):
         """
         ε-greedy 法の ε 値を減衰させる。
@@ -332,11 +308,19 @@ class DDQNMLPBrain( Brain ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon -= self._epsilon_step
 
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
+
         return
 
     def decay_epsilon_episode( self, episode ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon = 0.5 * ( 1 / (episode + 1) )
+
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
         return
 
 
@@ -427,24 +411,43 @@ class DDQNMLPBrain( Brain ):
         #--------------------------------------------------------
         # 一定間隔で、Target Network と Main Network を同期する
         #--------------------------------------------------------
-        self.update_target_q_function( episode, time_step, total_time_step )
+        #self.update_target_q_function( total_time_step )
+        self.update_target_q_function_episode( episode )
 
         return self._q_function
 
 
-    def update_target_q_function( self, episode, time_step, total_time_step ):
+    def update_target_q_function( self, total_time_step ):
         """
         Target Network を Main Network と同期する。
+        ・時間ステップ単位での同期
         """
         # 一定間隔で同期する。
-        #if( (episode % 2) == 0 ):
         if( (total_time_step % self._n_frec_target_update) == 0 ):
             # load_state_dict() : モデルを読み込み
             self._target_network.load_state_dict(
                 state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
             )
 
-            # Target Network の勾配計算を行わないようにする。別途必要？
+            # Target Network の勾配計算を行わないようにする。別途必要
+            for param in self._target_network.parameters():
+                param.requires_grad = False
+
+        return
+
+    def update_target_q_function_episode( self, episode ):
+        """
+        Target Network を Main Network と同期する。
+        ・エピソード単位での同期
+        """
+        # 一定間隔で同期する。
+        if( (episode % self._n_frec_target_update) == 0 ):
+            # load_state_dict() : モデルを読み込み
+            self._target_network.load_state_dict(
+                state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
+            )
+
+            # Target Network の勾配計算を行わないようにする。別途必要
             for param in self._target_network.parameters():
                 param.requires_grad = False
 

@@ -39,7 +39,7 @@ NUM_SAVE_STEP = 50                  # 強化学習環境の動画の保存間隔
 
 BRAIN_LEARNING_RATE = 0.0001        # 学習率
 BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ (Default:32)
-BRAIN_GREEDY_EPSILON_INIT = 0.5     # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_INIT = 1.0     # ε-greedy 法の ε 値の初期値
 BRAIN_GREEDY_EPSILON_FINAL = 0.001  # ε-greedy 法の ε 値の最終値
 BRAIN_GREEDY_EPSILON_STEPS = 5000   # ε-greedy 法の ε が減少していくフレーム数
 BRAIN_GAMMDA = 0.99                 # 利得の割引率

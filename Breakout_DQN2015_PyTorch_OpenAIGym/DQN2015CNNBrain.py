@@ -129,6 +129,8 @@ class DQN2015CNNBrain( Brain ):
         """
         return self._q_function
 
+    def get_epsilon( self ):
+        return self._epsilon
 
     def model( self ):
         """
@@ -189,13 +191,14 @@ class DQN2015CNNBrain( Brain ):
         [Returns]
             self._optimizer : <torch.optimizer> モデルの最適化アルゴリズム            
         """
-        # 最適化アルゴリズムとして、Adam を採用
         """
+        # 最適化アルゴリズムとして、Adam を採用
         self._optimizer = optim.Adam( 
             params = self._main_network.parameters(), 
             lr = self._learning_rate 
         )
         """
+
         # 最適化アルゴリズムとして、RMSprop を採用
         self._optimizer = optim.RMSprop(
             params = self._main_network.parameters(), 
@@ -283,6 +286,7 @@ class DQN2015CNNBrain( Brain ):
 
         return
 
+
     def decay_epsilon( self ):
         """
         ε-greedy 法の ε 値を減衰させる。
@@ -290,11 +294,19 @@ class DQN2015CNNBrain( Brain ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon -= self._epsilon_step
 
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
+
         return
 
     def decay_epsilon_episode( self, episode ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon = 0.5 * ( 1 / (episode + 1) )
+
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
         return
 
 
@@ -420,24 +432,43 @@ class DQN2015CNNBrain( Brain ):
         #--------------------------------------------------------
         # 一定間隔で、Target Network と Main Network を同期する
         #--------------------------------------------------------
-        self.update_target_q_function( episode, time_step, total_time_step )
+        #self.update_target_q_function( total_time_step )
+        self.update_target_q_function_episode( episode )
 
         return self._q_function
 
 
-    def update_target_q_function( self, episode, time_step, total_time_step ):
+    def update_target_q_function( self, total_time_step ):
         """
         Target Network を Main Network と同期する。
+        ・時間ステップ単位での同期
         """
         # 一定間隔で同期する。
-        #if( (episode % 2) == 0 ):
         if( (total_time_step % self._n_frec_target_update) == 0 ):
             # load_state_dict() : モデルを読み込み
             self._target_network.load_state_dict(
                 state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
             )
 
-            # Target Network の勾配計算を行わないようにする。別途必要？
+            # Target Network の勾配計算を行わないようにする。別途必要
+            for param in self._target_network.parameters():
+                param.requires_grad = False
+
+        return
+
+    def update_target_q_function_episode( self, episode ):
+        """
+        Target Network を Main Network と同期する。
+        ・エピソード単位での同期
+        """
+        # 一定間隔で同期する。
+        if( (episode % self._n_frec_target_update) == 0 ):
+            # load_state_dict() : モデルを読み込み
+            self._target_network.load_state_dict(
+                state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
+            )
+
+            # Target Network の勾配計算を行わないようにする。別途必要
             for param in self._target_network.parameters():
                 param.requires_grad = False
 

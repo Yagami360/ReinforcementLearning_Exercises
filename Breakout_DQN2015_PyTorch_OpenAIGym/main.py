@@ -56,7 +56,7 @@ BRAIN_GREEDY_EPSILON_INIT = 1.0         # ε-greedy 法の ε 値の初期値 (D
 BRAIN_GREEDY_EPSILON_FINAL = 0.01       # ε-greedy 法の ε 値の最終値 (Default:0.1)
 BRAIN_GREEDY_EPSILON_STEPS = 50000      # ε-greedy 法の ε が減少していくフレーム数 (Default:1_000_000)
 BRAIN_GAMMDA = 0.99                     # 利得の割引率 (Default:0.99)
-BRAIN_FREC_TARGET_UPDATE = 1000         # Target Network との同期頻度（Default:10_000） 
+BRAIN_FREC_TARGET_UPDATE = 2            # Target Network との同期頻度（Default:10_000） 
 MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用データセットのメモリの最大の長さ (Default:1_000_000)
 
 

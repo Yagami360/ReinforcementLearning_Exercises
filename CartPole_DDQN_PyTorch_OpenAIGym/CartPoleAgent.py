@@ -90,8 +90,8 @@ class CartPoleAgent( Agent ):
         #-------------------------------------------------------------------
         # ε-greedy 法の ε 値を減衰させる。
         #-------------------------------------------------------------------
-        #self._brain.decay_epsilon()
-        self._brain.decay_epsilon_episode( episode )
+        self._brain.decay_epsilon()
+        #self._brain.decay_epsilon_episode( episode )
         
         #-------------------------------------------------------------------
         # 行動 a_t を求める
@@ -160,16 +160,13 @@ class CartPoleAgent( Agent ):
             time_step : エピソード完了時の時間ステップ数
             total_time_step : <int> 全てのエピソードにおける全経過時間ステップ数
         """
-        print( "エピソード = {0} / 全時間ステップ数 = {1} / 最終時間ステップ数 = {2}".format( episode, total_time_step, time_step )  )
-
-        # ε-greedy 法の ε 値を出力
-        print( "epsilon = %0.6f" % self._brain.get_epsilon() )
-
         # 利得の履歴に追加
         self._reward_historys.append( self._total_reward )
 
         # 損失関数の履歴に追加
-        print( "loss = %0.6f" % self._brain.get_loss() )
         self._loss_historys.append( self._brain.get_loss() )
 
+        # デバッグ情報出力
+        print( "エピソード = {0} / 全時間ステップ数 = {1} / 最終時間ステップ数 = {2}".format( episode, total_time_step, time_step )  )
+        print( "epsilon = %0.6f / total_reward = %0.6f / loss = %0.6f" % (self._brain.get_epsilon(), self._total_reward, self._brain.get_loss() ) )
         return

@@ -153,6 +153,7 @@ class DQN2015MLPBrain( Brain ):
             n_actions = self._n_actions
         )
         """
+
         return
 
 
@@ -217,7 +218,6 @@ class DQN2015MLPBrain( Brain ):
         # model(引数) で呼び出せるのは、__call__ をオーバライトしているため
         #--------------------------------------------------------------------
         # outputs / shape = batch_size * _n_actions
-        #outputs = self._main_network( state_batch ).to(self._device)
         outputs = self._main_network( state_batch )
         #print( "outputs :", outputs )
 
@@ -225,7 +225,6 @@ class DQN2015MLPBrain( Brain ):
         # gather(...) : 
         # dim = 1 : 列方向
         # index = action_batch : エージェントが実際に選択した行動は action_batch 
-        #self._q_function = outputs.gather( 1, action_batch ).to(self._device)
         self._q_function = outputs.gather( 1, action_batch )
         #print( "_q_function :", self._q_function )
 
@@ -233,13 +232,11 @@ class DQN2015MLPBrain( Brain ):
         # 次の状態を求める
         #--------------------------------------------------------------------
         # Main Network ではなく Target Network からの出力
-        #next_outputs = self._target_network( next_state_batch ).to(self._device)
         next_outputs = self._target_network( next_state_batch )
         #print( "next_outputs :", next_outputs )
 
         # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        #next_q_function = next_outputs.max(dim=1)[0].detach().to(self._device)
         next_q_function = next_outputs.max(dim=1)[0].detach()
         #print( "next_q_function :", next_q_function )
 
@@ -281,6 +278,7 @@ class DQN2015MLPBrain( Brain ):
 
         return
 
+
     def decay_epsilon( self ):
         """
         ε-greedy 法の ε 値を減衰させる。
@@ -288,11 +286,19 @@ class DQN2015MLPBrain( Brain ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon -= self._epsilon_step
 
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
+
         return
 
     def decay_epsilon_episode( self, episode ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon = 0.5 * ( 1 / (episode + 1) )
+
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
         return
 
 
@@ -383,18 +389,37 @@ class DQN2015MLPBrain( Brain ):
         #--------------------------------------------------------
         # 一定間隔で、Target Network と Main Network を同期する
         #--------------------------------------------------------
-        self.update_target_q_function( episode, time_step, total_time_step )
+        #self.update_target_q_function( total_time_step )
+        self.update_target_q_function_episode( episode )
 
         return self._q_function
 
 
-    def update_target_q_function( self, episode, time_step, total_time_step ):
+    def update_target_q_function( self, total_time_step ):
         """
         Target Network を Main Network と同期する。
+        ・時間ステップ単位での同期
         """
         # 一定間隔で同期する。
-        #if( (episode % 2) == 0 ):
         if( (total_time_step % self._n_frec_target_update) == 0 ):
+            # load_state_dict() : モデルを読み込み
+            self._target_network.load_state_dict(
+                state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
+            )
+
+            # Target Network の勾配計算を行わないようにする。別途必要
+            for param in self._target_network.parameters():
+                param.requires_grad = False
+
+        return
+
+    def update_target_q_function_episode( self, episode ):
+        """
+        Target Network を Main Network と同期する。
+        ・エピソード単位での同期
+        """
+        # 一定間隔で同期する。
+        if( (episode % self._n_frec_target_update) == 0 ):
             # load_state_dict() : モデルを読み込み
             self._target_network.load_state_dict(
                 state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む

@@ -64,7 +64,7 @@ MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データ�
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON_INIT`|1.0|←|
 |ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.001|←|
 |ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|5000|←|
-|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|20|←|
+|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|2エピソード|←|
 |Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10000|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
@@ -75,18 +75,27 @@ MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データ�
 -->
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
+![CartPole-v0_DQN2015_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/55082667-6e504d00-50e5-11e9-8222-756d4f9d573b.png)<br>
+<!--
 ![CartPole-v0_DQN2015_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54997028-26aac200-500e-11e9-9208-698e54dafef9.png)<br>
+-->
 
 - 損失関数のグラフ（実行条件１）<br>
+![CartPole-v0_DQN2015_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/55082666-6e504d00-50e5-11e9-8673-71f0c309e938.png)<br>
+<!--
 ![CartPole-v0_DQN2015_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54997027-26aac200-500e-11e9-9b5f-450418e49b8b.png)<br>
+-->
 
+<!--
 - 割引利得のエピソード毎の履歴（実行条件２）<br>
 ![CartPole-v0_DQN2015_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54995218-8eaad980-5009-11e9-8052-4d21ed5dbcd1.png)<br>
+-->
 
+<!--
 - 損失関数のグラフ（実行条件２）<br>
 ![CartPole-v0_DQN2015_Loss_episode100_lr0 0001](https://user-images.githubusercontent.com/25688193/54997433-07606480-500f-11e9-8022-21859e3c2743.png)<br>
 ![CartPole-v0_DQN2015_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54995214-8d79ac80-5009-11e9-9cec-1d4c58d3a01f.png)<br>
-
+-->
 
 <br>
 
@@ -96,17 +105,32 @@ MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データ�
 ※ ポールを左右に振りながらバランスを取るときの振り幅が、Q学習や Sarsa では大きかったのに対して、この DQN では小さい傾向がある？<br>
 -->
 
-- エピソード = 0 / 最終時間ステップ数 = 10（実行条件２）<br>
-![RL_ENV_CartPole-v0_Episode0](https://user-images.githubusercontent.com/25688193/54994281-3b378c00-5007-11e9-8c84-0beaf5ef2410.gif)<br>
+- エピソード = 0 / 最終時間ステップ数 = 14（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode0](https://user-images.githubusercontent.com/25688193/55082356-dd797180-50e4-11e9-90a2-528e3e1dac92.gif)<br>
 
-- エピソード = 50 / 最終時間ステップ数 = 146<br>
-![RL_ENV_CartPole-v0_Episode50](https://user-images.githubusercontent.com/25688193/54994282-3bd02280-5007-11e9-93a2-9dc1e378b592.gif)<br>
+- エピソード = 50 / 最終時間ステップ数 = 52（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode50](https://user-images.githubusercontent.com/25688193/55082357-dd797180-50e4-11e9-8f94-e6397af302e0.gif)<br>
 
-- エピソード = 100 / 最終時間ステップ数 = 199<br>
-![RL_ENV_CartPole-v0_Episode100](https://user-images.githubusercontent.com/25688193/54994283-3bd02280-5007-11e9-8b79-ae5a504a092e.gif)<br>
+- エピソード = 100 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode100](https://user-images.githubusercontent.com/25688193/55082358-dd797180-50e4-11e9-8501-7609aa38ca57.gif)<br>
 
-- エピソード = 200 / 最終時間ステップ数 = 199<br>
-![RL_ENV_CartPole-v0_Episode200](https://user-images.githubusercontent.com/25688193/54994290-3d99e600-5007-11e9-9956-f129066c8da3.gif)<br>
+- エピソード = 150 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode150](https://user-images.githubusercontent.com/25688193/55082359-de120800-50e4-11e9-86c5-799121ee9db3.gif)<br>
 
-- エピソード = 300 / 最終時間ステップ数 = 199<br>
-![RL_ENV_CartPole-v0_Episode300](https://user-images.githubusercontent.com/25688193/54994719-4f2fbd80-5008-11e9-854a-acdd6409425a.gif)<br>
+- エピソード = 200 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode200](https://user-images.githubusercontent.com/25688193/55082355-dd797180-50e4-11e9-94e8-03db49a8d57f.gif)<br>
+
+- エピソード = 300 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode300](https://user-images.githubusercontent.com/25688193/55082361-deaa9e80-50e4-11e9-8ef0-f53e77484fd1.gif)<br>
+
+- エピソード = 350 / 最終時間ステップ数 = 196（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode350](https://user-images.githubusercontent.com/25688193/55082626-5ed10400-50e5-11e9-94c2-97bd60f6505e.gif)<br>
+
+- エピソード = 400 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode400](https://user-images.githubusercontent.com/25688193/55082366-e0746200-50e4-11e9-9489-49394682aa9e.gif)<br>
+
+- エピソード = 450 / 最終時間ステップ数 = 158（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode450](https://user-images.githubusercontent.com/25688193/55082622-5d9fd700-50e5-11e9-97b4-06127bda292c.gif)<br>
+
+- エピソード = 500 / 最終時間ステップ数 = xxx（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode499](https://user-images.githubusercontent.com/25688193/55082368-e1a58f00-50e4-11e9-8d55-77c1ac652763.gif)<br>

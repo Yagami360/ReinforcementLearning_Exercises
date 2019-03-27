@@ -111,6 +111,9 @@ class DQN2013MLPBrain( Brain ):
         """
         return self._q_function
 
+    def get_epsilon( self ):
+        return self._epsilon
+
 
     def model( self ):
         """
@@ -133,7 +136,6 @@ class DQN2013MLPBrain( Brain ):
             n_actions = self._n_actions
         )
         """
-
         return
 
 
@@ -198,25 +200,24 @@ class DQN2013MLPBrain( Brain ):
         # model(引数) で呼び出せるのは、__call__ をオーバライトしているため
         #--------------------------------------------------------------------
         # outputs / shape = batch_size * _n_actions
-        outputs = self._main_network( state_batch ).to(self._device)
+        outputs = self._main_network( state_batch )
         #print( "outputs :", outputs )
 
         # outputs から実際にエージェントが選択した action を取り出す
         # gather(...) : 
         # dim = 1 : 列方向
         # index = action_batch : エージェントが実際に選択した行動は action_batch 
-        self._q_function = outputs.gather( 1, action_batch ).to(self._device)
+        self._q_function = outputs.gather( 1, action_batch )
         #print( "_q_function :", self._q_function )
 
         #--------------------------------------------------------------------
         # 次の状態を求める
         #--------------------------------------------------------------------
-        next_outputs = self._main_network( next_state_batch ).to(self._device)
+        next_outputs = self._main_network( next_state_batch )
         #print( "next_outputs :", next_outputs )
 
         # detach() : ネットワークの出力の値を取り出す。Variable の誤差逆伝搬による値の更新が止まる？
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        #next_q_function = next_outputs.max(dim=1)[0].detach().to(self._device)
         next_q_function = next_outputs.max(dim=1)[0].detach()
         #print( "next_q_function :", next_q_function )
 
@@ -257,6 +258,7 @@ class DQN2013MLPBrain( Brain ):
 
         return
 
+
     def decay_epsilon( self ):
         """
         ε-greedy 法の ε 値を減衰させる。
@@ -264,11 +266,19 @@ class DQN2013MLPBrain( Brain ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon -= self._epsilon_step
 
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
+
         return
 
     def decay_epsilon_episode( self, episode ):
         if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
             self._epsilon = 0.5 * ( 1 / (episode + 1) )
+
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
         return
 
 

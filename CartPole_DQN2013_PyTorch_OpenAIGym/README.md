@@ -74,21 +74,31 @@ MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データ�
 -->
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
+![CartPole-v0_DQN2013_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/55083350-bf147580-50e6-11e9-9ca0-08f2c85a3916.png)<br>
+<!--
 ![CartPole-v0_DQN2013_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54998197-e0a32d80-5010-11e9-890a-61542dfc6fb6.png)<br>
+-->
 
 - 損失関数のグラフ（実行条件１）<br>
+![CartPole-v0_DQN2013_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/55083349-bf147580-50e6-11e9-8b98-cee1e1ec42e6.png)<br>
+<!--
 ![CartPole-v0_DQN2013_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54998194-e0a32d80-5010-11e9-9dcd-15e0ab566bb6.png)<br>
+-->
 
 <!--
 > 途中で損失関数の値が発散しており、その後０付近の収束しておらず、うまく学習できていないことがわかる。<br>
 -->
 
+<!--
 - 割引利得のエピソード毎の履歴（実行条件２）<br>
 ![CartPole-v0_DQN2013_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54996397-84d6a580-500c-11e9-9b2b-4e0116d9eab1.png)<br>
+-->
 
+<!--
 - 損失関数のグラフ（実行条件２）<br>
 ![CartPole-v0_DQN2013_Loss_episode100_lr0 0001](https://user-images.githubusercontent.com/25688193/54996753-7b9a0880-500d-11e9-8efc-9c0bb6fb3231.png)<br>
 ![CartPole-v0_DQN2013_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/54996396-84d6a580-500c-11e9-82b8-86af38a9ac1e.png)<br>
+-->
 
 <!--
 > エピソードが経過するにつれて、損失関数の値が０付近の値に向かって収束しており、うまく学習できていることがわかる。<br>
@@ -103,23 +113,23 @@ MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データ�
 ※ ポールを左右に振りながらバランスを取るときの振り幅が、Q学習や Sarsa では大きかったのに対して、この DQN では小さい傾向がある？<br>
 -->
 
-- エピソード = 0 / 最終時間ステップ数 = 10（実行条件２）<br>
-![RL_ENV_CartPole-v0_Episode0](https://user-images.githubusercontent.com/25688193/54994129-d54b0480-5006-11e9-95fd-ab1e86aa23e0.gif)<br>
+- エピソード = 0 / 最終時間ステップ数 = 14（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode0](https://user-images.githubusercontent.com/25688193/55083446-e703d900-50e6-11e9-8546-99067777b120.gif)<br>
 
-- エピソード = 50 / 最終時間ステップ数 = 52<br>
-![RL_ENV_CartPole-v0_Episode50](https://user-images.githubusercontent.com/25688193/54994369-6de18480-5007-11e9-885a-8e20f264c3ba.gif)<br>
+- エピソード = 50 / 最終時間ステップ数 = 63（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode50](https://user-images.githubusercontent.com/25688193/55083449-e79c6f80-50e6-11e9-9674-8ee1f5fa1b33.gif)<br>
 
-- エピソード = 100 / 最終時間ステップ数 = 199<br>
-![RL_ENV_CartPole-v0_Episode100](https://user-images.githubusercontent.com/25688193/54994812-869e6a00-5008-11e9-86df-5be5b748d188.gif)<br>
+- エピソード = 100 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode100](https://user-images.githubusercontent.com/25688193/55083452-e79c6f80-50e6-11e9-9aa6-942b2ed35734.gif)<br>
 
-- エピソード = 150 / 最終時間ステップ数 = 145<br>
-![RL_ENV_CartPole-v0_Episode150](https://user-images.githubusercontent.com/25688193/54994813-869e6a00-5008-11e9-9e13-a6d97335686b.gif)<br>
+- エピソード = 200 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode200](https://user-images.githubusercontent.com/25688193/55083455-e8350600-50e6-11e9-95bd-9d98bdb83f8d.gif)<br>
 
-- エピソード = 200 / 最終時間ステップ数 = 199<br>
-![RL_ENV_CartPole-v0_Episode200](https://user-images.githubusercontent.com/25688193/54995672-a20a7480-500a-11e9-8001-e76f1c1a7cb9.gif)<br>
+- エピソード = 300 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode300](https://user-images.githubusercontent.com/25688193/55083457-e8350600-50e6-11e9-8506-6ecab96030a1.gif)<br>
 
-- エピソード = 300 / 最終時間ステップ数 = 199<br>
-![RL_ENV_CartPole-v0_Episode300](https://user-images.githubusercontent.com/25688193/54995675-a3d43800-500a-11e9-88d9-89d98a9042b3.gif)<br>
+- エピソード = 400 / 最終時間ステップ数 = 199（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode400](https://user-images.githubusercontent.com/25688193/55083460-e8cd9c80-50e6-11e9-9ce4-c3e77b9a27a3.gif)<br>
 
-- エピソード = 400 / 最終時間ステップ数 = 199<br>
-![RL_ENV_CartPole-v0_Episode400](https://user-images.githubusercontent.com/25688193/54996099-bc911d80-500b-11e9-8d12-afdb28b56593.gif)<br>
+- エピソード = 500 / 最終時間ステップ数 = xxx（実行条件１）<br>
+![RL_ENV_CartPole-v0_Episode499](https://user-images.githubusercontent.com/25688193/55083462-e8cd9c80-50e6-11e9-9ef3-8333b86e9e35.gif)<br>

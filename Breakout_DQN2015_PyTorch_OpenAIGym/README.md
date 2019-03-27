@@ -96,37 +96,25 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 -->
 
 
-- エピソード = 0 / 最終時間ステップ数 = 24（実行条件１）<br>
+- エピソード = 0 / 最終時間ステップ数 = 24 / total_reward = 0.0（実行条件１）<br>
 ![RL_ENV_BreakoutNoFrameskip-v0_Episode0](https://user-images.githubusercontent.com/25688193/54999042-c9fdd600-5012-11e9-97af-ae7153c8f860.gif)<br>
 
-- エピソード = 100 / 最終時間ステップ数 = xx（実行条件１）<br>
+- エピソード = 100 / 最終時間ステップ数 = xx / total_reward = x.x（実行条件１）<br>
 <br>
 
-- エピソード = 500 / 最終時間ステップ数 = xx（実行条件１）<br>
+- エピソード = 500 / 最終時間ステップ数 = xx / total_reward = x.x（実行条件１）<br>
 <br>
 
-- エピソード = 1000 / 最終時間ステップ数 = xx（実行条件１）<br>
+- エピソード = 1000 / 最終時間ステップ数 = xx / total_reward = x.x（実行条件１）<br>
 <br>
 
-- エピソード = 4400 / 最終時間ステップ数 = 139（実行条件１）<br>
+- エピソード = 4400 / 最終時間ステップ数 = 139 / total_reward = x.x（実行条件１）<br>
 ![RL_ENV_BreakoutNoFrameskip-v0_Episode4400](https://user-images.githubusercontent.com/25688193/55045191-52ff2680-5080-11e9-9e80-42528bd09a72.gif)<br>
 
-- エピソード = 5000 / 最終時間ステップ数 = 80（実行条件１）<br>
+- エピソード = 5000 / 最終時間ステップ数 = 80 / total_reward = x.x（実行条件１）<br>
 ![RL_ENV_BreakoutNoFrameskip-v0_Episode4999](https://user-images.githubusercontent.com/25688193/55045151-3a8f0c00-5080-11e9-9573-fdadac98fa26.gif)<br>
 
-- エピソード = 10000 / 最終時間ステップ数 = xx（実行条件１）<br>
-<br>
-
-- エピソード = 20000 / 最終時間ステップ数 = xx（実行条件１）<br>
-<br>
-
-- エピソード = 30000 / 最終時間ステップ数 = xx（実行条件１）<br>
-<br>
-
-- エピソード = 40000 / 最終時間ステップ数 = xx（実行条件１）<br>
-<br>
-
-- エピソード = 50000 / 最終時間ステップ数 = xx（実行条件１）<br>
+- エピソード = 10000 / 最終時間ステップ数 = xx / total_reward = x.x（実行条件１）<br>
 <br>
 
 <!--
