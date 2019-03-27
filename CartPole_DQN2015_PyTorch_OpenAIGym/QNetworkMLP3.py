@@ -18,9 +18,6 @@ class QNetworkMLP3( nn.Module ):
     PyTorch の nn.Module を継承して
 
     [public]
-        fc1 : [nn.Linear] 入力層
-        fc2 : [nn.Linear] 隠れ層
-        fc3 : 出力層
     """
     def __init__( self, device, n_states, n_hiddens, n_actions ):
         """

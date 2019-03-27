@@ -34,7 +34,7 @@ class CartPoleAgent( Agent ):
         gamma = 0.9,
         max_time_step = 200
     ):
-        super().__init__( brain, gamma, 0 )
+        super().__init__( brain, gamma )
         self._env = env
         self._max_time_step = max_time_step
         self._observations = []

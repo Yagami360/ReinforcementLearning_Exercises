@@ -25,7 +25,7 @@ from GymAcademy import GymAcademy
 from Brain import Brain
 from DQN2015CNNBrain import DQN2015CNNBrain
 from Agent import Agent
-from AtariAgent import AtariAgent
+from GymAgent import GymAgent
 from ExperienceReplay import ExperienceReplay
 
 from AtariWrappers import *
@@ -170,7 +170,7 @@ def main():
     #-----------------------------------
 	# Agent の生成
     #-----------------------------------
-    agent = AtariAgent(
+    agent = GymAgent(
         device = device,
         env = env,
         brain = brain,
@@ -206,7 +206,7 @@ def main():
         range(0,NUM_EPISODE+1), reward_historys,
         label = 'gamma = {}'.format(BRAIN_GAMMDA),
         linestyle = '-',
-        linewidth = 0.2,
+        linewidth = 0.1,
         color = 'black'
     )
     plt.title( "Reward History" )
@@ -233,7 +233,7 @@ def main():
         range( 0, NUM_EPISODE ), loss_historys,
         label = 'mini_batch_size = %d, learning_rate = %0.4f' % ( BRAIN_BATCH_SIZE, BRAIN_LEARNING_RATE ),
         linestyle = '-',
-        linewidth = 0.2,
+        linewidth = 0.1,
         color = 'black'
     )
     plt.title( "loss / Smooth L1" )

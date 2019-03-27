@@ -116,6 +116,9 @@ class DQN2015MLPBrain( Brain ):
         """
         return self._q_function
 
+    def get_epsilon( self ):
+        return self._epsilon
+
 
     def model( self ):
         """

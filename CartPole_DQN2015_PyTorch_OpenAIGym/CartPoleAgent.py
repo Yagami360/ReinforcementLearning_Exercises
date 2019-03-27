@@ -34,7 +34,7 @@ class CartPoleAgent( Agent ):
         gamma = 0.9,
         max_time_step = 200
     ):
-        super().__init__( brain, gamma, 0 )
+        super().__init__( brain, gamma )
         self._env = env
         self._max_time_step = max_time_step
         self._observations = []
@@ -163,7 +163,7 @@ class CartPoleAgent( Agent ):
         print( "エピソード = {0} / 全時間ステップ数 = {1} / 最終時間ステップ数 = {2}".format( episode, total_time_step, time_step )  )
 
         # ε-greedy 法の ε 値を出力
-        print( "epsilon = %0.6f" % self._brain._epsilon )
+        print( "epsilon = %0.6f" % self._brain.get_epsilon() )
 
         # 利得の履歴に追加
         self._reward_historys.append( self._total_reward )

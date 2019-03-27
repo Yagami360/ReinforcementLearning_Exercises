@@ -83,10 +83,10 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 <br>
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
-<br>
+![BreakoutNoFrameskip-v0_DQN2015_Reward_episode5000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/55045104-074c7d00-5080-11e9-9dd5-9fc364507843.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
-<br>
+![BreakoutNoFrameskip-v0_DQN2015_Loss_episode5000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/55045103-06b3e680-5080-11e9-89a6-901b7c4eb003.png)<br>
 
 <br>
 
@@ -108,8 +108,11 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 - エピソード = 1000 / 最終時間ステップ数 = xx（実行条件１）<br>
 <br>
 
-- エピソード = 5000 / 最終時間ステップ数 = xx（実行条件１）<br>
-<br>
+- エピソード = 4400 / 最終時間ステップ数 = 139（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode4400](https://user-images.githubusercontent.com/25688193/55045191-52ff2680-5080-11e9-9e80-42528bd09a72.gif)<br>
+
+- エピソード = 5000 / 最終時間ステップ数 = 80（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode4999](https://user-images.githubusercontent.com/25688193/55045151-3a8f0c00-5080-11e9-9573-fdadac98fa26.gif)<br>
 
 - エピソード = 10000 / 最終時間ステップ数 = xx（実行条件１）<br>
 <br>
