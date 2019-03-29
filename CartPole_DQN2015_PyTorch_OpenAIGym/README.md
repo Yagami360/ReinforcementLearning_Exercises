@@ -132,5 +132,5 @@ MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データ�
 - エピソード = 450 / 最終時間ステップ数 = 158（実行条件１）<br>
 ![RL_ENV_CartPole-v0_Episode450](https://user-images.githubusercontent.com/25688193/55082622-5d9fd700-50e5-11e9-97b4-06127bda292c.gif)<br>
 
-- エピソード = 500 / 最終時間ステップ数 = xxx（実行条件１）<br>
+- エピソード = 500 / 最終時間ステップ数 = 199（実行条件１）<br>
 ![RL_ENV_CartPole-v0_Episode499](https://user-images.githubusercontent.com/25688193/55082368-e1a58f00-50e4-11e9-8d55-77c1ac652763.gif)<br>

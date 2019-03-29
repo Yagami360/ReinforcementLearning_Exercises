@@ -55,23 +55,23 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 
 ### ◎ コードの実行結果
 
-|パラメータ名|値（実行条件１）|値（実行条件２）|
-|---|---|---|
-|エピソード試行回数：`NUM_EPISODE`|5,000|10,000|
+|パラメータ名|値（実行条件１）|値（実行条件２）|値（実行条件３）|
+|---|---|---|---|
+|エピソード試行回数：`NUM_EPISODE`|5,000|5,000|10,000|
 |１エピソードの時間ステップの最大数：`NUM_TIME_STEP`|1000|←|
-|エピソード開始からの何も学習しないステップ数：`NUM_NOOP`|30|10|
+|エピソード開始からの何も学習しないステップ数：`NUM_NOOP`|30|30|10|
 |モデルに一度に入力する画像データのフレーム数：`NUM_STACK_FRAME`|4|←|
 |スキップするフレーム数：`NUM_SKIP_FRAME`|4|←|
 |ミニバッチサイズ：`BRAIN_LEARNING_RATE`|32|←|
-|最適化アルゴリズム|RMSprop<br>減衰項：デフォルト値|←|
+|最適化アルゴリズム|RMSprop<br>減衰項：デフォルト値|Adam|
 |学習率：`learning_rate`|0.00005|0.0005|
 |損失関数|smooth L1 関数（＝Huber 関数）|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|←|
 |ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON_INIT`|1.0|←|
-|ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.01|←|
-|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|50,000|100,00|
-|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|1000|←|
-|Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10,000|←|
+|ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.01|0.1|
+|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|50,000|50,000|
+|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|1000 time_step|50 episode|5 episode|
+|Experience Relay用のメモリサイズ：`MEMORY_CAPACITY`|10,000|←|100,000|
 |報酬の設定|Breakout のデフォルト報酬<br>・下段の青色＆緑色のブロック崩し：１点<br>・中央の黄色＆黄土色のブロック崩し：４点<br>・上段のオレンジ＆赤色のブロック崩し：７点<br>に対して、符号化関数 sign で 0.0 or 1.0 の範囲にクリッピング|←|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|
 |DQNのネットワーク構成|CNN<br>(0): Conv2d(in_channels=**1**, out_channels=32, kernel_size=(8, 8), stride=(4, 4))<br>(1): ReLU()<br>(2): Conv2d(in_channels=32, out_channels=64, kernel_size=(4, 4), stride=(2, 2))<br>(3): ReLU()<br>(4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1))<br>(5): ReLU()<br>(6): Flatten()<br>(7): Linear(in_features=7×7×64, out_features=512, bias=True)<br>(8): ReLU()<br>Linear(in_features=512, out_features=**4**, bias=True)|←|
@@ -86,7 +86,15 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 ![BreakoutNoFrameskip-v0_DQN2015_Reward_episode5000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/55045104-074c7d00-5080-11e9-9dd5-9fc364507843.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
+<!--
 ![BreakoutNoFrameskip-v0_DQN2015_Loss_episode5000_ts1000_lr5e-05_noop30](https://user-images.githubusercontent.com/25688193/55045103-06b3e680-5080-11e9-89a6-901b7c4eb003.png)<br>
+-->
+
+- 割引利得のエピソード毎の履歴（実行条件２）<br>
+![BreakoutNoFrameskip-v0_DQN2015_Reward_episode5000_ts1000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/55122230-7fc74280-5141-11e9-8f60-ccbe1461f3c0.png)<br>
+
+- 損失関数のグラフ（実行条件２）<br>
+![BreakoutNoFrameskip-v0_DQN2015_Loss_episode5000_ts1000_lr0 0005_noop30](https://user-images.githubusercontent.com/25688193/55122229-7fc74280-5141-11e9-9b95-85834d68dd9b.png)<br>
 
 <br>
 
@@ -95,6 +103,19 @@ MEMORY_CAPACITY = 10000                 # Experience Relay 用の学習用デー
 エピソードの経過と共に、徐々にブロック崩しが出来るようになっており、徐々に学習できていることがわかる。<br>
 -->
 
+<!--
+- エピソード = 0 / 最終時間ステップ数 = 24 / total_reward = 0.0（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode0](https://user-images.githubusercontent.com/25688193/55122346-f3694f80-5141-11e9-8dcd-4f4ed022c1c1.gif)<br>
+
+- エピソード = 100 / 最終時間ステップ数 = 64 / total_reward = 0.649（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode100](https://user-images.githubusercontent.com/25688193/55122400-33303700-5142-11e9-8160-081c1f361de2.gif)<br>
+
+- エピソード = 500 / 最終時間ステップ数 = 92 / total_reward = 0.489（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode500](https://user-images.githubusercontent.com/25688193/55122405-3c210880-5142-11e9-9789-f1d33d0248a9.gif)<br>
+
+- エピソード = 1000 / 最終時間ステップ数 = 24 / total_reward = 0.000（実行条件１）<br>
+![RL_ENV_BreakoutNoFrameskip-v0_Episode1000](https://user-images.githubusercontent.com/25688193/55122416-43481680-5142-11e9-8224-6454d38e2a3a.gif)<br>
+-->
 
 - エピソード = 0 / 最終時間ステップ数 = 24 / total_reward = 0.0（実行条件１）<br>
 ![RL_ENV_BreakoutNoFrameskip-v0_Episode0](https://user-images.githubusercontent.com/25688193/54999042-c9fdd600-5012-11e9-97af-ae7153c8f860.gif)<br>

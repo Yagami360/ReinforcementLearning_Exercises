@@ -23,17 +23,20 @@ class DuelingNetworkMLP3( nn.Module ):
         fc3_adv : [nn.Linear] アドバンテージ関数のネットワーク
         fc3_vfunc : [nn.Linear] 状態価値関数のネットワーク
     """
-    def __init__( self, n_states, n_hiddens, n_actions ):
+    def __init__( self, device, n_states, n_hiddens, n_actions ):
         """
         [Args]
+            device : 使用デバイス
             n_states : 状態数 |S| / 入力ノード数に対応する。
             n_actions : 状態数 |A| / 出力ノード数に対応する。
         """
         super( DuelingNetworkMLP3, self ).__init__()
-        self.fc1 = nn.Linear( in_features = n_states, out_features = n_hiddens )
-        self.fc2 = nn.Linear( in_features = n_hiddens, out_features = n_hiddens )
-        self.fc3_adv = nn.Linear( in_features = n_hiddens, out_features = n_actions )
-        self.fc3_vfunc = nn.Linear( in_features = n_hiddens, out_features = 1 )
+        self._device = device
+
+        self.fc1 = nn.Linear( in_features = n_states, out_features = n_hiddens ).to(self._device)
+        self.fc2 = nn.Linear( in_features = n_hiddens, out_features = n_hiddens ).to(self._device)
+        self.fc3_adv = nn.Linear( in_features = n_hiddens, out_features = n_actions ).to(self._device)
+        self.fc3_vfunc = nn.Linear( in_features = n_hiddens, out_features = 1 ).to(self._device)
         return
 
     def forward( self, x ):

@@ -191,19 +191,19 @@ class DQN2015CNNBrain( Brain ):
         [Returns]
             self._optimizer : <torch.optimizer> モデルの最適化アルゴリズム            
         """
-        """
         # 最適化アルゴリズムとして、Adam を採用
         self._optimizer = optim.Adam( 
             params = self._main_network.parameters(), 
             lr = self._learning_rate 
         )
-        """
 
+        """
         # 最適化アルゴリズムとして、RMSprop を採用
         self._optimizer = optim.RMSprop(
             params = self._main_network.parameters(), 
             lr = self._learning_rate 
         )
+        """
 
         return self._optimizer
 

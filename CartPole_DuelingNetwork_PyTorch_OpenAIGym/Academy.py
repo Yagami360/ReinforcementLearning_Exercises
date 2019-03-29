@@ -8,7 +8,7 @@
 """
 import numpy as np
 import matplotlib.pyplot as plt
-
+from tqdm import tqdm
 
 # 自作クラス
 from Agent import Agent
@@ -18,7 +18,6 @@ class Academy( object ):
     """
     エージェントの強化学習環境
     ・強化学習モデルにおける環境 Enviroment に対応
-    ・学習や推論を行うための設定を行う。
     
     [public]
 
@@ -28,6 +27,7 @@ class Academy( object ):
         _save_step : <int> 保存間隔（エピソード数）
         _agents : list<AgentBase>
         _done : <bool> エピソードが完了したかのフラグ
+        _frames : list <ndarray>　動画のフレーム（１つの要素が１画像のフレーム）
 
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
@@ -38,6 +38,7 @@ class Academy( object ):
         self._save_step = save_step
         self._agents = []
         self._done = False
+        self._frames = []
         return
 
     def academy_reset( self ):
@@ -77,9 +78,7 @@ class Academy( object ):
         学習環境を実行する
         """
         # エピソードを試行
-        for episode in range( 0, self._max_episode ):
-            print( "現在のエピソード数：", episode )
-
+        for episode in tqdm( range( 0, self._max_episode ), desc = "Episode" ):
             # 学習環境を RESET
             self.academy_reset()
 
@@ -118,9 +117,13 @@ class Academy( object ):
         return
 
 
-    def add_frame( self, episode, times_step ):
+    def add_frame( self, episode, times_step, total_times_step ):
         """
-        強化学習の環境の１フレームをリストに追加する
+        強化学習環境の１フレームを追加する
+        [Args]
+            episode : <int> 現在のエピソード数
+            time_step : <int> 現在のエピソードにおける経過時間ステップ数
+            total_time_step : <int> 全てのエピソードにおける全経過時間ステップ数
         """
         #frame = None
         #self._frames.append( frame )
