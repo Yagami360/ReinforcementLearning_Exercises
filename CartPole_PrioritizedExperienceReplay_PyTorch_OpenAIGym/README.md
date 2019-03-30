@@ -19,7 +19,7 @@
 - Python : 3.6
 - Anaconda : 5.0.1
 - OpenAIGym : 0.10.9
-- PyTorch : 1.0.0
+- PyTorch : 1.0.1
 
 ## ■ 使用法
 
@@ -31,13 +31,20 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
+RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
+
 NUM_EPISODE = 500                   # エピソード試行回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
+NUM_SAVE_STEP = 50                  # 強化学習環境の動画の保存間隔（単位：エピソード数）
+
 BRAIN_LEARNING_RATE = 0.0001        # 学習率
-BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON = 0.5          # ε-greedy 法の ε 値
+BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ (Default:32)
+BRAIN_GREEDY_EPSILON_INIT = 0.5     # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_FINAL = 0.001  # ε-greedy 法の ε 値の最終値
+BRAIN_GREEDY_EPSILON_STEPS = 5000   # ε-greedy 法の ε が減少していくフレーム数
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
-MEMORY_CAPACITY = 10000             # Relay Memory のメモリの最大の長さ
+BRAIN_FREC_TARGET_UPDATE = 2        # Target Network との同期頻度（Default:10_000） 
+MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データセットのメモリの最大の長さ
 MEMORY_TD_ERROR_EPSILON = 0.0001    # サンプリング優先度を計算するTD誤差のバイアス値
 MEMORY_CHANGE_EPISODE = 30          # Experience Replay → PrioritizedExperienceReplay に切り替えるエピソード数
 ```
@@ -57,7 +64,10 @@ MEMORY_CHANGE_EPISODE = 30          # Experience Replay → PrioritizedExperienc
 |最適化アルゴリズム|Adam<br>減衰率：`beta1=0.9,beta2=0.999`|←|
 |損失関数|smooth L1 関数（＝Huber 関数）|
 |利得の割引率：`BRAIN_GAMMDA`|0.99|
-|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON`|0.5（減衰）|
+|ε-greedy 法の ε 値の初期値：`BRAIN_GREEDY_EPSILON_INIT`|1.0|←|
+|ε-greedy 法の ε 値の最終値：`BRAIN_GREEDY_EPSILON_FINAL`|0.001|←|
+|ε-greedy 法の減衰ステップ数：`BRAIN_GREEDY_EPSILON_STEPS`|5000|←|
+|Target Network との同期頻度：`BRAIN_FREC_TARGET_UPDATE`|2エピソード|←|
 |報酬の設定|転倒：-1<br>連続 `NUM_TIME_STEP=200`回成功：+1<br>それ以外：0|
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|
 |DQNのネットワーク構成|MLP（3層）<br>入力層：状態数（4）<br>隠れ層：32ノード<br>出力層：行動数（2）|
@@ -68,19 +78,13 @@ MEMORY_CHANGE_EPISODE = 30          # Experience Replay → PrioritizedExperienc
 |Experience Replay → PrioritizedExperienceReplay に切り替えるエピソード数：`MEMORY_CHANGE_EPISODE`|30|
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
+<!--
 ![cartpole-v0_reward_episode500](https://user-images.githubusercontent.com/25688193/53941394-4e87c380-40fb-11e9-8a8a-75bd4250a7c1.png)<br>
+-->
+![CartPole-v0_Reward_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/55268857-1d04b100-52d1-11e9-8cdf-55afb284c6e6.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
+<!--
 ![cartpole-v0_loss_episode500](https://user-images.githubusercontent.com/25688193/53941392-4e87c380-40fb-11e9-8f96-9c24dd5b1870.png)<br>
-
-
-<br>
-
-### ◎ コードの説明
-
-
-## ■ デバッグ情報
-
-```python
-
-```
+-->
+![CartPole-v0_Loss_episode500_lr0 0001](https://user-images.githubusercontent.com/25688193/55268856-1aa25700-52d1-11e9-8a28-38aebb4ac7a4.png)<br>

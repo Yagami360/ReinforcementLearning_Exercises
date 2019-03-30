@@ -22,10 +22,9 @@ from torch import optim
 import torch.nn.functional as F
 
 
-class CartPoleDDQNwithPERBrain( Brain ):
+class DDQNMLPwithPERBrain( Brain ):
     """
-    倒立振子課題（CartPole）の Brain。
-    ・DDQN & Prioritized Experience Replay によるアルゴリズム
+    DDQN (MLPベース）& Prioritized Experience Replay の Brain。
     
     [public]
 
@@ -34,8 +33,8 @@ class CartPoleDDQNwithPERBrain( Brain ):
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
 
-        _q_function : <> 教師信号である古いパラメーター θ- で固定化された行動状態関数 Q(s,a,θ-)
-        _expected_q_function : <> 推定行動状態関数 Q(s,a,θ)
+        _q_function : <torch.FloatTensor> 教師信号である古いパラメーター θ- で固定化された行動状態関数 Q(s,a,θ-)
+        _expected_q_function : <torch.FloatTensor> 推定行動状態関数 Q(s,a,θ)
         _memory : <PrioritizedExperienceReplay> PrioritizedExperienceReplay に基づく学習用のデータセット
 
         _main_network : <QNetwork> DDQNのメインネットワーク
@@ -49,19 +48,26 @@ class CartPoleDDQNwithPERBrain( Brain ):
     """
     def __init__(
         self,
+        device,
         n_states,
         n_actions,
+        epsilon_init = 1.0, epsilon_final = 0.1, n_epsilon_step = 1000000,
         epsilon = 0.5, gamma = 0.9, learning_rate = 0.0001,
         batch_size = 32,
         memory_capacity = 10000,
+        n_frec_target_update = 50,
         td_error_epsilon = 0.0001,
         change_episode = 30
     ):
         super().__init__( n_states, n_actions )
-        self._epsilon = epsilon
+        self._device = device
+        self._epsilon = epsilon_init
+        self._epsilon_init = epsilon_init
+        self._epsilon_final = epsilon_final
         self._gamma = gamma
         self._learning_rate = learning_rate
         self._batch_size = batch_size
+        self._n_frec_target_update = n_frec_target_update
 
         self._main_network = None
         self._target_network = None
@@ -74,30 +80,34 @@ class CartPoleDDQNwithPERBrain( Brain ):
         self._expected_q_function = None
 
         self._memory = PrioritizedExperienceReplay( 
+            device = self._device,
             capacity = memory_capacity, 
             td_error_epsilon = td_error_epsilon,
             change_episode = change_episode
         )
 
         self._b_loss_init = False
-
+        self._epsilon_step = ( epsilon_init - epsilon_final ) / n_epsilon_step
         return
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "CartPoleDDQNBrain" )
+        print( "DDQNMLPwithPERBrain" )
         print( self )
         print( str )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
         print( "_epsilon : \n", self._epsilon )
+        print( "_epsilon_init : ", self._epsilon_init )
+        print( "_epsilon_final : ", self._epsilon_final )
+        print( "_epsilon_step : ", self._epsilon_step )
         print( "_gamma : \n", self._gamma )
         print( "_learning_rate : \n", self._learning_rate )
         print( "_batch_size : \n", self._batch_size )
-
-        print( "_q_function : \n", self._q_function )
-        print( "_expected_q_function : \n", self._expected_q_function )
-        print( "_memory :", self._memory )
+        print( "_n_frec_target_update : ", self._n_frec_target_update )
+        #print( "_q_function : \n", self._q_function )
+        #print( "_expected_q_function : \n", self._expected_q_function )
+        #print( "_memory :", self._memory )
 
         print( "_main_network :\n", self._main_network )
         print( "_target_network :", self._target_network )
@@ -113,6 +123,9 @@ class CartPoleDDQNwithPERBrain( Brain ):
         """
         return self._q_function
 
+    def get_epsilon( self ):
+        return self._epsilon
+
 
     def model( self ):
         """
@@ -125,19 +138,21 @@ class CartPoleDDQNwithPERBrain( Brain ):
         # ネットワーク構成
         #------------------------------------------------
         self._main_network = QNetworkMLP3(
+            device = self._device,
             n_states = self._n_states, 
             n_hiddens = 32,
             n_actions = self._n_actions
         )
 
         self._target_network = QNetworkMLP3(
+            device = self._device,
             n_states = self._n_states, 
             n_hiddens = 32,
             n_actions = self._n_actions
         )
 
-        print( "main network :", self._main_network )
-        print( "target network :", self._target_network )
+        #print( "main network :", self._main_network )
+        #print( "target network :", self._target_network )
         return
 
     def loss( self ):
@@ -166,6 +181,7 @@ class CartPoleDDQNwithPERBrain( Brain ):
         else:
             return 0.0
 
+
     def optimizer( self ):
         """
         モデルの最適化アルゴリズムを設定する。
@@ -182,10 +198,10 @@ class CartPoleDDQNwithPERBrain( Brain ):
         return self._optimizer
 
 
-    def predict( self, batch, state_batch, action_batch, reward_batch, non_final_next_states ):
+    def predict( self, state_batch, action_batch, next_state_batch, reward_batch, done_batch ):
+
         """
         教師信号となる行動価値関数を求める
-
         [Args]
         [Returns]
         """
@@ -203,63 +219,61 @@ class CartPoleDDQNwithPERBrain( Brain ):
         # outputs / shape = batch_size * _n_actions
         outputs = self._main_network( state_batch )
         #print( "outputs :", outputs )
+        #print( "outputs.size() :", outputs.size() )
 
         # outputs から実際にエージェントが選択した action を取り出す
         # gather(...) : 
         # dim = 1 : 列方向
         # index = action_batch : エージェントが実際に選択した行動は action_batch 
+        # self._q_function は損失関数で使用
         self._q_function = outputs.gather( 1, action_batch )
+        #print( "action_batch :", action_batch )
         #print( "_q_function :", self._q_function )
-
-        #--------------------------------------------------------------------
-        # CartPole が done ではなく、next_state が存在するインデックス用のマスク
-        #--------------------------------------------------------------------
-        non_final_mask = torch.ByteTensor(
-            tuple( map(lambda s: s is not None,batch.next_state) )
-        )
-        #print( "non_final_mask :", non_final_mask )
+        #print( "_q_function.size() :", self._q_function.size() )
 
         #--------------------------------------------------------------------
         # 次の状態 s_{t+1} でQ値を最大化する行動 a_m を求める
         # a_m = arg max_{a∈A} Q_main(s_{t+1},a)
         #--------------------------------------------------------------------
-        a_m = torch.zeros( self._batch_size ).type(torch.LongTensor)
-        #print( "a_m :", a_m )   # tensor([0, 0, 0,...,0) / shape = [batch_size]
-
         # a_m は、メインネットワークから求める
         # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
-        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
+        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。(requires_grad=True → False)
         # 最後の[1]で行動に対応したindexが返る
-        a_m[non_final_mask] = self._main_network( non_final_next_states ).detach().max(1)[1]
+        a_m = self._main_network( next_state_batch ).detach().max(1)[1]
         #print( "a_m :", a_m )   # shape = [batch_size]
+        #print( "a_m.size() :", a_m.size() )   # shape = [batch_size]
 
-        # 次の状態があるものだけにフィルターし、batch_size → batch_size * 1 へ reshape
-        a_m_non_final_next_states = a_m[non_final_mask].view(-1, 1)
-        #print( "a_m_non_final_next_states :", a_m_non_final_next_states )   # shape = [batch_size*1]
+        # .unsqueeze(1) で gather 用の次元を追加
+        a_m_batch = a_m.unsqueeze(1)
+        #print( "a_m_batch :", a_m_batch )   # shape = [batch_size,1]
+        #print( "a_m_batch.size() :", a_m_batch.size() )   # shape = [batch_size,1]
 
         #--------------------------------------------------------------------
         # 次の状態を求める
         #--------------------------------------------------------------------
-        # 全部 0 で初期化
-        next_state_values = torch.zeros( self._batch_size )
-
         # Main Network ではなく Target Network からの出力
-        next_outputs = self._target_network( non_final_next_states )
+        next_outputs = self._target_network( next_state_batch )
         #print( "next_outputs :", next_outputs )
+        #print( "next_outputs.size() :", next_outputs.size() )
 
-        # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
+        # detach() : Tensor の誤差逆伝搬による値の更新が止まったもので、Tensorをコピーする。(requires_grad=True → False)
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        # squeeze() で [batch_size]→[batch_size*1] に reshape
-        #next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
-        next_state_values[non_final_mask] = next_outputs.gather(1, a_m_non_final_next_states).detach().squeeze()
-        #print( "next_state_values :", next_state_values )
+        # torch.squeeze() では要素数が1のみの軸を削除
+        next_q_function = next_outputs.gather(1, a_m_batch).detach().squeeze()
+        #print( "next_q_function :", next_q_function )
+        #print( "next_q_function.size() :", next_q_function.size() ) # shape = [batch_size]
 
         #--------------------------------------------------------------------
         # ネットワークの出力となる推定行動価値関数を求める
         #--------------------------------------------------------------------
-        self._expected_q_function = reward_batch + self._gamma * next_state_values
+        gamma_tsr = torch.FloatTensor( [self._gamma] ).to(self._device)
+
+        # done = 0 ⇒ 価値関数の更新は行われる
+        # done = 1 ⇒ 価値関数の更新は行われない
+        self._expected_q_function = reward_batch + gamma_tsr * next_q_function * ( 1 - done_batch )
 
         return
+
 
     def fit( self ):
         """
@@ -286,12 +300,27 @@ class CartPoleDDQNwithPERBrain( Brain ):
 
         return
 
-    def decay_epsilon( self, episode ):
+
+    def decay_epsilon( self ):
         """
         ε-greedy 法の ε 値を減衰させる。
         """
-        #self._epsilon = self._epsilon / 2.0
-        self._epsilon = 0.5 * ( 1 / (episode + 1) )
+        if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
+            self._epsilon -= self._epsilon_step
+
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
+
+        return
+
+    def decay_epsilon_episode( self, episode ):
+        if( self._epsilon > self._epsilon_final and self._epsilon <= self._epsilon_init ):
+            self._epsilon = 0.5 * ( 1 / (episode + 1) )
+
+            if( self._epsilon < self._epsilon_final ):
+                # 下限値にクリッピング
+                self._epsilon = self._epsilon_final
         return
 
 
@@ -308,6 +337,9 @@ class CartPoleDDQNwithPERBrain( Brain ):
             #------------------------------
             # Q の最大化する行動を選択
             #------------------------------
+            state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)      # numpy → Tensor に型変換
+            state = torch.unsqueeze( state, dim = 0 ).to(self._device)                      # ミニバッチ用の次元を追加
+
             # model を推論モードに切り替える（PyTorch特有の処理）
             self._main_network.eval()
 
@@ -323,42 +355,41 @@ class CartPoleDDQNwithPERBrain( Brain ):
                 _, max_index = torch.max( outputs.data, dim = 1 )
                 #print( "max_index :", max_index )
 
-                # .view(1,1) : [torch.LongTensor of size 1] → size 1×1 に reshape
-                action = max_index.view(1,1)
+                # tensor → int に変換
+                action = max_index.item()
                 #print( "action :", action )
 
         else:
             # ε の確率でランダムな行動を選択
-            #action = np.random.choice( self._n_actions )
-            action = torch.LongTensor(
-                [ [random.randrange(self._n_actions)] ]
-            )
+            action = np.random.choice( self._n_actions )
 
         return action
 
 
-    def update_q_function( self, state, action, next_state, reward, episode ):
+    def update( 
+        self, 
+        state, action, next_state, reward, done, 
+        episode, time_step, total_time_step
+    ):
         """
-        Q 関数の値を更新する。
-
+        Brain の状態を更新する。
         [Args]
-            state : <int> 現在の状態 s のインデックス
-            action : <int> 現在の行動 a
-            next_state : <int> 次の状態 s'
+            state : <ndarray> 現在の状態 s / shape = [n_channels, width, height]
+            action : <int> 現在の行動 a / shape = [1]
+            next_state : <ndarray> 次の状態 s' / shape = [n_channels, width, height]
             reword : <float> 報酬
-            episode : 現在のエピソード数
+            done : <bool> 完了フラグ
         
         [Returns]
-
         """
         #-----------------------------------------
         # 経験に基づく学習用データを追加
         #-----------------------------------------
-        self._memory.push( state = state, action = action, next_state = next_state, reward = reward )
+        self._memory.push( state = state, action = action, next_state = next_state, reward = reward, done = done )
 
         # TD誤差メモリにTD誤差を追加
         # 本当はTD誤差を格納するが、0をいれておく
-        self._memory.push_td_error(0)
+        #self._memory.push_td_error(0)
 
         # 学習用データがミニバッチサイズ以下ならば、以降の処理は行わない
         if( len(self._memory) < self._batch_size ):
@@ -367,36 +398,72 @@ class CartPoleDDQNwithPERBrain( Brain ):
         #-----------------------------------------        
         # ミニバッチデータを取得する
         #-----------------------------------------
-        batch, state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_mini_batch( self._batch_size, episode )
+        state_batch, action_batch, next_state_batch, reward_batch, done_batch = self._memory.get_mini_batch( self._batch_size, episode )
 
         #-----------------------------------------
         # 教師信号となる推定行動価値関数を求める 
         #-----------------------------------------
-        self.predict( batch, state_batch, action_batch, reward_batch, non_final_next_states )
+        self.predict( state_batch, action_batch, next_state_batch, reward_batch, done_batch )
 
         #-----------------------------------------
         # ネットワークを学習し、パラメーターを更新する。
         #-----------------------------------------
         self.fit()
 
+        #--------------------------------------------------------
+        # 一定間隔で、Target Network と Main Network を同期する
+        #--------------------------------------------------------
+        #self.update_target_q_function( total_time_step )
+        self.update_target_q_function_episode( episode )
+
         return self._q_function
 
 
-    def update_target_q_function( self ):
+    def update_target_q_function( self, total_time_step ):
         """
         Target Network を Main Network と同期する。
+        ・時間ステップ単位での同期
         """
-        # load_state_dict() : モデルを読み込み
-        self._target_network.load_state_dict(
-            state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
-        )
+        # 一定間隔で同期する。
+        if( (total_time_step % self._n_frec_target_update) == 0 ):
+            # load_state_dict() : モデルを読み込み
+            self._target_network.load_state_dict(
+                state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
+            )
+
+            # Target Network の勾配計算を行わないようにする。別途必要
+            for param in self._target_network.parameters():
+                param.requires_grad = False
 
         return
+
+    def update_target_q_function_episode( self, episode ):
+        """
+        Target Network を Main Network と同期する。
+        ・エピソード単位での同期
+        """
+        # 一定間隔で同期する。
+        if( (episode % self._n_frec_target_update) == 0 ):
+            # load_state_dict() : モデルを読み込み
+            self._target_network.load_state_dict(
+                state_dict = self._main_network.state_dict()    # Main Network のモデルを読み込む
+            )
+
+            # Target Network の勾配計算を行わないようにする。別途必要
+            for param in self._target_network.parameters():
+                param.requires_grad = False
+
+        return
+
 
     def update_td_error_memory( self ):
         """
         TD誤差メモリに格納されているTD誤差を更新する
         """
+        # 学習用データがミニバッチサイズ以下ならば、以降の処理は行わない
+        if( len(self._memory) < self._batch_size ):
+            return
+
         #--------------------------------------------------------------------
         # ネットワークを推論モードへ切り替え（PyTorch特有の処理）
         #--------------------------------------------------------------------
@@ -406,7 +473,7 @@ class CartPoleDDQNwithPERBrain( Brain ):
         #-----------------------------------------        
         # ミニバッチデータを取得する
         #-----------------------------------------
-        batch, state_batch, action_batch, reward_batch, non_final_next_states = self._memory.get_td_error_mini_batch()
+        state_batch, action_batch, next_state_batch, reward_batch, done_batch = self._memory.get_td_error_mini_batch()
 
         #--------------------------------------------------------------------
         # 構築したDQNのネットワークが出力する Q(s,a) を求める。
@@ -415,63 +482,61 @@ class CartPoleDDQNwithPERBrain( Brain ):
         #--------------------------------------------------------------------
         # outputs / shape = batch_size * _n_actions
         outputs = self._main_network( state_batch )
+        #print( "outputs :", outputs )
+        #print( "outputs.size() :", outputs.size() )
 
         # outputs から実際にエージェントが選択した action を取り出す
         # gather(...) : 
         # dim = 1 : 列方向
         # index = action_batch : エージェントが実際に選択した行動は action_batch 
+        # self._q_function は損失関数で使用
         self._q_function = outputs.gather( 1, action_batch )
-
-        #--------------------------------------------------------------------
-        # CartPole が done ではなく、next_state が存在するインデックス用のマスク
-        #--------------------------------------------------------------------
-        non_final_mask = torch.ByteTensor(
-            tuple( map(lambda s: s is not None,batch.next_state) )
-        )
+        #print( "action_batch :", action_batch )
+        #print( "_q_function :", self._q_function )
+        #print( "_q_function.size() :", self._q_function.size() )
 
         #--------------------------------------------------------------------
         # 次の状態 s_{t+1} でQ値を最大化する行動 a_m を求める
         # a_m = arg max_{a∈A} Q_main(s_{t+1},a)
         #--------------------------------------------------------------------
-        a_m = torch.zeros( len( self._memory ) ).type(torch.LongTensor)
-        #print( "a_m :", a_m )   # tensor([0, 0, 0,...,0) / shape = [batch_size]
-
         # a_m は、メインネットワークから求める
         # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
-        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
+        # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。(requires_grad=True → False)
         # 最後の[1]で行動に対応したindexが返る
-        a_m[non_final_mask] = self._main_network( non_final_next_states ).detach().max(1)[1]
+        a_m = self._main_network( next_state_batch ).detach().max(1)[1]
         #print( "a_m :", a_m )   # shape = [batch_size]
+        #print( "a_m.size() :", a_m.size() )   # shape = [batch_size]
 
-        # 次の状態があるものだけにフィルターし、batch_size → batch_size * 1 へ reshape
-        a_m_non_final_next_states = a_m[non_final_mask].view(-1, 1)
-        #print( "a_m_non_final_next_states :", a_m_non_final_next_states )   # shape = [batch_size*1]
+        # .unsqueeze(1) で gather 用の次元を追加
+        a_m_batch = a_m.unsqueeze(1)
+        #print( "a_m_batch :", a_m_batch )   # shape = [batch_size,1]
+        #print( "a_m_batch.size() :", a_m_batch.size() )   # shape = [batch_size,1]
 
         #--------------------------------------------------------------------
         # 次の状態を求める
         #--------------------------------------------------------------------
-        # 全部 0 で初期化
-        next_state_values = torch.zeros( len( self._memory ) )
-
         # Main Network ではなく Target Network からの出力
-        next_outputs = self._target_network( non_final_next_states )
+        next_outputs = self._target_network( next_state_batch )
         #print( "next_outputs :", next_outputs )
+        #print( "next_outputs.size() :", next_outputs.size() )
 
-        # tensor.detach() : 新しい Tensor を返す。このとき、Variable の誤差逆伝搬による値の更新が止まる。
+        # detach() : Tensor の誤差逆伝搬による値の更新が止まったもので、Tensorをコピーする。(requires_grad=True → False)
         # 教師信号は固定された値である必要があるので、detach() で値が変更させないようにする。
-        # squeeze() で [batch_size]→[batch_size*1] に reshape
-        #next_state_values[non_final_mask] = next_outputs.max(1)[0].detach()
-        next_state_values[non_final_mask] = next_outputs.gather(1, a_m_non_final_next_states).detach().squeeze()
-        #print( "next_state_values :", next_state_values )
+        # torch.squeeze() では要素数が1のみの軸を削除
+        next_q_function = next_outputs.gather(1, a_m_batch).detach().squeeze()
+        #print( "next_q_function :", next_q_function )
+        #print( "next_q_function.size() :", next_q_function.size() ) # shape = [batch_size]
 
         #--------------------------------------------------------------------
         # TD誤差を求める
         #--------------------------------------------------------------------
+        gamma_tsr = torch.FloatTensor( [self._gamma] ).to(self._device)
+
         # state_action_valuesはsize[minibatch×1]なので、squeezeしてsize[minibatch]へ
-        td_errors = (reward_batch + self._gamma * next_state_values) - self._q_function.squeeze()
+        td_errors = (reward_batch + self._gamma * next_q_function) - self._q_function.squeeze()
         
         # TD誤差メモリを更新、Tensorをdetach()で取り出し、NumPyにしてから、Pythonのリストまで変換
-        td_errors_list = td_errors.detach().numpy().tolist()
+        td_errors_list = td_errors.detach().cpu().numpy().tolist()
         self._memory.set_td_error_memory( td_errors_list )
 
         return

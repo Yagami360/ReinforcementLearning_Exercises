@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from matplotlib import animation
+from datetime import datetime
 
 # OpenAI Gym
 import gym
@@ -17,9 +18,9 @@ import torchvision      # 画像処理関連
 
 # 自作モジュール
 from Academy import Academy
-from CartPoleAcademy import CartPoleAcademy
+from GymAcademy import GymAcademy
 from Brain import Brain
-from CartPoleDDQNwithPERBrain import CartPoleDDQNwithPERBrain
+from DDQNMLPwithPERBrain import DDQNMLPwithPERBrain
 from Agent import Agent
 from CartPoleAgent import CartPoleAgent
 from PrioritizedExperienceReplay import PrioritizedExperienceReplay
@@ -27,16 +28,26 @@ from PrioritizedExperienceReplay import PrioritizedExperienceReplay
 #--------------------------------
 # 設定可能な定数
 #--------------------------------
+#DEVICE = "CPU"                     # 使用デバイス ("CPU" or "GPU")
+DEVICE = "GPU"                      # 使用デバイス ("CPU" or "GPU")
 RL_ENV = "CartPole-v0"              # 利用する強化学習環境の課題名
+
 NUM_EPISODE = 500                   # エピソード試行回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
+NUM_SAVE_STEP = 50                  # 強化学習環境の動画の保存間隔（単位：エピソード数）
+
 BRAIN_LEARNING_RATE = 0.0001        # 学習率
-BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ
-BRAIN_GREEDY_EPSILON = 0.5          # ε-greedy 法の ε 値
+BRAIN_BATCH_SIZE = 32               # ミニバッチサイズ (Default:32)
+BRAIN_GREEDY_EPSILON_INIT = 1.0     # ε-greedy 法の ε 値の初期値
+BRAIN_GREEDY_EPSILON_FINAL = 0.001  # ε-greedy 法の ε 値の最終値
+BRAIN_GREEDY_EPSILON_STEPS = 5000   # ε-greedy 法の ε が減少していくフレーム数
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
-MEMORY_CAPACITY = 10000             # Relay Memory のメモリの最大の長さ
+BRAIN_FREC_TARGET_UPDATE = 2        # Target Network との同期頻度（Default:10_000） 
+
+MEMORY_CAPACITY = 10000             # Experience Relay 用の学習用データセットのメモリの最大の長さ
 MEMORY_TD_ERROR_EPSILON = 0.0001    # サンプリング優先度を計算するTD誤差のバイアス値
 MEMORY_CHANGE_EPISODE = 30          # Experience Replay → PrioritizedExperienceReplay に切り替えるエピソード数
+
 
 def main():
     """
@@ -49,13 +60,50 @@ def main():
     print( "OpenAI Gym", gym.__version__ )
     print( "PyTorch :", torch.__version__ )
 
-    np.random.seed(8)
-    random.seed(8)
-    torch.manual_seed(8)
+    # 実行条件の出力
+    print( "----------------------------------------------" )
+    print( "実行条件" )
+    print( "----------------------------------------------" )
+    print( "開始時間：", datetime.now() )
+    print( "DEVICE : ", DEVICE )
+    print( "RL_ENV : ", RL_ENV )
+    print( "NUM_EPISODE : ", NUM_EPISODE )
+    print( "NUM_TIME_STEP : ", NUM_TIME_STEP )
+    print( "NUM_SAVE_STEP : ", NUM_SAVE_STEP )
+    print( "BRAIN_LEARNING_RATE : ", BRAIN_LEARNING_RATE )
+    print( "BRAIN_BATCH_SIZE : ", BRAIN_BATCH_SIZE )
+    print( "BRAIN_GREEDY_EPSILON_INIT : ", BRAIN_GREEDY_EPSILON_INIT )
+    print( "BRAIN_GREEDY_EPSILON_FINAL : ", BRAIN_GREEDY_EPSILON_FINAL )
+    print( "BRAIN_GREEDY_EPSILON_STEPS : ", BRAIN_GREEDY_EPSILON_STEPS )
+    print( "BRAIN_GAMMDA : ", BRAIN_GAMMDA )
+    print( "MEMORY_CAPACITY : ", MEMORY_CAPACITY )
+    print( "MEMORY_TD_ERROR_EPSILON : ", MEMORY_TD_ERROR_EPSILON )
+    print( "MEMORY_CHANGE_EPISODE : ", MEMORY_CHANGE_EPISODE )
+
+    #===================================
+    # 実行 Device の設定
+    #===================================
+    if( DEVICE == "GPU" ):
+        use_cuda = torch.cuda.is_available()
+        if( use_cuda == True ):
+            device = torch.device( "cuda" )
+        else:
+            print( "can't using gpu." )
+            device = torch.device( "cpu" )
+    else:
+        device = torch.device( "cpu" )
+
+    print( "実行デバイス :", device)
+    print( "GPU名 :", torch.cuda.get_device_name(0))
+    print( "----------------------------------------------" )
 
     #===================================
     # 学習環境、エージェント生成フェイズ
     #===================================
+    np.random.seed(8)
+    random.seed(8)
+    torch.manual_seed(8)
+
     # OpenAI-Gym の ENV を作成
     env = gym.make( RL_ENV )
     env.seed(8)
@@ -63,25 +111,31 @@ def main():
     #-----------------------------------
     # Academy の生成
     #-----------------------------------
-    academy = CartPoleAcademy( env = env, max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, save_step = 50 )
+    academy = GymAcademy( 
+        env = env, 
+        max_episode = NUM_EPISODE, max_time_step = NUM_TIME_STEP, 
+        save_step = NUM_SAVE_STEP
+    )
 
     #-----------------------------------
     # Brain の生成
     #-----------------------------------
-    brain = CartPoleDDQNwithPERBrain(
+    brain = DDQNMLPwithPERBrain(
+        device = device,
         n_states = env.observation_space.shape[0],
         n_actions = env.action_space.n,
-        epsilon = BRAIN_GREEDY_EPSILON,
+        epsilon_init = BRAIN_GREEDY_EPSILON_INIT, epsilon_final = BRAIN_GREEDY_EPSILON_FINAL, n_epsilon_step = BRAIN_GREEDY_EPSILON_STEPS,
         gamma = BRAIN_GAMMDA,
         learning_rate = BRAIN_LEARNING_RATE,
         batch_size = BRAIN_BATCH_SIZE,
         memory_capacity = MEMORY_CAPACITY,
+        n_frec_target_update = BRAIN_FREC_TARGET_UPDATE,
         td_error_epsilon = MEMORY_TD_ERROR_EPSILON,
         change_episode = MEMORY_CHANGE_EPISODE
     )
     
     # モデルの構造を定義する。
-    brain.model()
+    #brain.model()
 
     # 損失関数を設定する。
     #brain.loss()
@@ -117,8 +171,6 @@ def main():
     #===================================
     # 学習結果の描写処理
     #===================================
-    #academy.save_frames( file_name = "RL_ENV_CartPole-v0_DQN_Episode{}.gif".format(NUM_EPISODE) )
-
     #---------------------------------------------
     # 利得の履歴の plot
     #---------------------------------------------
@@ -140,7 +192,10 @@ def main():
     plt.legend( loc = "lower right" )
     plt.tight_layout()
 
-    plt.savefig( "{}_Reward_episode{}.png".format( RL_ENV, NUM_EPISODE), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( 
+        "{}_Reward_episode{}_lr{}.png".format( RL_ENV, NUM_EPISODE, BRAIN_LEARNING_RATE ), 
+        dpi = 300, bbox_inches = "tight"
+    )
     plt.show()
 
     #-----------------------------------
@@ -163,7 +218,10 @@ def main():
     plt.xlabel( "Episode" )
     plt.grid()
     plt.tight_layout()
-    plt.savefig( "{}_Loss_episode{}.png".format( academy._env.spec.id, NUM_EPISODE ), dpi = 300, bbox_inches = "tight" )
+    plt.savefig( 
+        "{}_Loss_episode{}_lr{}.png".format( academy._env.spec.id, NUM_EPISODE, BRAIN_LEARNING_RATE ), 
+        dpi = 300, bbox_inches = "tight"
+    )
     plt.show()
 
     print("Finish main()")

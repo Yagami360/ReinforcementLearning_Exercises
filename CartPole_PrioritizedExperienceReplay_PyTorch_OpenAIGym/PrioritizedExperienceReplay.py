@@ -4,7 +4,8 @@
 """
     更新情報
     [19/03/07] : 新規作成
-    [xx/xx/xx] : 
+    [19/03/29] : データ構造を list から deque に変更
+                 done フラグもバッファに保管するように変更
 """
 import numpy as np
 import random
@@ -13,10 +14,11 @@ import random
 import torch
 
 from collections import namedtuple
+from collections import deque
 
 Transition = namedtuple(
     typename = "Transition",
-    field_names = ( "state", "action", "next_state", "reward" )
+    field_names = ( "state", "action", "next_state", "reward", "done" )
 )
 
 
@@ -28,12 +30,10 @@ class PrioritizedExperienceReplay( object ):
     [public]
 
     [protected] 変数名の前にアンダースコア _ を付ける        
+        _device : <torch.device> 実行デバイス
         _capacity : [int] メモリの最大値
         _memory : [list] (s,a,s',a',r) のリスト（学習用データ）
-        _index : [int] 現在のメモリのインデックス
-
         _memory_td_error : [list] サンプリング優先度を表すTD誤差のメモリ
-        _index_td_error : [int] 現在のメモリのインデックス
         _td_error_epsilon : [float] サンプリング優先度を表すTD誤差のバイアス値
 
         _change_episode : Experience Replay → PrioritizedExperienceReplay に切り替えるエピソード数
@@ -43,18 +43,16 @@ class PrioritizedExperienceReplay( object ):
     """
     def __init__(
         self,
+        device,
         capacity = 10000,
         td_error_epsilon = 0.0001,
         change_episode = 30
     ):
+        self._device = device
         self._capacity = capacity
-        self._memory = []
-        self._index = 0
-
-        self._memory_td_error = []
-        self._index_td_error = 0
+        self._memory = deque( maxlen = capacity )
+        self._memory_td_error = deque( maxlen = capacity )
         self._td_error_epsilon = td_error_epsilon
-
         self._change_episode = change_episode
         return
 
@@ -68,9 +66,7 @@ class PrioritizedExperienceReplay( object ):
         print( str )
         print( "_capacity :", self._capacity )
         print( "_memory :\n", self._memory )
-        print( "_index : ", self._index )
         print( "_memory_td_error :\n", self._memory_td_error )
-        print( "_index_td_error : ", self._index_td_error )
         print( "_td_error_epsilon : ", self._td_error_epsilon )
         print( "_change_episode : ", self._change_episode )
         return
@@ -81,26 +77,46 @@ class PrioritizedExperienceReplay( object ):
     def set_td_error_memory( self, td_errors ):
         self._memory_td_error = td_errors
 
-    def push( self, state, action, next_state, reward ):
+    def push( self, state, action, next_state, reward, done ):
         """
         学習用のデータのメモリに、データを push する
         [Args]
-            state : <> 現在の状態 s
-            action : <> 現在の行動 a
-            next_state : <> 次の状態 s'
-            reword : <> 報酬        
+            state : <ndarry> 現在の状態 s
+            action : <int> 現在の行動 a
+            next_state : <ndarray> 次の状態 s'
+            reword : <float> 報酬        
+            done : <bool> 完了フラグ
         [Returns]
         """
-        # 現在のメモリサイズが上限値以下なら、新たに容量を確保する。
-        if( len(self._memory) < self._capacity ):
-            self._memory.append( None )
+        # nametuple を使用して、メモリに値を格納
+        self._memory.append( Transition( state, action, next_state, reward, done ) )
+        return
+
+    def push_tensor( self, state, action, next_state, reward, done ):
+        """
+        学習用のデータのメモリに、データを Tensor 型として push する
+        [Args]
+            state : <ndarry> 現在の状態 s
+            action : <int> 現在の行動 a
+            next_state : <ndarray> 次の状態 s'
+            reword : <float> 報酬        
+            done : <bool> 完了フラグ
+        [Returns]
+        """
+        #-----------------------------------------
+        # メモリに保管する値を Tensor に変換
+        # この際に、ミニバッチ用の次元を追加
+        #-----------------------------------------
+        state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)
+        state = torch.unsqueeze( state, dim = 0 ).to(self._device)
+        action = torch.LongTensor( [[action]] ).to(self._device)                # [[x]] で shape = [1,1] にしておき、ミニバッチ用の次元を用意
+        reward = torch.FloatTensor( [reward] ).to(self._device)
+        next_state = torch.from_numpy( next_state ).type(torch.FloatTensor).to(self._device)
+        next_state = torch.unsqueeze( next_state, dim = 0 ).to(self._device)
+        done = torch.FloatTensor( [done] ).to(self._device)
 
         # nametuple を使用して、メモリに値を格納
-        self._memory[ self._index ] = Transition( state, action, next_state, reward )
-
-        # 現在のインデックスをづらす
-        self._index = ( self._index + 1 ) % self._capacity
-
+        self._memory.append( Transition( state, action, next_state, reward, done ) )
         return
 
     def pop( self, batch_size ):
@@ -119,16 +135,8 @@ class PrioritizedExperienceReplay( object ):
         [Args]
             td_error : [float] TD誤差
         """
-        # 現在のメモリサイズが上限値以下なら、新たに容量を確保する。
-        if( len(self._memory_td_error) < self._capacity ):
-            self._memory_td_error.append( None )
-
         # メモリに値を格納
-        self._memory_td_error[ self._index_td_error ] = td_error
-
-        # 現在のインデックスをづらす
-        self._index_td_error = ( self._index_td_error + 1 ) % self._capacity
-
+        self._memory_td_error.append( td_error )
         return
 
 
@@ -174,40 +182,103 @@ class PrioritizedExperienceReplay( object ):
         ミニバッチデータを取得する
         [Args]
         [Returns]
+            state_batch : <Tensor/torch.float32> 現在の状態 s のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            action_batch : <Tensor/torch.int64> 現在の行動 a のミニバッチデータ / shape = [batch_size,1]
+            next_state_batch : <Tensor/torch.float32> 次の状態 s' のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            reword_batch : <Tensor/torch.float32> 報酬のミニバッチデータ / shape = [batch_size,1]
+            done_batch : <Tensor/torch.float32> 完了フラグのミニバッチデータ / shape = [batch_size,1]
         """
         #----------------------------------------------------------------------
         # Prioritized　Experience Replay に基づき、ミニバッチ処理用のデータセットを生成する。
         #----------------------------------------------------------------------
-        # メモリサイズがまだミニバッチサイズより小さい場合は、処理を行わない
-        if( len(self._memory) < batch_size ):
-            return None, None, None, None, None
-
         # エピソードのはじめは、TD誤差がないので、通常の ExperienceRelpay を使用する。
         if( episode < self._change_episode ):
             # ミニバッチサイズ以上ならば、学習用データを pop する
-            transitions = self.pop( batch_size )
-            #print( "transitions :", transitions )
+            batch  = self.pop( batch_size )
+            #print( "batch  :", batch  )
 
         # ある程度エピソードが経過してから、Prioritized　Experience Replay を使用する。
         else:
             indexes = self.get_prioritized_indexes( batch_size )
-            transitions = [ self._memory[n] for n in indexes ]
+            batch  = [ self._memory[n] for n in indexes ]
+
+        #--------------------------------------------------------------------
+        # numpy → Tensor に変換
+        # ミニバッチデータの段階で Tensor に変換するのは、GPUメモリ削減のため
+        # .to(self._device) で Tensor を GPU に転送
+        #--------------------------------------------------------------------
+        # 以下の操作を一度に行っている。
+        # state_batch = torch.from_numpy( b.state ).float().to(self._device)
+        # state_batch = torch.unsqueeze( state_batch, dim = 0 ).to(self._device)
+        # state_batch = torch.cat( batch_state_tsr ).to(self._device)
+        state_batch = torch.cat(
+            [ torch.from_numpy(b.state).type(torch.FloatTensor).unsqueeze(0) for b in batch ], 
+            dim=0
+        ).to(self._device)
+
+        action_batch = torch.cat(
+            [ torch.LongTensor([[b.action]]) for b in batch ]   # [[x]] で shape = [batch_size, 1] にしておく
+        ).to(self._device)
+
+        reward_batch = torch.cat(
+            [ torch.FloatTensor([b.reward]) for b in batch ]
+        ).to(self._device)
+
+        next_state_batch = torch.cat(
+            [ torch.from_numpy(b.next_state).type(torch.FloatTensor).unsqueeze(0) for b in batch ], 
+            dim=0
+        ).to(self._device)
+
+        done_batch = torch.cat(
+            [ torch.FloatTensor([b.done]) for b in batch ]
+        ).to(self._device)
+
+        return state_batch, action_batch, next_state_batch, reward_batch, done_batch
+
+
+    def get_mini_batch_from_tensor( self, batch_size ):
+        """
+        Experience Replay に基いた、ミニバッチデータを取得する。
+        ※ メモリの値を Tensor で保管しているときの処理
+        ※ メモリを非Tensor で保管しているのに比べて、処理は早くなるが、GPU メモリの使用量は多い
+        [Args]
+            batch_size : <int> ミニバッチサイズ
+        [Returns]
+            state_batch : <Tensor/torch.float32> 現在の状態 s のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            action_batch : <Tensor/torch.int64> 現在の行動 a のミニバッチデータ / shape = [batch_size,1]
+            next_state_batch : <Tensor/torch.float32> 次の状態 s' のミニバッチデータ / shape = [batch_size, n_channels, width,height]
+            reword_batch : <Tensor/torch.float32> 報酬のミニバッチデータ / shape = [batch_size,1]
+            done_batch : <Tensor/torch.float32> 完了フラグのミニバッチデータ / shape = [batch_size,1]
+        """
+        #----------------------------------------------------------------------
+        # Prioritized　Experience Replay に基づき、ミニバッチ処理用のデータセットを生成する。
+        #----------------------------------------------------------------------
+        # エピソードのはじめは、TD誤差がないので、通常の ExperienceRelpay を使用する。
+        if( episode < self._change_episode ):
+            # ミニバッチサイズ以上ならば、学習用データを pop する
+            batch  = self.pop( batch_size )
+            #print( "batch  :", batch  )
+
+        # ある程度エピソードが経過してから、Prioritized　Experience Replay を使用する。
+        else:
+            indexes = self.get_prioritized_indexes( batch_size )
+            batch  = [ self._memory[n] for n in indexes ]
 
         # 取り出したデータをミニバッチ学習用に reshape
         # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size / shape = 32 * 4
         # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
-        batch = Transition( *zip(*transitions) )
+        batch = Transition( *zip(*batch ) )
         #print( "batch :", batch )
 
-        #
+        # torch.cat() : Tensorをリスト入れてして渡すことで、それらを連結したTensorを返す。連結する軸はdimによって指定。
+        #               Tensor の配列(shepe=batch_size)である batch[0]=batch.state → 1つの Tensor である state.batch に変換
         state_batch = torch.cat( batch.state )
         action_batch = torch.cat( batch.action )
         reward_batch = torch.cat( batch.reward )
-        non_final_next_states = torch.cat(
-            [s for s in batch.next_state if s is not None]
-        )
+        next_state_batch = torch.cat( batch.next_state )
+        done_batch = torch.cat( batch.done )
 
-        return batch, state_batch, action_batch, reward_batch, non_final_next_states
+        return state_batch, action_batch, next_state_batch, reward_batch, done_batch
 
 
     def get_td_error_mini_batch( self ):
@@ -216,23 +287,64 @@ class PrioritizedExperienceReplay( object ):
         #--------------------------------------------------------------------
         # 全メモリでミニバッチを作成
         #--------------------------------------------------------------------
-        transitions = self._memory
-        batch = Transition( *zip(*transitions) )
+        batch  = self._memory
+
+        #--------------------------------------------------------------------
+        # numpy → Tensor に変換
+        # ミニバッチデータの段階で Tensor に変換するのは、GPUメモリ削減のため
+        # .to(self._device) で Tensor を GPU に転送
+        #--------------------------------------------------------------------
+        # 以下の操作を一度に行っている。
+        # state_batch = torch.from_numpy( b.state ).float().to(self._device)
+        # state_batch = torch.unsqueeze( state_batch, dim = 0 ).to(self._device)
+        # state_batch = torch.cat( batch_state_tsr ).to(self._device)
+        state_batch = torch.cat(
+            [ torch.from_numpy(b.state).type(torch.FloatTensor).unsqueeze(0) for b in batch ], 
+            dim=0
+        ).to(self._device)
+
+        action_batch = torch.cat(
+            [ torch.LongTensor([[b.action]]) for b in batch ]   # [[x]] で shape = [batch_size, 1] にしておく
+        ).to(self._device)
+
+        reward_batch = torch.cat(
+            [ torch.FloatTensor([b.reward]) for b in batch ]
+        ).to(self._device)
+
+        next_state_batch = torch.cat(
+            [ torch.from_numpy(b.next_state).type(torch.FloatTensor).unsqueeze(0) for b in batch ], 
+            dim=0
+        ).to(self._device)
+
+        done_batch = torch.cat(
+            [ torch.FloatTensor([b.done]) for b in batch ]
+        ).to(self._device)
+
+        return state_batch, action_batch, next_state_batch, reward_batch, done_batch
+
+    def get_td_error_mini_batch_from_tensor( self ):
+        """
+        """
+        #--------------------------------------------------------------------
+        # 全メモリでミニバッチを作成
+        #--------------------------------------------------------------------
+        batch  = self._memory
 
         # 取り出したデータをミニバッチ学習用に reshape
         # transtions : shape = 1 step 毎の (s,a,s',r) * batch_size / shape = 32 * 4
         # → shape = (s * batch_size, a * batch_size, s' * batch_size, r * batch_size) / shape = 4 * 32
-        batch = Transition( *zip(*transitions) )
+        batch = Transition( *zip(*batch ) )
+        #print( "batch :", batch )
 
-        #
+        # torch.cat() : Tensorをリスト入れてして渡すことで、それらを連結したTensorを返す。連結する軸はdimによって指定。
+        #               Tensor の配列(shepe=batch_size)である batch[0]=batch.state → 1つの Tensor である state.batch に変換
         state_batch = torch.cat( batch.state )
         action_batch = torch.cat( batch.action )
         reward_batch = torch.cat( batch.reward )
-        non_final_next_states = torch.cat(
-            [s for s in batch.next_state if s is not None]
-        )
+        next_state_batch = torch.cat( batch.next_state )
+        done_batch = torch.cat( batch.done )
 
-        return batch, state_batch, action_batch, reward_batch, non_final_next_states
+        return state_batch, action_batch, next_state_batch, reward_batch, done_batch
 
 
     def update_td_error( self, updated_td_errors ):
