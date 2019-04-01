@@ -4,7 +4,7 @@
 """
     更新情報
     [19/03/11] : 新規作成
-    [xx/xx/xx] : 
+    [19/04/01] : GPU で実行できるように変更 
 """
 import numpy as np
 
@@ -12,9 +12,9 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-class A2CNetwork( nn.Module ):
+class A2CMLPNetwork( nn.Module ):
     """
-    A2C のネットワーク構成
+    A2C のネットワーク構成（MLPベース）
     ・PyTorch の nn.Module を継承して実装
     ・簡単のため CNN ではなく、MLP でネットワーク構成
 
@@ -24,17 +24,19 @@ class A2CNetwork( nn.Module ):
         actor : [nn.Linear] アクター側の出力層
         critic : [nn.Linear] クリティック側の出力層
     """
-    def __init__( self, n_states, n_hiddens, n_actions ):
+    def __init__( self, device, n_states, n_hiddens, n_actions ):
         """
         [Args]
+            device : 実行デバイス
             n_states : 状態数 |S| / 入力ノード数に対応する。
             n_actions : 状態数 |A| / 出力ノード数に対応する。
         """
-        super( A2CNetwork, self ).__init__()
-        self.fc1 = nn.Linear( n_states, n_hiddens )
-        self.fc2 = nn.Linear( n_hiddens, n_hiddens )
-        self.actor = nn.Linear( n_hiddens, n_actions )
-        self.critic = nn.Linear( n_hiddens, 1 )
+        super( A2CMLPNetwork, self ).__init__()
+        self._device = device
+        self.fc1 = nn.Linear( n_states, n_hiddens ).to(self._device)
+        self.fc2 = nn.Linear( n_hiddens, n_hiddens ).to(self._device)
+        self.actor = nn.Linear( n_hiddens, n_actions ).to(self._device)
+        self.critic = nn.Linear( n_hiddens, 1 ).to(self._device)
         return
 
 

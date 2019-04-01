@@ -4,7 +4,8 @@
 """
     更新情報
     [19/03/13] : 新規作成
-    [xx/xx/xx] : 
+    [19/04/01] : ・クラス名を変更。 
+                 ・エージェントクラスとのインターフェイス変更
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,24 +14,18 @@ import os.path
 
 # 自作クラス
 from Academy import Academy
-from CartPoleAcademy import CartPoleAcademy
+from GymAcademy import GymAcademy
 from Agent import Agent
+from tqdm import tqdm
 
 
-class CartPoleA2CAcademy( CartPoleAcademy ):
+class GymKStepAcademy( GymAcademy ):
     """
-    エージェントの強化学習環境
-    ・強化学習モデルにおける環境 Enviroment に対応
-    ・学習や推論を行うための設定を行う。
+    OpenAIGym を利用したエージェントの強化学習環境
+    ・K-step間 (k=2,3,4,...) での更新に対応
     
     [public]
-
-    [protected] 変数名の前にアンダースコア _ を付ける
-        _env : OpenAIGym の ENV
-
-        _frames : list<>
-            動画のフレーム（１つの要素が１画像のフレーム）
-        
+    [protected] 変数名の前にアンダースコア _ を付ける        
     [private] 変数名の前にダブルアンダースコア __ を付ける（Pythonルール）
 
     """
@@ -67,21 +62,23 @@ class CartPoleA2CAcademy( CartPoleAcademy ):
 
         episode = 0     # 現在のエピソード数
         time_step = 0   # 現在の時間ステップ t
+        total_times_step = 0
 
         # 繰り返し試行
-        for epoch in range( 0, self._max_epoches ):
+        for epoch in tqdm( range( 0, self._max_epoches ), desc = "Epoches" ):
             # k step
             for kstep in range( self._k_step ):
                 dones = []
                 for agent in self._agents:
-                    done = agent.agent_step( episode, time_step )
+                    done = agent.agent_step( episode, time_step, total_times_step )
                     dones.append( done )
 
                 time_step += 1
+                total_times_step += 1
 
                 # 学習環境の動画のフレームを追加
                 if( episode % self._save_step == 0 ):
-                    self.add_frame( episode, time_step )
+                    self.add_frame( episode, time_step, total_times_step )
 
                 # 全エージェントが完了した場合
                 if( all(dones) == True ):
@@ -90,14 +87,14 @@ class CartPoleA2CAcademy( CartPoleAcademy ):
 
             # k_step 完了後の処理
             for agent in self._agents:
-                agent.agent_on_kstep_done( episode, time_step )
+                agent.agent_on_kstep_done( episode, time_step, total_times_step )
 
             # 学習環境を RESET
             if ( self._done == True ):
-                print( "epoch :", epoch )
+                #print( "epoch :", epoch )
                 # Academy と全 Agents のエピソードを完了
                 for agent in self._agents:
-                    agent.agent_on_done( episode, time_step )
+                    agent.agent_on_done( episode, time_step, total_times_step )
                 
                 # 動画を保存
                 if( episode % self._save_step == 0 ):

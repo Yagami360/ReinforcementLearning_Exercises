@@ -18,7 +18,7 @@
 - Python : 3.6
 - Anaconda : 5.0.1
 - OpenAIGym : 0.10.9
-- PyTorch : 1.0.0
+- PyTorch : 1.0.1
 
 ## ■ 使用法
 
@@ -30,8 +30,10 @@ $ python main.py
 - 設定可能な定数
 ```python
 [main.py]
+DEVICE = "GPU"                      # 使用デバイス ("CPU" or "GPU")
 NUM_EPOCHS = 2000                   # 繰り返し回数
 NUM_TIME_STEP = 200                 # １エピソードの時間ステップの最大数
+NUM_SAVE_STEP = 250                 # 強化学習環境の動画の保存間隔（単位：エピソード数）
 NUM_KSTEP = 5                       # 先読みステップ数 k
 BRAIN_LEARNING_RATE = 0.01          # 学習率
 BRAIN_GAMMDA = 0.99                 # 利得の割引率
@@ -63,10 +65,16 @@ BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 |シード値|`np.random.seed(8)`<br>`random.seed(8)`<br>`torch.manual_seed(8)`<br>`env.seed(8)`|←|←|
 
 - 割引利得のエピソード毎の履歴（実行条件１）<br>
+<!--
 ![CartPole-v0_Reward_epoch2000_lr0 01](https://user-images.githubusercontent.com/25688193/54404650-96b86e80-4717-11e9-877e-36ccfd40bf17.png)<br>
+-->
+![CartPole-v0_Reward_epoch2000_lr0 01_maxgrad0 5](https://user-images.githubusercontent.com/25688193/55305716-8c72d000-548c-11e9-9a35-d422cda66512.png)<br>
 
 - 損失関数のグラフ（実行条件１）<br>
+<!--
 ![CartPole-v0_Loss_epoch2000_lr0 01](https://user-images.githubusercontent.com/25688193/54404651-96b86e80-4717-11e9-89cd-e640686caf0b.png)<br>
+-->
+![CartPole-v0_Loss_epoch2000_lr0 01_maxgrad0 5](https://user-images.githubusercontent.com/25688193/55305717-8d0b6680-548c-11e9-842b-c030de65ae43.png)<br>
 
 > 学習が不安定。<br>
 > →学習回数が足りてない？学習率が大きすぎて最適解を飛び越えている？<br>
@@ -82,11 +90,18 @@ BRAIN_CLIPPING_MAX_GRAD = 0.5       # クリッピングする最大勾配値
 -->
 
 - 割引利得のエピソード毎の履歴（実行条件２）<br>
+<!--
 ![CartPole-v0_Reward_epoch50000_lr0 0001_maxgrad0 5](https://user-images.githubusercontent.com/25688193/54408248-7cd15880-4724-11e9-872b-19a0652cd538.png)<br>
+-->
+![CartPole-v0_Reward_epoch50000_lr0 0001_maxgrad0 5](https://user-images.githubusercontent.com/25688193/55309707-8cc59800-5499-11e9-9765-88d3ace7cbbf.png)<br>
+
 > 実行条件１の学習率より、高い報酬に到達できている。<br>
 
 - 損失関数のグラフ（実行条件２）<br>
+<!--
 ![CartPole-v0_Loss_epoch50000_lr0 0001_maxgrad0 5](https://user-images.githubusercontent.com/25688193/54408251-7fcc4900-4724-11e9-8aa1-ae3b70e65ced.png)<br>
+-->
+![CartPole-v0_Loss_epoch50000_lr0 0001_maxgrad0 5](https://user-images.githubusercontent.com/25688193/55309711-8e8f5b80-5499-11e9-8650-981d478af981.png)<br>
 
 <!--
 - 割引利得のエピソード毎の履歴（実行条件３）<br>

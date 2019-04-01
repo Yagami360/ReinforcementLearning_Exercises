@@ -4,7 +4,7 @@
 """
     更新情報
     [19/03/11] : 新規作成
-    [xx/xx/xx] : 
+    [19/04/01] : ・GPU で実行できるように変更 
 """
 import numpy as np
 import random
@@ -13,7 +13,7 @@ import random
 from Brain import Brain
 from Agent import Agent
 from AdavantageMemory import AdavantageMemory
-from A2CNetwork import A2CNetwork
+from A2CMLPNetwork import A2CMLPNetwork
 
 # PyTorch
 import torch
@@ -22,27 +22,29 @@ from torch import optim
 import torch.nn.functional as F
 
 
-class CartPoleA2CBrain( Brain ):
+class A2CMLPBrain( Brain ):
     """
-    倒立振子課題（CartPole）の Brain。
-    ・A2C [Advantage Actor Critic] によるアルゴリズム
+    A2C [Advantage Actor Critic] （ネットワーク構成は、MLPベース）の Brain。
     
     [public]
         memory : <AdavantageMemory> メモリ
 
     [protected] 変数名の前にアンダースコア _ を付ける
+        _device : 実行デバイス
+
         _gamma : <float> 割引利得の γ 値
         _learning_rate : <float> 学習率
         _loss_critic_coef : <float> クリティック側の損失関数の重み係数
         _loss_entropy_coef : <float> アクター側の損失関数のエントロピー後の重み係数
         _clipping_max_grad : <float> クリッピングする最大勾配量
 
-        _network : <A2CNetwork> A2C のネットワーク
+        _network : <A2CMLPNetwork> A2C のネットワーク
         _loss_fn : <torch.> モデルの損失関数
         _optimizer : <torch.optimizer> モデルの最適化アルゴリズム
     """
     def __init__(
         self,
+        device,
         n_states,
         n_actions,
         gamma = 0.9, learning_rate = 0.0001,
@@ -53,6 +55,7 @@ class CartPoleA2CBrain( Brain ):
         clipping_max_grad = 0.5
     ):
         super().__init__( n_states, n_actions )
+        self._device = device
         self._gamma = gamma
         self._learning_rate = learning_rate
         self._loss_critic_coef = loss_critic_coef
@@ -64,16 +67,17 @@ class CartPoleA2CBrain( Brain ):
 
         self._loss_fn = None
         self._optimizer = None
-        self.memory = AdavantageMemory( n_kstep, n_states, gamma )
+        self.memory = AdavantageMemory( device, n_kstep, n_states, gamma )
 
         self._b_loss_init = False
         return
 
     def print( self, str ):
         print( "----------------------------------" )
-        print( "CartPoleA2CBrain" )
+        print( "A2CMLPBrain" )
         print( self )
         print( str )
+        print( "_device : ", self._device )
         print( "_n_states : \n", self._n_states )
         print( "_n_actions : \n", self._n_actions )
         print( "_gamma : \n", self._gamma )
@@ -94,16 +98,29 @@ class CartPoleA2CBrain( Brain ):
             return self._loss_fn.data
         else:
             return 0.0
-        
-        
+
+    def reset_brain( self, state ):
+        """
+        Brain を再初期化する
+        """
+        # numpy → Tensor に型変換
+        state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)
+
+        # 0 番目の要素に初期状態を挿入
+        self.memory.observations[0].copy_( state )
+        return
+
+
     def action( self, state ):
         """
         Brain のロジックに従って、現在の状態 s での行動 a を決定する。
         
         [Args]
-            state : int
-                現在の状態
+            state : <ndarray> 現在の状態
         """
+        # numpy → Tensor に型変換
+        state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)
+
         # ネットワークを推論モードへ切り替え
         #self._network.eval()
         with torch.no_grad():
@@ -117,6 +134,9 @@ class CartPoleA2CBrain( Brain ):
 
         # 確率分布で表現された行動方策のうち、最も確率が高い値のインデックスを取得
         action = policy.multinomial( num_samples = 1 )
+
+        # tensor → int に変換
+        action = action.item()
         #print( "action :", action )
 
         return action
@@ -129,13 +149,14 @@ class CartPoleA2CBrain( Brain ):
         [Args]
         [Returns]
         """
-        self._network = A2CNetwork(
+        self._network = A2CMLPNetwork(
+            device = self._device,
             n_states = self._n_states, 
             n_hiddens = 32,
             n_actions = self._n_actions
         )
 
-        print( "_network :", self._network )
+        #print( "_network :", self._network )
         return
 
     def loss( self ):
@@ -250,8 +271,42 @@ class CartPoleA2CBrain( Brain ):
         return
 
 
-    def update( self ):
+    def update( 
+        self, 
+        state, action, next_state, reward, done, 
+        episode, time_step, total_time_step
+    ):
         """
+        毎ステップでの Brain の更新処理
+        """
+        # Tensor 型への変換
+        state = torch.from_numpy( state ).type(torch.FloatTensor).to(self._device)
+        next_state = torch.from_numpy( next_state ).type(torch.FloatTensor).to(self._device)
+        action = torch.LongTensor( [action] ).to(self._device)
+        reward = torch.FloatTensor( [reward] ).to(self._device)
+
+        #----------------------------------------
+        # エピソードが完了したかのマスク定数
+        #----------------------------------------
+        if( done == True ):
+            done_mask =  torch.FloatTensor( [0.0] ).to(self._device)
+        else:
+            done_mask =  torch.FloatTensor( [1.0] ).to(self._device)
+
+        # 完了時は observation を 0 にする
+        next_state *= done_mask
+        #print( "next_state :", next_state )
+
+        #-----------------------------------------
+        # 経験に基づく学習用データを追加
+        #-----------------------------------------
+        self.memory.insert( next_state, action, reward, done_mask )
+
+        return
+
+    def update_on_kstep_done( self ):
+        """
+        Kステップ完了時の Brain の更新処理
         """
         #self.memory.print()
         #print( "self.memory.observations[-1] :", self.memory.observations[-1] )

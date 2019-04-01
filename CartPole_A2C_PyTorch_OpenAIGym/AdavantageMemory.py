@@ -4,7 +4,7 @@
 """
     更新情報
     [19/03/11] : 新規作成
-    [xx/xx/xx] : 
+    [19/04/01] : GPU で実行できるように変更 
 """
 import numpy as np
 import random
@@ -30,17 +30,19 @@ class AdavantageMemory( object ):
     """
     def __init__( 
         self, 
+        device,
         n_kstep, n_states,
         gamma = 0.0001
     ):
+        self._device = device
         #self._n_processes = n_processes
         self._n_kstep = n_kstep
 
-        self.observations = torch.zeros( n_kstep + 1, n_states )
-        self.rewards = torch.zeros( n_kstep, 1 )
-        self.actions = torch.zeros( n_kstep, 1 ).long()
-        self.done_masks = torch.ones( n_kstep + 1, 1 )
-        self.total_rewards = torch.zeros( n_kstep + 1, 1 )
+        self.observations = torch.zeros( n_kstep + 1, n_states ).to(self._device)
+        self.rewards = torch.zeros( n_kstep, 1 ).to(self._device)
+        self.actions = torch.zeros( n_kstep, 1 ).long().to(self._device)
+        self.done_masks = torch.ones( n_kstep + 1, 1 ).to(self._device)
+        self.total_rewards = torch.zeros( n_kstep + 1, 1 ).to(self._device)
         self._index = 0
 
         self._gamma = gamma
@@ -49,9 +51,10 @@ class AdavantageMemory( object ):
 
     def print( self, str = "" ):
         print( "----------------------------------" )
-        print( "CartPoleA2CBrain" )
+        print( "AdavantageMemory" )
         print( self )
         print( str )
+        print( "_device :\n", self._device )
         print( "_index :\n", self._index )
         print( "observations :\n", self.observations )
         print( "rewards :\n", self.rewards )
@@ -72,9 +75,9 @@ class AdavantageMemory( object ):
         # .copy_() : Deep Copy
         # _で終わるメソッドは呼び出し元の変数の値を変化させる
         self.observations[self._index + 1].copy_( observations )   # 次の状態 s_{t+1} なので、index+1
-        self.rewards[self._index].copy_( reward )   # 
-        self.actions[self._index].copy_( action )
-        self.done_masks[self._index + 1].copy_( done_mask )
+        self.rewards[self._index].copy_( reward ).to(self._device)   # 
+        self.actions[self._index].copy_( action ).to(self._device)
+        self.done_masks[self._index + 1].copy_( done_mask ).to(self._device)
 
         # index = 0 → 1 → ... → _n_ksteps → 0 → 1,...
         self._index = ( self._index + 1 ) % self._n_kstep
